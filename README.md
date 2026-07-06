@@ -1,40 +1,40 @@
 # Libft Tester
 
-Um tester C++ para projetos `libft` da 42, focado em:
+A C++ tester for 42 `libft` projects, focused on:
 
-- cobertura por funcao;
-- output compacto e legivel;
-- isolamento com `fork`;
-- deteccao de `SEGV`, `BUS`, `ABRT`, `FPE` e `TIMEOUT`;
-- simulacao de falhas de `malloc`;
-- modo de leaks com `valgrind`;
-- suporte a terminais sem cor com `NO_COLOR=1`;
-- filtros por suite ou funcao;
-- output JSON para scripts e CI;
-- comando de versao para identificar builds do tester.
+- per-function coverage;
+- compact and readable output;
+- isolation with `fork`;
+- detection of `SEGV`, `BUS`, `ABRT`, `FPE`, and `TIMEOUT`;
+- `malloc` failure simulation;
+- leak-checking mode with `valgrind`;
+- support for terminals without color using `NO_COLOR=1`;
+- filters by suite or function;
+- JSON output for scripts and CI;
+- version command to identify tester builds.
 
-## Como usar
+## How to Use
 
-A partir da raiz do repositório do tester:
+From the root of the tester repository:
 
 ```sh
 make
 ```
 
-Ou a partir da pasta pai, se o repositório estiver numa subpasta chamada `tester`:
+Or from the parent folder, if the repository is inside a subfolder called `tester`:
 
 ```sh
 make -C tester
 ```
 
-Tambem podes passar argumentos pelo Makefile:
+You can also pass arguments through the Makefile:
 
 ```sh
 make ARGS="--only ft_split"
 make ARGS="--suite memory --verbose"
 ```
 
-## Opcoes
+## Options
 
 ```sh
 ./libft_tester --help
@@ -49,7 +49,7 @@ make ARGS="--suite memory --verbose"
 ./libft_tester --no-color
 ```
 
-Atalhos pelo Makefile:
+Makefile shortcuts:
 
 ```sh
 make help
@@ -59,7 +59,7 @@ make json
 make ci
 ```
 
-Para JSON limpo a partir da raiz:
+For clean JSON output from the root:
 
 ```sh
 make --no-print-directory -C tester json ARGS="--only ft_strlen"
@@ -72,8 +72,7 @@ make ci
 make ci ARGS="--only ft_strlen"
 ```
 
-O alvo `ci` usa JSON sem cores, para o output ser estavel em GitHub Actions,
-GitLab CI ou scripts locais.
+The `ci` target uses colorless JSON output, so the output remains stable in GitHub Actions, GitLab CI, or local scripts.
 
 ## Leaks
 
@@ -81,54 +80,52 @@ GitLab CI ou scripts locais.
 make leaks
 ```
 
-O modo de leaks corre sem `fork`, para o `valgrind` analisar diretamente as
-funcoes testadas e nao o mecanismo interno do runner.
+Leak mode runs without `fork`, so `valgrind` can analyze the tested functions directly instead of the runner's internal mechanism.
 
-Tambem aceita filtros:
+It also accepts filters:
 
 ```sh
 make leaks ARGS="--only ft_split"
 make leaks ARGS="--suite lists"
 ```
 
-## Sem cores
+## Without Colors
 
 ```sh
 NO_COLOR=1 make
 ```
 
-## Estados
+## Statuses
 
-- `OK`: teste normal passou.
-- `MOK`: expectativa relacionada com `malloc` passou.
-- `NOK`: teste normal falhou.
-- `MNOK`: expectativa relacionada com `malloc` falhou.
-- `SEGV`: a suite caiu com segmentation fault.
-- `BUS`: a suite caiu com bus error.
-- `ABRT`: a suite abortou.
-- `FPE`: a suite caiu com erro aritmetico.
-- `TIMEOUT`: a suite demorou demasiado tempo.
+- `OK`: normal test passed.
+- `MOK`: `malloc`-related expectation passed.
+- `NOK`: normal test failed.
+- `MNOK`: `malloc`-related expectation failed.
+- `SEGV`: the suite crashed with a segmentation fault.
+- `BUS`: the suite crashed with a bus error.
+- `ABRT`: the suite aborted.
+- `FPE`: the suite crashed with an arithmetic error.
+- `TIMEOUT`: the suite took too long to finish.
 
-## Comportamento
+## Behavior
 
-O tester nao apaga automaticamente a `libft.a` depois de correr. Isto evita
-corridas e problemas em CI ou quando varios comandos sao executados em paralelo.
-Para limpar tudo, usa:
+The tester does not automatically delete `libft.a` after running. This prevents race conditions and issues in CI or when multiple commands are executed in parallel.
+
+To clean everything, use:
 
 ```sh
 make fclean
 ```
 
-## Estrutura
+## Structure
 
-- `include/tester.hpp`: runner, asserts, output e helpers.
-- `include/test_modules.hpp`: declaracoes das suites.
-- `include/malloc_fail.hpp`: controlo das falhas simuladas de `malloc`.
-- `src/*_tests.cpp`: testes separados por familia.
-- `src/malloc_fail.cpp`: wrapper de `malloc`.
-- `src/main.cpp`: registo e execucao das suites.
+- `include/tester.hpp`: runner, asserts, output, and helpers.
+- `include/test_modules.hpp`: suite declarations.
+- `include/malloc_fail.hpp`: simulated `malloc` failure control.
+- `src/*_tests.cpp`: tests separated by family.
+- `src/malloc_fail.cpp`: `malloc` wrapper.
+- `src/main.cpp`: suite registration and execution.
 
-## Nota
+## Note
 
-Este tester evita testar comportamento indefinido do C quando isso nao e exigido
-pelo subject. Por exemplo, nao testa chamadas como `ft_strlen(NULL)`.
+This tester avoids testing undefined C behavior when it is not required by the subject. For example, it does not test calls such as `ft_strlen(NULL)`.
