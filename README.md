@@ -1,45 +1,87 @@
 # Libft Tester
 
-A C++ tester for 42 `libft` projects, focused on:
+![CI](https://github.com/NeddyKun01/Libft-Tester/actions/workflows/ci.yml/badge.svg)
+![Language](https://img.shields.io/badge/language-C%2B%2B17-00599C)
+![Project](https://img.shields.io/badge/project-42%20libft-111111)
+![Output](https://img.shields.io/badge/output-OK%20%7C%20MOK%20%7C%20NOK%20%7C%20MNOK-informational)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-- per-function coverage;
-- compact and readable output;
-- isolation with `fork`;
-- detection of `SEGV`, `BUS`, `ABRT`, `FPE`, and `TIMEOUT`;
-- `malloc` failure simulation;
-- leak-checking mode with `valgrind`;
-- support for terminals without color using `NO_COLOR=1`;
-- filters by suite or function;
-- JSON output for scripts and CI;
-- version command to identify tester builds.
+A C++ tester for 42 `libft` projects, designed to be fast, readable, and useful
+during development, debugging, and peer evaluation.
 
-## How to Use
+## Quick Start
 
-From the root of the tester repository:
+With the tester next to your Libft repository:
+
+```text
+projects/
+├── libft/
+└── Libft-Tester/
+```
 
 ```sh
+cd Libft-Tester
+make ROOT_DIR=../libft
+```
+
+With the tester inside your Libft repository:
+
+```text
+libft/
+├── Makefile
+├── libft.h
+├── ft_*.c
+└── tester/
+```
+
+```sh
+cd libft/tester
 make
 ```
 
-Or from the parent folder, if the repository is inside a subfolder called `tester`:
+## What It Does
+
+- tests every function from the current `libft` subject;
+- prints compact per-function results;
+- uses `OK`, `NOK`, `MOK`, and `MNOK`;
+- isolates suites with `fork`;
+- detects `SEGV`, `BUS`, `ABRT`, `FPE`, and `TIMEOUT`;
+- simulates `malloc` failures;
+- provides a `valgrind` leak-checking mode;
+- exports JSON for scripts and CI;
+- explains function coverage with `--explain`;
+- lists documented coverage with `--coverage`.
+
+## Commands
 
 ```sh
-make -C tester
+make ROOT_DIR=../libft
+make ROOT_DIR=../libft run
+make ROOT_DIR=../libft ci
+make ROOT_DIR=../libft leaks
 ```
 
-You can also pass arguments through the Makefile:
+Filter by function or suite:
 
 ```sh
-make ARGS="--only ft_split"
-make ARGS="--suite memory --verbose"
+make ROOT_DIR=../libft ARGS="--only ft_split"
+make ROOT_DIR=../libft ARGS="--suite memory --verbose"
 ```
 
-## Options
+Explain one function:
+
+```sh
+make ROOT_DIR=../libft explain FUNC=ft_lstmap
+```
+
+## CLI
 
 ```sh
 ./libft_tester --help
 ./libft_tester --version
 ./libft_tester --list
+./libft_tester --coverage
+./libft_tester --explain ft_lstmap
 ./libft_tester --only ft_split
 ./libft_tester --suite memory
 ./libft_tester --timeout 5000
@@ -49,83 +91,68 @@ make ARGS="--suite memory --verbose"
 ./libft_tester --no-color
 ```
 
-Makefile shortcuts:
-
-```sh
-make help
-make list
-make verbose
-make json
-make ci
-```
-
-For clean JSON output from the root:
-
-```sh
-make --no-print-directory -C tester json ARGS="--only ft_strlen"
-```
-
-## CI
-
-```sh
-make ci
-make ci ARGS="--only ft_strlen"
-```
-
-The `ci` target uses colorless JSON output, so the output remains stable in GitHub Actions, GitLab CI, or local scripts.
-
-## Leaks
-
-```sh
-make leaks
-```
-
-Leak mode runs without `fork`, so `valgrind` can analyze the tested functions directly instead of the runner's internal mechanism.
-
-It also accepts filters:
-
-```sh
-make leaks ARGS="--only ft_split"
-make leaks ARGS="--suite lists"
-```
-
-## Without Colors
-
-```sh
-NO_COLOR=1 make
-```
-
 ## Statuses
 
-- `OK`: normal test passed.
-- `MOK`: `malloc`-related expectation passed.
-- `NOK`: normal test failed.
-- `MNOK`: `malloc`-related expectation failed.
-- `SEGV`: the suite crashed with a segmentation fault.
-- `BUS`: the suite crashed with a bus error.
-- `ABRT`: the suite aborted.
-- `FPE`: the suite crashed with an arithmetic error.
-- `TIMEOUT`: the suite took too long to finish.
+| Status | Meaning |
+| --- | --- |
+| `OK` | Normal test passed. |
+| `MOK` | `malloc`-related expectation passed. |
+| `NOK` | Normal test failed. |
+| `MNOK` | `malloc`-related expectation failed. |
+| `SEGV` | The suite crashed with a segmentation fault. |
+| `BUS` | The suite crashed with a bus error. |
+| `ABRT` | The suite aborted. |
+| `FPE` | The suite crashed with an arithmetic error. |
+| `TIMEOUT` | The suite took too long to finish. |
 
-## Behavior
+## Suites
 
-The tester does not automatically delete `libft.a` after running. This prevents race conditions and issues in CI or when multiple commands are executed in parallel.
+| Suite | Functions |
+| --- | --- |
+| `ctype` | `ft_isalpha`, `ft_isdigit`, `ft_isalnum`, `ft_isascii`, `ft_isprint`, `ft_toupper`, `ft_tolower` |
+| `memory` | `ft_memset`, `ft_bzero`, `ft_memcpy`, `ft_memmove`, `ft_memchr`, `ft_memcmp`, `ft_calloc` |
+| `atoi` | `ft_atoi` |
+| `strings` | `ft_strlen`, `ft_strchr`, `ft_strrchr`, `ft_strncmp`, `ft_strnstr`, `ft_strlcpy`, `ft_strlcat`, `ft_strdup` |
+| `string_utils` | `ft_substr`, `ft_strjoin`, `ft_strtrim`, `ft_split`, `ft_itoa`, `ft_strmapi`, `ft_striteri` |
+| `output` | `ft_putchar_fd`, `ft_putstr_fd`, `ft_putendl_fd`, `ft_putnbr_fd` |
+| `lists` | `ft_lstnew`, `ft_lstadd_front`, `ft_lstsize`, `ft_lstlast`, `ft_lstadd_back`, `ft_lstdelone`, `ft_lstclear`, `ft_lstiter`, `ft_lstmap` |
 
-To clean everything, use:
+## Documentation
 
-```sh
-make fclean
+- [Coverage table](docs/COVERAGE.md): tested cases per function.
+- [GitHub Actions](.github/workflows/ci.yml): workflow ready to test an external Libft repository.
+
+## GitHub Actions
+
+The included workflow is designed for this tester to live in its own repository
+while testing an external Libft repository.
+
+You can use it in two ways:
+
+- manually, with `workflow_dispatch`, by providing the Libft `owner/repo`;
+- automatically, by setting the `LIBFT_REPOSITORY` repository variable.
+
+Example:
+
+```text
+NeddyKun01/Libft
 ```
 
 ## Structure
 
-- `include/tester.hpp`: runner, asserts, output, and helpers.
-- `include/test_modules.hpp`: suite declarations.
-- `include/malloc_fail.hpp`: simulated `malloc` failure control.
-- `src/*_tests.cpp`: tests separated by family.
-- `src/malloc_fail.cpp`: `malloc` wrapper.
-- `src/main.cpp`: suite registration and execution.
+```text
+include/
+├── malloc_fail.hpp
+├── test_modules.hpp
+└── tester.hpp
+
+src/
+├── *_tests.cpp
+├── main.cpp
+└── malloc_fail.cpp
+```
 
 ## Note
 
-This tester avoids testing undefined C behavior when it is not required by the subject. For example, it does not test calls such as `ft_strlen(NULL)`.
+This tester avoids testing undefined C behavior when it is not required by the
+subject. For example, it does not test calls such as `ft_strlen(NULL)`.

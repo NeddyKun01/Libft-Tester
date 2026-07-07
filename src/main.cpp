@@ -16,6 +16,7 @@ struct CliOptions
 {
 	std::string	only;
 	std::string	suite;
+	std::string	explain;
 	int			timeout_ms = 3000;
 	bool		verbose = false;
 	bool		quiet = false;
@@ -23,9 +24,21 @@ struct CliOptions
 	bool		list = false;
 	bool		help = false;
 	bool		version = false;
+	bool		coverage = false;
 };
 
 static const char	*g_version = "1.0.0-dev";
+
+struct CoverageEntry
+{
+	const char	*name;
+	const char	*suite;
+	const char	*group;
+	const char	*cases;
+	const char	*malloc_cases;
+};
+
+static std::vector<CoverageEntry>	coverage_entries(void);
 
 static void	register_suites(tester::SuiteRunner &runner)
 {
@@ -41,29 +54,76 @@ static void	register_suites(tester::SuiteRunner &runner)
 static std::vector<std::string>	function_names(void)
 {
 	std::vector<std::string>	names;
-	const char					*items[] = {
-		"ft_isalpha", "ft_isdigit", "ft_isalnum", "ft_isascii",
-		"ft_isprint", "ft_strlen", "ft_memset", "ft_bzero",
-		"ft_memcpy", "ft_memmove", "ft_strlcpy", "ft_strlcat",
-		"ft_toupper", "ft_tolower", "ft_strchr", "ft_strrchr",
-		"ft_strncmp", "ft_memchr", "ft_memcmp", "ft_strnstr",
-		"ft_atoi", "ft_calloc", "ft_strdup", "ft_substr",
-		"ft_strjoin", "ft_strtrim", "ft_split", "ft_itoa",
-		"ft_strmapi", "ft_striteri", "ft_putchar_fd",
-		"ft_putstr_fd", "ft_putendl_fd", "ft_putnbr_fd",
-		"ft_lstnew", "ft_lstadd_front", "ft_lstsize", "ft_lstlast",
-		"ft_lstadd_back", "ft_lstdelone", "ft_lstclear",
-		"ft_lstiter", "ft_lstmap"
+	std::vector<CoverageEntry>	entries;
+	size_t						i;
+
+	entries = coverage_entries();
+	i = 0;
+	while (i < entries.size())
+	{
+		names.push_back(entries[i].name);
+		i++;
+	}
+	return (names);
+}
+
+static std::vector<CoverageEntry>	coverage_entries(void)
+{
+	std::vector<CoverageEntry>	entries;
+	const CoverageEntry			items[] = {
+		{"ft_isalpha", "ctype", "classification", "full signed/unsigned char range, letters, non-letters", "none"},
+		{"ft_isdigit", "ctype", "classification", "full signed/unsigned char range, digits, non-digits", "none"},
+		{"ft_isalnum", "ctype", "classification", "full signed/unsigned char range, letters, digits, symbols", "none"},
+		{"ft_isascii", "ctype", "classification", "full signed/unsigned char range, ASCII limits, out of range", "none"},
+		{"ft_isprint", "ctype", "classification", "full signed/unsigned char range, printable limits, controls", "none"},
+		{"ft_toupper", "ctype", "conversion", "full signed/unsigned char range, lowercase, uppercase, symbols", "none"},
+		{"ft_tolower", "ctype", "conversion", "full signed/unsigned char range, uppercase, lowercase, symbols", "none"},
+		{"ft_strlen", "strings", "string length", "empty string, normal text, whitespace, punctuation, early NUL", "none"},
+		{"ft_strchr", "strings", "string search", "found, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL", "none"},
+		{"ft_strrchr", "strings", "string search", "last match, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL", "none"},
+		{"ft_strncmp", "strings", "string compare", "zero length, equal, prefix, negative diff, positive diff, shorter string, unsigned chars", "none"},
+		{"ft_strnstr", "strings", "bounded search", "empty needle, zero length, exact fit, too short, start match, missing, partial end", "none"},
+		{"ft_strlcpy", "strings", "bounded copy", "size zero, size one, full copy, truncation, empty source, return length, buffer bytes", "none"},
+		{"ft_strlcat", "strings", "bounded append", "size smaller than dst, truncation, full append, size zero, empty dst, empty src, buffer bytes", "none"},
+		{"ft_strdup", "strings", "allocation copy", "normal text, empty string, copied content", "malloc failure"},
+		{"ft_memset", "memory", "memory write", "return pointer, fixed fill, zero size, unsigned char cast", "none"},
+		{"ft_bzero", "memory", "memory zero", "full clear, partial clear, zero size, one byte, surrounding bytes", "none"},
+		{"ft_memcpy", "memory", "memory copy", "return pointer, fixed copy, zero size, unchanged bytes, offset copy", "none"},
+		{"ft_memmove", "memory", "overlap copy", "return pointer, forward overlap, backward overlap, zero size, same pointer", "none"},
+		{"ft_memchr", "memory", "memory search", "first match, NUL byte, missing, zero size, stops before later match", "none"},
+		{"ft_memcmp", "memory", "memory compare", "equal buffers, zero size, unsigned diff, negative diff, equal prefix", "none"},
+		{"ft_calloc", "memory", "zero allocation", "overflow protection, zero-filled blocks, one byte allocation", "malloc failure"},
+		{"ft_atoi", "atoi", "conversion", "zero, positive, negative, whitespace, signs, INT_MAX, INT_MIN, invalid prefixes, trailing text", "none"},
+		{"ft_substr", "string_utils", "allocation substring", "basic slice, long length, out of range, zero length, empty source", "malloc failure"},
+		{"ft_strjoin", "string_utils", "allocation join", "normal join, empty left, empty right, both empty", "malloc failure"},
+		{"ft_strtrim", "string_utils", "allocation trim", "spaces, custom set, empty set, full trim, no trim, multi-character set", "malloc failure"},
+		{"ft_split", "string_utils", "allocation split", "spaces, repeated delimiters, leading/trailing delimiters, empty tokens avoided, NULL terminator", "malloc failure across allocations"},
+		{"ft_itoa", "string_utils", "integer to string", "INT_MIN, zero, positive, INT_MAX, negative, selected values", "malloc failure"},
+		{"ft_strmapi", "string_utils", "mapped string", "index-aware transform, empty string, allocated result", "malloc failure"},
+		{"ft_striteri", "string_utils", "in-place iteration", "uppercase transform, empty string, index use, NULL function, NULL string guard", "none"},
+		{"ft_putchar_fd", "output", "fd output", "letter, newline, digit, NUL byte size/content", "none"},
+		{"ft_putstr_fd", "output", "fd output", "normal text, empty string, whitespace, NULL string, digits", "none"},
+		{"ft_putendl_fd", "output", "fd output", "normal text with newline, empty string, inner newline, NULL string, digits", "none"},
+		{"ft_putnbr_fd", "output", "fd output", "INT_MIN, zero, negative, INT_MAX, positive", "none"},
+		{"ft_lstnew", "lists", "list allocation", "content pointer, NULL content, next initialized to NULL", "malloc failure"},
+		{"ft_lstadd_front", "lists", "list mutation", "normal prepend, empty list, NULL new node, size after prepend", "setup allocations"},
+		{"ft_lstsize", "lists", "list query", "NULL list, one node, multiple nodes, after clear", "none"},
+		{"ft_lstlast", "lists", "list query", "NULL list, single node, multiple nodes, next NULL on tail", "none"},
+		{"ft_lstadd_back", "lists", "list mutation", "NULL new node, empty list, preserves head, links tail, last node", "setup allocations"},
+		{"ft_lstdelone", "lists", "list deletion", "covered through clear/map deletion paths and custom deleters", "none"},
+		{"ft_lstclear", "lists", "list deletion", "two nodes, resets head, empty list, NULL deleter guard", "none"},
+		{"ft_lstiter", "lists", "list iteration", "multiple nodes, single node, NULL function guard, content mutation", "none"},
+		{"ft_lstmap", "lists", "list mapping", "mapped copy, size, transformed values, f failure cleanup, NULL list", "malloc failure and cleanup"}
 	};
 	size_t						i;
 
 	i = 0;
 	while (i < sizeof(items) / sizeof(items[0]))
 	{
-		names.push_back(items[i]);
+		entries.push_back(items[i]);
 		i++;
 	}
-	return (names);
+	return (entries);
 }
 
 static void	print_help(const char *program)
@@ -74,6 +134,8 @@ static void	print_help(const char *program)
 		<< "  --help              Show this help message\n"
 		<< "  --version           Show tester version\n"
 		<< "  --list              List suites and functions\n"
+		<< "  --coverage          Show documented coverage table\n"
+		<< "  --explain NAME      Explain what is tested for a function\n"
 		<< "  --suite NAME        Run only suites matching NAME\n"
 		<< "  --only NAME         Show only functions matching NAME\n"
 		<< "  --timeout MS        Timeout per suite in milliseconds\n"
@@ -83,8 +145,55 @@ static void	print_help(const char *program)
 		<< "  --no-color          Disable terminal colors\n\n"
 		<< "Examples:\n"
 		<< "  " << program << " --only ft_split\n"
+		<< "  " << program << " --explain ft_lstmap\n"
 		<< "  " << program << " --suite memory --verbose\n"
 		<< "  " << program << " --json --no-color\n";
+}
+
+static void	print_coverage_table(void)
+{
+	std::vector<CoverageEntry>	entries = coverage_entries();
+	size_t						i;
+
+	std::cout << "Function             Suite          Group              Malloc\n";
+	std::cout << "----------------------------------------------------------------\n";
+	i = 0;
+	while (i < entries.size())
+	{
+		std::cout << std::left << std::setw(21) << entries[i].name
+			<< std::setw(15) << entries[i].suite
+			<< std::setw(23) << entries[i].group
+			<< entries[i].malloc_cases << '\n';
+		i++;
+	}
+}
+
+static bool	print_explain(const std::string &filter)
+{
+	std::vector<CoverageEntry>	entries = coverage_entries();
+	bool						found;
+	size_t						i;
+
+	found = false;
+	i = 0;
+	while (i < entries.size())
+	{
+		if (tester::name_matches(entries[i].name, filter))
+		{
+			if (found)
+				std::cout << '\n';
+			std::cout << entries[i].name << "\n";
+			std::cout << "  suite:  " << entries[i].suite << "\n";
+			std::cout << "  group:  " << entries[i].group << "\n";
+			std::cout << "  cases:  " << entries[i].cases << "\n";
+			std::cout << "  malloc: " << entries[i].malloc_cases << "\n";
+			found = true;
+		}
+		i++;
+	}
+	if (!found)
+		std::cerr << "No documented coverage found for: " << filter << '\n';
+	return (found);
 }
 
 static void	print_list(const tester::SuiteRunner &runner)
@@ -133,6 +242,8 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.version = true;
 		else if (value == "--list")
 			options.list = true;
+		else if (value == "--coverage")
+			options.coverage = true;
 		else if (value == "--verbose" || value == "-v")
 			options.verbose = true;
 		else if (value == "--quiet" || value == "-q")
@@ -142,6 +253,9 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 		else if (value == "--no-color")
 			setenv("NO_COLOR", "1", 1);
 		else if (value == "--only" && read_value(argc, argv, i, options.only))
+			;
+		else if (value == "--explain"
+			&& read_value(argc, argv, i, options.explain))
 			;
 		else if (value == "--suite" && read_value(argc, argv, i, options.suite))
 			;
@@ -197,6 +311,13 @@ int	main(int argc, char **argv)
 		print_list(runner);
 		return (0);
 	}
+	if (cli.coverage)
+	{
+		print_coverage_table();
+		return (0);
+	}
+	if (!cli.explain.empty())
+		return (print_explain(cli.explain) ? 0 : 1);
 	report = runner.run_all(cli.timeout_ms, cli.suite);
 	report = tester::filter_report(report, cli.only);
 	if (cli.json)

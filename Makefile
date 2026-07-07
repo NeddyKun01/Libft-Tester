@@ -74,6 +74,16 @@ run: $(NAME)
 list: $(NAME)
 	@./$(NAME) --list
 
+# PT: Mostra a tabela de cobertura documentada.
+# EN: Shows the documented coverage table.
+coverage: $(NAME)
+	@./$(NAME) --coverage
+
+# PT: Explica os casos testados para uma funcao. Usa FUNC=ft_split.
+# EN: Explains the cases tested for one function. Use FUNC=ft_split.
+explain: $(NAME)
+	@./$(NAME) --explain $(FUNC)
+
 # PT: Corre sem agregar os estados dos testes.
 # EN: Runs without aggregating test statuses.
 verbose: $(NAME)
@@ -113,4 +123,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all help run list verbose json ci leaks clean fclean re
+.PHONY: all help run list coverage explain verbose json ci leaks clean fclean re

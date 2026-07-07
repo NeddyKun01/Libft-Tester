@@ -1,0 +1,4 @@
+build/
+libft_tester
+*.o
+*.a

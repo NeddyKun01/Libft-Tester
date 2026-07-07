@@ -1,0 +1,63 @@
+name: Libft Tester
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+    inputs:
+      libft_repository:
+        description: "Repository to test, for example owner/libft"
+        required: false
+        type: string
+
+env:
+  TARGET_LIBFT_REPOSITORY: ${{ github.event.inputs.libft_repository || vars.LIBFT_REPOSITORY }}
+
+jobs:
+  test-libft:
+    name: Run tester
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.LIBFT_REPOSITORY != '' }}
+
+    steps:
+      - name: Checkout libft under test
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TARGET_LIBFT_REPOSITORY }}
+          path: libft
+
+      - name: Checkout tester
+        uses: actions/checkout@v4
+        with:
+          path: libft/tester
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+
+      - name: Build and run full suite
+        working-directory: libft/tester
+        run: make ci
+
+      - name: Run focused malloc/leak check
+        working-directory: libft/tester
+        run: make leaks ARGS="--only ft_split --no-color"
+
+      - name: Show coverage metadata
+        working-directory: libft/tester
+        run: make coverage
+
+  configuration-help:
+    name: Configuration help
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' && vars.LIBFT_REPOSITORY == '' }}
+
+    steps:
+      - name: Explain missing variable
+        run: |
+          echo "Set the repository variable LIBFT_REPOSITORY to run this workflow automatically."
+          echo "Example: NeddyKun01/Libft"
+          echo "You can also run workflow_dispatch and provide libft_repository manually."

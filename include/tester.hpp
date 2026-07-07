@@ -37,7 +37,7 @@
 extern "C"
 {
 # define new list_new
-# include "../../libft.h"
+# include "libft.h"
 # undef new
 }
 
