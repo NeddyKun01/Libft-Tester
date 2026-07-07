@@ -31,10 +31,33 @@ ARGS=
 
 SRCS=$(wildcard $(SRC_DIR)/*.cpp)
 OBJS=$(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+HEADERS=$(INC_DIR)/coverage.hpp \
+		$(INC_DIR)/malloc_fail.hpp \
+		$(INC_DIR)/test_modules.hpp \
+		$(INC_DIR)/tester.hpp
+
+# PT: Verifica se ROOT_DIR aponta para uma Libft valida.
+# EN: Checks whether ROOT_DIR points to a valid Libft project.
+check-root:
+	@if [ ! -d "$(ROOT_DIR)" ]; then \
+		printf "Error: ROOT_DIR '%s' does not exist.\n" "$(ROOT_DIR)"; \
+		printf "Use: make ROOT_DIR=/path/to/libft\n"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(ROOT_DIR)/Makefile" ]; then \
+		printf "Error: '%s/Makefile' was not found.\n" "$(ROOT_DIR)"; \
+		printf "Use: make ROOT_DIR=/path/to/libft\n"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(ROOT_DIR)/libft.h" ]; then \
+		printf "Error: '%s/libft.h' was not found.\n" "$(ROOT_DIR)"; \
+		printf "Use: make ROOT_DIR=/path/to/libft\n"; \
+		exit 1; \
+	fi
 
 # PT: Garante que a biblioteca principal existe antes de ligar o tester.
 # EN: Ensures the main library exists before linking the tester.
-$(LIBFT):
+$(LIBFT): | check-root
 	@$(MAKE) -s -C $(ROOT_DIR)
 
 # PT: Cria a pasta onde ficam os objetos do tester.
@@ -44,7 +67,7 @@ $(BUILD_DIR):
 
 # PT: Compila um objeto C++ a partir do ficheiro fonte correspondente.
 # EN: Compiles one C++ object from its matching source file.
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(INC_DIR)/tester.hpp $(INC_DIR)/test_modules.hpp $(INC_DIR)/malloc_fail.hpp $(LIBFT) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS) $(LIBFT) | $(BUILD_DIR)
 	@$(CXX) $(CXXFLAGS) -I$(INC_DIR) -I$(ROOT_DIR) -c $< -o $@
 
 # PT: Liga o executavel final do tester.
@@ -123,4 +146,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all help run list coverage explain verbose json ci leaks clean fclean re
+.PHONY: all check-root help run list coverage explain verbose json ci leaks clean fclean re

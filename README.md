@@ -120,6 +120,7 @@ make ROOT_DIR=../libft explain FUNC=ft_lstmap
 ## Documentation
 
 - [Coverage table](docs/COVERAGE.md): tested cases per function.
+- [Changelog](CHANGELOG.md): project history and pending changes.
 - [GitHub Actions](.github/workflows/ci.yml): workflow ready to test an external Libft repository.
 
 ## GitHub Actions
