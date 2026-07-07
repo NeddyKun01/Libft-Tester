@@ -92,3 +92,19 @@ Which existing functions can still be tested right now?
 
 Use `diagnose` to fix the project structure and the normal tester for final
 validation.
+
+## Tester Self-Test
+
+The tester also has a small self-test suite that creates temporary broken Libft
+fixtures under `/tmp`:
+
+```sh
+make self-test
+```
+
+It checks that:
+
+- `diagnose` fails and explains a missing `libft.h`;
+- `diagnose` detects a partial `libft.a`;
+- `rescue-test` runs an existing `ft_strlen`;
+- `rescue-test` skips missing symbols such as `ft_split`.

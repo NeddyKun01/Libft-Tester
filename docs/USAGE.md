@@ -77,6 +77,12 @@ Test only functions that have real symbols in `libft.a`:
 make ROOT_DIR=../libft rescue-test
 ```
 
+Validate the tester's own diagnose/rescue behavior:
+
+```sh
+make self-test
+```
+
 ## Profiles
 
 Profiles are shortcuts for different levels of confidence.

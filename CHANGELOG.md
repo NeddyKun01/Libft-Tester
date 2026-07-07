@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - Added `make diagnose` for Makefile/header/source/archive diagnostics.
 - Added `make rescue-test` to test only functions with real `libft.a` symbols.
 - Added weak rescue stubs for missing functions during partial testing.
+- Added `make self-test` with temporary broken Libft fixtures.
+- Added a GitHub Actions self-test job for diagnose/rescue fixtures.
 - Added known-good reference files in `templates/libft.h` and
   `templates/Makefile`.
 - Added `docs/DIAGNOSE.md`.

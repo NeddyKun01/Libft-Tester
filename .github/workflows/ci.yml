@@ -16,6 +16,17 @@ env:
   TARGET_LIBFT_REPOSITORY: ${{ inputs.libft_repository || vars.LIBFT_REPOSITORY }}
 
 jobs:
+  tester-self-test:
+    name: Tester self-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tester
+        uses: actions/checkout@v4
+
+      - name: Run diagnose/rescue fixtures
+        run: make self-test
+
   build-and-test:
     name: Build and test
     runs-on: ubuntu-latest

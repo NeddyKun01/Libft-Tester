@@ -68,6 +68,7 @@ make ROOT_DIR=../libft run
 make ROOT_DIR=../libft ci
 make ROOT_DIR=../libft diagnose
 make ROOT_DIR=../libft rescue-test
+make self-test
 make ROOT_DIR=../libft report
 make ROOT_DIR=../libft report-html
 make ROOT_DIR=../libft summary
