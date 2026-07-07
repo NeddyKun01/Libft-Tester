@@ -11,6 +11,8 @@
 /* ************************************************************************** */
 
 #include "coverage.hpp"
+#include "hints.hpp"
+#include "profiles.hpp"
 #include "test_modules.hpp"
 
 struct CliOptions
@@ -18,20 +20,27 @@ struct CliOptions
 	std::string	only;
 	std::string	suite;
 	std::string	explain;
+	std::string	hint;
+	std::string	profile = "normal";
 	int			timeout_ms = 3000;
 	int			repeat_count = 1;
 	unsigned int	seed = 0;
 	bool		verbose = false;
 	bool		quiet = false;
 	bool		json = false;
+	bool		html = false;
 	bool		list = false;
 	bool		help = false;
+	bool		profiles = false;
 	bool		version = false;
 	bool		coverage = false;
 	bool		coverage_md = false;
 	bool		fail_fast = false;
 	bool		summary_only = false;
 	bool		has_seed = false;
+	bool		timeout_set = false;
+	bool		repeat_set = false;
+	bool		fail_fast_set = false;
 };
 
 static const char	*g_version = "1.0.0-dev";
@@ -57,25 +66,33 @@ static void	print_help(const char *program)
 		<< "  --list              List suites and functions\n"
 		<< "  --coverage          Show documented coverage table\n"
 		<< "  --coverage-md       Print documented coverage as Markdown\n"
+		<< "  --profiles          List run profiles\n"
 		<< "  --explain NAME      Explain what is tested for a function\n"
+		<< "  --hint NAME         Show debugging hints for a function\n"
 		<< "  --suite NAME        Run only suites matching NAME\n"
 		<< "  --only NAME         Show only functions matching NAME\n"
+		<< "  --profile NAME      Use quick, normal, strict, or brutal\n"
 		<< "  --timeout MS        Timeout per suite in milliseconds\n"
 		<< "  --repeat N          Run the selected suites N times\n"
 		<< "  --seed N            Reproduce pseudo-random tests with seed N\n"
+		<< "  --strict            Shortcut for --profile strict\n"
 		<< "  --fail-fast         Stop after the first failing suite\n"
 		<< "  --summary-only      Print only the final summary\n"
 		<< "  --verbose           Do not aggregate status tokens\n"
 		<< "  --quiet             Show only failures and summary\n"
 		<< "  --json              Print machine-readable JSON\n"
+		<< "  --html              Print a standalone HTML report\n"
 		<< "  --no-color          Disable terminal colors\n\n"
 		<< "Examples:\n"
 		<< "  " << program << " --only ft_split\n"
 		<< "  " << program << " --suite lists --fail-fast\n"
+		<< "  " << program << " --profile brutal --summary-only\n"
 		<< "  " << program << " --repeat 10 --seed 42\n"
+		<< "  " << program << " --hint ft_split\n"
 		<< "  " << program << " --explain ft_lstmap\n"
 		<< "  " << program << " --suite memory --verbose\n"
-		<< "  " << program << " --json --no-color\n";
+		<< "  " << program << " --json --no-color\n"
+		<< "  " << program << " --html --no-color > report.html\n";
 }
 
 static void	print_list(const tester::SuiteRunner &runner)
@@ -150,18 +167,27 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.version = true;
 		else if (value == "--list")
 			options.list = true;
+		else if (value == "--profiles")
+			options.profiles = true;
 		else if (value == "--coverage")
 			options.coverage = true;
 		else if (value == "--coverage-md")
 			options.coverage_md = true;
 		else if (value == "--fail-fast")
+		{
 			options.fail_fast = true;
+			options.fail_fast_set = true;
+		}
+		else if (value == "--strict")
+			options.profile = "strict";
 		else if (value == "--verbose" || value == "-v")
 			options.verbose = true;
 		else if (value == "--quiet" || value == "-q")
 			options.quiet = true;
 		else if (value == "--json")
 			options.json = true;
+		else if (value == "--html")
+			options.html = true;
 		else if (value == "--no-color")
 			setenv("NO_COLOR", "1", 1);
 		else if (value == "--summary-only")
@@ -171,17 +197,24 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 		else if (value == "--explain"
 			&& read_value(argc, argv, i, options.explain))
 			;
+		else if (value == "--hint" && read_value(argc, argv, i, options.hint))
+			;
+		else if (value == "--profile"
+			&& read_value(argc, argv, i, options.profile))
+			;
 		else if (value == "--suite" && read_value(argc, argv, i, options.suite))
 			;
 		else if (value == "--timeout" && read_value(argc, argv, i, value))
 		{
 			if (!parse_int_value(value, options.timeout_ms))
 				return (false);
+			options.timeout_set = true;
 		}
 		else if (value == "--repeat" && read_value(argc, argv, i, value))
 		{
 			if (!parse_int_value(value, options.repeat_count))
 				return (false);
+			options.repeat_set = true;
 		}
 		else if (value == "--seed" && read_value(argc, argv, i, value))
 		{
@@ -198,6 +231,27 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 	}
 	if (options.json)
 		setenv("NO_COLOR", "1", 1);
+	if (options.html)
+		setenv("NO_COLOR", "1", 1);
+	return (true);
+}
+
+static bool	apply_profile(CliOptions &options)
+{
+	profiles::Settings	settings;
+
+	if (!profiles::find(options.profile, settings))
+	{
+		std::cerr << "Unknown profile: " << options.profile << '\n';
+		profiles::print_table();
+		return (false);
+	}
+	if (!options.repeat_set)
+		options.repeat_count = settings.repeat_count;
+	if (!options.timeout_set)
+		options.timeout_ms = settings.timeout_ms;
+	if (!options.fail_fast_set)
+		options.fail_fast = settings.fail_fast;
 	return (true);
 }
 
@@ -217,6 +271,7 @@ static void	fill_report_metadata(tester::Report &report, const CliOptions &cli,
 	long long duration_ms, int executed_repeats)
 {
 	report.version = g_version;
+	report.profile = cli.profile;
 	report.seed = cli.seed;
 	report.repeat_count = executed_repeats;
 	report.timeout_ms = cli.timeout_ms;
@@ -263,6 +318,8 @@ int	main(int argc, char **argv)
 		print_help(argv[0]);
 		return (2);
 	}
+	if (!apply_profile(cli))
+		return (2);
 	if (cli.help)
 	{
 		print_help(argv[0]);
@@ -278,6 +335,11 @@ int	main(int argc, char **argv)
 		print_list(runner);
 		return (0);
 	}
+	if (cli.profiles)
+	{
+		profiles::print_table();
+		return (0);
+	}
 	if (cli.coverage)
 	{
 		coverage::print_table();
@@ -290,6 +352,8 @@ int	main(int argc, char **argv)
 	}
 	if (!cli.explain.empty())
 		return (coverage::print_explain(cli.explain) ? 0 : 1);
+	if (!cli.hint.empty())
+		return (hints::print_for_function(cli.hint) ? 0 : 1);
 	if (!cli.has_seed)
 		cli.seed = tester::default_seed();
 	start = std::chrono::steady_clock::now();
@@ -300,6 +364,8 @@ int	main(int argc, char **argv)
 	report = tester::filter_report(report, cli.only);
 	if (cli.json)
 		tester::print_json_report(report);
+	else if (cli.html)
+		tester::print_html_report(report);
 	else
 		tester::print_summary(report, output_options(cli));
 	return (report.failures == 0 ? 0 : 1);

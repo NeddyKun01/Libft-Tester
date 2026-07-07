@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Added run profiles with `--profile quick|normal|strict|brutal`.
+- Added `--strict` shortcut for stronger local validation.
+- Added standalone HTML reports with `--html` and `make report-html`.
+- Added debugging hints with `--hint` and automatic hints on failures.
+- Added HTML report artifacts to GitHub Actions.
 - Added `--repeat`, `--seed`, and `--summary-only`.
 - Added reproducible pseudo-random checks for memory and string functions.
 - Expanded JSON reports with metadata and individual check details.

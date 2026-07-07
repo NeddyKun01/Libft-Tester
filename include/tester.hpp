@@ -13,6 +13,8 @@
 #ifndef TESTER_HPP
 # define TESTER_HPP
 
+# include "hints.hpp"
+
 # include <algorithm>
 # include <climits>
 # include <cstddef>
@@ -91,6 +93,7 @@ namespace tester
 		unsigned int				seed = 0;
 		bool						fail_fast = false;
 		std::string					version;
+		std::string					profile;
 		std::string					suite_filter;
 		std::string					function_filter;
 		std::vector<FunctionReport>	functions;
@@ -303,6 +306,7 @@ namespace tester
 		filtered.seed = report.seed;
 		filtered.fail_fast = report.fail_fast;
 		filtered.version = report.version;
+		filtered.profile = report.profile;
 		filtered.suite_filter = report.suite_filter;
 		filtered.function_filter = filter;
 		i = 0;
@@ -659,6 +663,10 @@ namespace tester
 						<< check.label << '\n';
 					if (!check.details.empty())
 						std::cout << "  " << check.details << '\n';
+					std::string	hint = hints::for_label(check.label);
+					if (!hint.empty())
+						std::cout << paint(dim) << "  hint: " << hint
+							<< paint(reset) << '\n';
 				}
 				j++;
 			}
@@ -683,6 +691,30 @@ namespace tester
 				result += "\\n";
 			else if (value[i] == '\t')
 				result += "\\t";
+			else
+				result += value[i];
+			i++;
+		}
+		return (result);
+	}
+
+	inline std::string	html_escape(const std::string &value)
+	{
+		std::string	result;
+		size_t		i;
+
+		result.reserve(value.size());
+		i = 0;
+		while (i < value.size())
+		{
+			if (value[i] == '&')
+				result += "&amp;";
+			else if (value[i] == '<')
+				result += "&lt;";
+			else if (value[i] == '>')
+				result += "&gt;";
+			else if (value[i] == '"')
+				result += "&quot;";
 			else
 				result += value[i];
 			i++;
@@ -717,6 +749,7 @@ namespace tester
 
 		std::cout << "{";
 		std::cout << "\"version\":\"" << json_escape(report.version)
+			<< "\",\"profile\":\"" << json_escape(report.profile)
 			<< "\",\"seed\":" << report.seed
 			<< ",\"repeats\":" << report.repeat_count
 			<< ",\"timeout_ms\":" << report.timeout_ms
@@ -761,6 +794,109 @@ namespace tester
 		std::cout << "]}\n";
 	}
 
+	inline void	print_html_status(const CheckResult &check)
+	{
+		std::cout << "<span class=\"status "
+			<< (check.success ? "pass" : "fail") << "\">"
+			<< html_escape(check.status) << "</span>";
+	}
+
+	inline void	print_html_report(const Report &report)
+	{
+		size_t	i;
+
+		std::cout << "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">";
+		std::cout << "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">";
+		std::cout << "<title>Libft Tester Report</title><style>";
+		std::cout << ":root{--bg:#10131a;--card:#181d27;--text:#eef2ff;";
+		std::cout << "--muted:#9aa4b2;--ok:#54d18a;--bad:#ff6370;--line:#293142;}";
+		std::cout << "body{margin:0;background:radial-gradient(circle at top left,#1e3557,#10131a 45%);";
+		std::cout << "color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}";
+		std::cout << "main{max-width:1180px;margin:0 auto;padding:32px 18px;}";
+		std::cout << ".hero{border:1px solid var(--line);background:rgba(24,29,39,.92);";
+		std::cout << "border-radius:22px;padding:26px;box-shadow:0 24px 70px #0008;}";
+		std::cout << "h1{margin:0 0 8px;font-size:34px}.muted{color:var(--muted)}";
+		std::cout << ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));";
+		std::cout << "gap:12px;margin:22px 0}.metric{background:#0d111a;border:1px solid var(--line);";
+		std::cout << "border-radius:16px;padding:14px}.metric strong{display:block;font-size:25px}";
+		std::cout << ".pass{color:var(--ok)}.fail{color:var(--bad)}";
+		std::cout << ".card{margin-top:16px;border:1px solid var(--line);border-radius:18px;";
+		std::cout << "background:rgba(24,29,39,.9);overflow:hidden}";
+		std::cout << ".head{display:flex;justify-content:space-between;gap:12px;padding:14px 16px;";
+		std::cout << "border-bottom:1px solid var(--line)}.checks{padding:14px 16px}";
+		std::cout << ".status{display:inline-block;margin:3px 5px 3px 0;font-weight:700}";
+		std::cout << "details{margin-top:10px}.failure{margin:10px 0;padding:10px;border-left:3px solid var(--bad);";
+		std::cout << "background:#0d111a}.hint{color:var(--muted)}";
+		std::cout << "</style></head><body><main>";
+		std::cout << "<section class=\"hero\"><h1>Libft Tester Report</h1>";
+		std::cout << "<p class=\"muted\">version " << html_escape(report.version)
+			<< " | profile " << html_escape(report.profile)
+			<< " | seed " << report.seed
+			<< " | repeats " << report.repeat_count
+			<< " | duration " << report.duration_ms << "ms</p>";
+		std::cout << "<div class=\"grid\">";
+		std::cout << "<div class=\"metric\"><span>Verdict</span><strong class=\""
+			<< (report.failures == 0 ? "pass\">PASS" : "fail\">FAIL")
+			<< "</strong></div>";
+		std::cout << "<div class=\"metric\"><span>Checks</span><strong>"
+			<< report.checks << "</strong></div>";
+		std::cout << "<div class=\"metric\"><span>Failures</span><strong class=\""
+			<< (report.failures == 0 ? "pass" : "fail") << "\">"
+			<< report.failures << "</strong></div>";
+		std::cout << "<div class=\"metric\"><span>OK/MOK</span><strong>"
+			<< report.ok_count << "/" << report.mok_count << "</strong></div>";
+		std::cout << "<div class=\"metric\"><span>NOK/MNOK</span><strong>"
+			<< report.nok_count << "/" << report.mnok_count << "</strong></div>";
+		std::cout << "</div></section>";
+		i = 0;
+		while (i < report.functions.size())
+		{
+			const FunctionReport	&function = report.functions[i];
+			size_t					j = 0;
+
+			std::cout << "<section class=\"card\"><div class=\"head\"><strong>"
+				<< html_escape(function.name) << "</strong><span class=\""
+				<< (function_has_failure(function) ? "fail" : "pass") << "\">"
+				<< function.passed << "/" << function.checks.size()
+				<< "</span></div><div class=\"checks\">";
+			while (j < function.checks.size())
+			{
+				print_html_status(function.checks[j]);
+				j++;
+			}
+			if (function_has_failure(function))
+			{
+				std::cout << "<details open><summary>Failure details</summary>";
+				j = 0;
+				while (j < function.checks.size())
+				{
+					const CheckResult	&check = function.checks[j];
+
+					if (!check.success)
+					{
+						std::string	hint = hints::for_label(check.label);
+
+						std::cout << "<div class=\"failure\"><strong>"
+							<< html_escape(check.status) << " "
+							<< html_escape(check.label) << "</strong>";
+						if (!check.details.empty())
+							std::cout << "<pre>" << html_escape(check.details)
+								<< "</pre>";
+						if (!hint.empty())
+							std::cout << "<p class=\"hint\">hint: "
+								<< html_escape(hint) << "</p>";
+						std::cout << "</div>";
+					}
+					j++;
+				}
+				std::cout << "</details>";
+			}
+			std::cout << "</div></section>";
+			i++;
+		}
+		std::cout << "</main></body></html>\n";
+	}
+
 	inline void	print_summary(const Report &report,
 		const OutputOptions &options = OutputOptions())
 	{
@@ -777,6 +913,7 @@ namespace tester
 			if (report.seed != 0)
 				std::cout << paint(dim) << "seed: " << report.seed
 					<< " | repeats: " << report.repeat_count
+					<< " | profile: " << report.profile
 					<< " | duration: " << report.duration_ms << "ms"
 					<< paint(reset) << "\n";
 			if (!options.filter.empty())
@@ -791,6 +928,7 @@ namespace tester
 		if (options.summary_only && report.seed != 0)
 			std::cout << "seed: " << report.seed
 				<< " | repeats: " << report.repeat_count
+				<< " | profile: " << report.profile
 				<< " | duration: " << report.duration_ms << "ms\n  ";
 		print_status_count("OK", report.ok_count, true);
 		print_status_count("MOK", report.mok_count, true);

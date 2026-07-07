@@ -49,10 +49,14 @@ make
 - simulates `malloc` failures;
 - provides a `valgrind` leak-checking mode;
 - exports JSON for scripts and CI;
+- exports standalone HTML reports;
 - can stop early with `--fail-fast`;
+- provides run profiles with `--profile`;
+- has a stronger `--strict` shortcut;
 - can repeat runs with `--repeat`;
 - can reproduce pseudo-random tests with `--seed`;
 - can print a compact `--summary-only` view;
+- shows beginner-friendly debugging hints with `--hint`;
 - explains function coverage with `--explain`;
 - lists documented coverage with `--coverage`.
 
@@ -63,7 +67,9 @@ make ROOT_DIR=../libft
 make ROOT_DIR=../libft run
 make ROOT_DIR=../libft ci
 make ROOT_DIR=../libft report
+make ROOT_DIR=../libft report-html
 make ROOT_DIR=../libft summary
+make ROOT_DIR=../libft strict
 make ROOT_DIR=../libft leaks
 ```
 
@@ -74,12 +80,14 @@ make ROOT_DIR=../libft ARGS="--only ft_split"
 make ROOT_DIR=../libft ARGS="--suite memory --verbose"
 make ROOT_DIR=../libft ARGS="--fail-fast"
 make ROOT_DIR=../libft ARGS="--repeat 10 --seed 42"
+make ROOT_DIR=../libft ARGS="--profile brutal --summary-only"
 ```
 
-Explain one function:
+Explain or debug one function:
 
 ```sh
 make ROOT_DIR=../libft explain FUNC=ft_lstmap
+make ROOT_DIR=../libft hint FUNC=ft_split
 make ROOT_DIR=../libft coverage-docs
 ```
 
@@ -89,19 +97,50 @@ make ROOT_DIR=../libft coverage-docs
 ./libft_tester --help
 ./libft_tester --version
 ./libft_tester --list
+./libft_tester --profiles
 ./libft_tester --coverage
 ./libft_tester --explain ft_lstmap
+./libft_tester --hint ft_split
 ./libft_tester --only ft_split
 ./libft_tester --suite memory
+./libft_tester --profile quick
+./libft_tester --profile strict
+./libft_tester --profile brutal
 ./libft_tester --timeout 5000
 ./libft_tester --repeat 10
 ./libft_tester --seed 42
+./libft_tester --strict
 ./libft_tester --fail-fast
 ./libft_tester --summary-only
 ./libft_tester --verbose
 ./libft_tester --quiet
 ./libft_tester --json
+./libft_tester --html
 ./libft_tester --no-color
+```
+
+## Profiles
+
+Profiles are shortcuts for common testing moods:
+
+| Profile | Repeats | Timeout | Fail-fast | Use case |
+| --- | --- | --- | --- | --- |
+| `quick` | 1 | 1500 ms | yes | fast feedback while coding |
+| `normal` | 1 | 3000 ms | no | default balanced run |
+| `strict` | 10 | 6000 ms | no | stronger local validation |
+| `brutal` | 25 | 9000 ms | no | heavy run before push/release |
+
+```sh
+./libft_tester --profile quick --only ft_split
+./libft_tester --strict --summary-only
+./libft_tester --profile brutal --seed 42
+```
+
+Manual flags still work with profiles. For example, this uses the `brutal`
+timeout/fail-fast behavior but overrides the repeat count:
+
+```sh
+./libft_tester --profile brutal --repeat 3
 ```
 
 ## Statuses
@@ -143,8 +182,8 @@ The included workflow is designed for this tester to live in its own repository
 while testing an external Libft repository.
 
 It runs separate jobs for the main JSON suite, Valgrind leak checks, and coverage
-metadata. The JSON report, Valgrind log, and coverage report are uploaded as
-GitHub Actions artifacts.
+metadata. The JSON report, standalone HTML report, Valgrind log, and coverage
+report are uploaded as GitHub Actions artifacts.
 
 You can use it in two ways:
 
@@ -162,15 +201,19 @@ NeddyKun01/Libft
 ```text
 include/
 ├── coverage.hpp
+├── hints.hpp
 ├── malloc_fail.hpp
+├── profiles.hpp
 ├── test_modules.hpp
 └── tester.hpp
 
 src/
 ├── *_tests.cpp
 ├── coverage.cpp
+├── hints.cpp
 ├── main.cpp
-└── malloc_fail.cpp
+├── malloc_fail.cpp
+└── profiles.cpp
 ```
 
 ## Reproducibility
@@ -183,6 +226,29 @@ summary and JSON output so the run can be repeated later.
 ./libft_tester --repeat 20 --seed 42
 ./libft_tester --summary-only --repeat 20 --seed 42
 ```
+
+## Reports And Hints
+
+For scripts and CI:
+
+```sh
+./libft_tester --json --no-color > libft-test-report.json
+```
+
+For a visual artifact that can be opened in a browser:
+
+```sh
+./libft_tester --html --no-color > libft-test-report.html
+```
+
+For quick debugging advice:
+
+```sh
+./libft_tester --hint ft_split
+```
+
+When a test fails in normal terminal output or in the HTML report, the tester
+also prints a small hint for the related function.
 
 ## Note
 
