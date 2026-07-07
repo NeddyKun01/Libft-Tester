@@ -59,6 +59,7 @@ make
 make ROOT_DIR=../libft
 make ROOT_DIR=../libft run
 make ROOT_DIR=../libft ci
+make ROOT_DIR=../libft report
 make ROOT_DIR=../libft leaks
 ```
 
@@ -131,6 +132,10 @@ make ROOT_DIR=../libft explain FUNC=ft_lstmap
 
 The included workflow is designed for this tester to live in its own repository
 while testing an external Libft repository.
+
+It runs separate jobs for the main JSON suite, Valgrind leak checks, and coverage
+metadata. The JSON report, Valgrind log, and coverage report are uploaded as
+GitHub Actions artifacts.
 
 You can use it in two ways:
 

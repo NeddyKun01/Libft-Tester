@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Improved GitHub Actions with separate test, leak, and coverage jobs.
+- Added CI artifacts for JSON, Valgrind, and coverage reports.
+- Added `make report` to write JSON output to `libft-test-report.json`.
 - Improved `ROOT_DIR` validation with clear setup errors.
 - Moved coverage metadata out of `main.cpp` into dedicated coverage files.
 - Added `--fail-fast` to stop after the first failing suite.
