@@ -906,14 +906,14 @@ namespace tester
 		}
 
 		Report	run_all(int timeout_ms = 3000,
-			const std::string &suite_filter = "") const
+			const std::string &suite_filter = "", bool fail_fast = false) const
 		{
 			Report	report;
 			size_t	i;
 
 			if (std::getenv("LIBFT_TESTER_NO_FORK"))
 			{
-				run_all_in_process(report, suite_filter);
+				run_all_in_process(report, suite_filter, fail_fast);
 				return (report);
 			}
 			i = 0;
@@ -921,7 +921,11 @@ namespace tester
 			{
 				if (suite_filter.empty()
 					|| name_matches(m_suites[i].name, suite_filter))
+				{
 					run_suite(m_suites[i], timeout_ms, report);
+					if (fail_fast && report.failures > 0)
+						break ;
+				}
 				i++;
 			}
 			if (!suite_filter.empty() && report.functions.empty())
@@ -934,7 +938,7 @@ namespace tester
 		std::vector<Suite>	m_suites;
 
 		void	run_all_in_process(Report &report,
-			const std::string &suite_filter) const
+			const std::string &suite_filter, bool fail_fast) const
 		{
 			size_t	i;
 
@@ -943,7 +947,11 @@ namespace tester
 			{
 				if (suite_filter.empty()
 					|| name_matches(m_suites[i].name, suite_filter))
+				{
 					m_suites[i].run(report);
+					if (fail_fast && report.failures > 0)
+						break ;
+				}
 				i++;
 			}
 			if (!suite_filter.empty() && report.functions.empty())

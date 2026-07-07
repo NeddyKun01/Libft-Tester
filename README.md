@@ -49,6 +49,7 @@ make
 - simulates `malloc` failures;
 - provides a `valgrind` leak-checking mode;
 - exports JSON for scripts and CI;
+- can stop early with `--fail-fast`;
 - explains function coverage with `--explain`;
 - lists documented coverage with `--coverage`.
 
@@ -66,6 +67,7 @@ Filter by function or suite:
 ```sh
 make ROOT_DIR=../libft ARGS="--only ft_split"
 make ROOT_DIR=../libft ARGS="--suite memory --verbose"
+make ROOT_DIR=../libft ARGS="--fail-fast"
 ```
 
 Explain one function:
@@ -85,6 +87,7 @@ make ROOT_DIR=../libft explain FUNC=ft_lstmap
 ./libft_tester --only ft_split
 ./libft_tester --suite memory
 ./libft_tester --timeout 5000
+./libft_tester --fail-fast
 ./libft_tester --verbose
 ./libft_tester --quiet
 ./libft_tester --json
@@ -121,6 +124,7 @@ make ROOT_DIR=../libft explain FUNC=ft_lstmap
 
 - [Coverage table](docs/COVERAGE.md): tested cases per function.
 - [Changelog](CHANGELOG.md): project history and pending changes.
+- [Contributing guide](CONTRIBUTING.md): how to add tests and coverage.
 - [GitHub Actions](.github/workflows/ci.yml): workflow ready to test an external Libft repository.
 
 ## GitHub Actions

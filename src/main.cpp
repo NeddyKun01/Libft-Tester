@@ -26,6 +26,7 @@ struct CliOptions
 	bool		help = false;
 	bool		version = false;
 	bool		coverage = false;
+	bool		fail_fast = false;
 };
 
 static const char	*g_version = "1.0.0-dev";
@@ -54,12 +55,14 @@ static void	print_help(const char *program)
 		<< "  --suite NAME        Run only suites matching NAME\n"
 		<< "  --only NAME         Show only functions matching NAME\n"
 		<< "  --timeout MS        Timeout per suite in milliseconds\n"
+		<< "  --fail-fast         Stop after the first failing suite\n"
 		<< "  --verbose           Do not aggregate status tokens\n"
 		<< "  --quiet             Show only failures and summary\n"
 		<< "  --json              Print machine-readable JSON\n"
 		<< "  --no-color          Disable terminal colors\n\n"
 		<< "Examples:\n"
 		<< "  " << program << " --only ft_split\n"
+		<< "  " << program << " --suite lists --fail-fast\n"
 		<< "  " << program << " --explain ft_lstmap\n"
 		<< "  " << program << " --suite memory --verbose\n"
 		<< "  " << program << " --json --no-color\n";
@@ -113,6 +116,8 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.list = true;
 		else if (value == "--coverage")
 			options.coverage = true;
+		else if (value == "--fail-fast")
+			options.fail_fast = true;
 		else if (value == "--verbose" || value == "-v")
 			options.verbose = true;
 		else if (value == "--quiet" || value == "-q")
@@ -187,7 +192,7 @@ int	main(int argc, char **argv)
 	}
 	if (!cli.explain.empty())
 		return (coverage::print_explain(cli.explain) ? 0 : 1);
-	report = runner.run_all(cli.timeout_ms, cli.suite);
+	report = runner.run_all(cli.timeout_ms, cli.suite, cli.fail_fast);
 	report = tester::filter_report(report, cli.only);
 	if (cli.json)
 		tester::print_json_report(report);

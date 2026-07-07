@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Improved `ROOT_DIR` validation with clear setup errors.
 - Moved coverage metadata out of `main.cpp` into dedicated coverage files.
+- Added `--fail-fast` to stop after the first failing suite.
+- Added `CONTRIBUTING.md` with testing and coverage guidelines.
 - Added documented coverage commands with `--coverage` and `--explain`.
 - Added GitHub Actions support for testing an external Libft repository.
 - Added `docs/COVERAGE.md` with per-function coverage documentation.
