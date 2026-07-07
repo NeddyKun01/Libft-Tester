@@ -85,6 +85,14 @@ namespace tester
 		int							nok_count = 0;
 		int							mok_count = 0;
 		int							mnok_count = 0;
+		int							repeat_count = 1;
+		int							timeout_ms = 3000;
+		long long					duration_ms = 0;
+		unsigned int				seed = 0;
+		bool						fail_fast = false;
+		std::string					version;
+		std::string					suite_filter;
+		std::string					function_filter;
 		std::vector<FunctionReport>	functions;
 	};
 
@@ -93,6 +101,7 @@ namespace tester
 		bool		verbose = false;
 		bool		quiet = false;
 		bool		json = false;
+		bool		summary_only = false;
 		std::string	filter;
 	};
 
@@ -288,6 +297,14 @@ namespace tester
 
 		if (filter.empty())
 			return (report);
+		filtered.repeat_count = report.repeat_count;
+		filtered.timeout_ms = report.timeout_ms;
+		filtered.duration_ms = report.duration_ms;
+		filtered.seed = report.seed;
+		filtered.fail_fast = report.fail_fast;
+		filtered.version = report.version;
+		filtered.suite_filter = report.suite_filter;
+		filtered.function_filter = filter;
 		i = 0;
 		while (i < report.functions.size())
 		{
@@ -309,6 +326,54 @@ namespace tester
 			add_raw_check(filtered, "filter no match", "NOK", false,
 				std::string("no function matched: ") + filter);
 		return (filtered);
+	}
+
+	inline void	append_report(Report &target, const Report &source)
+	{
+		size_t	i;
+		size_t	j;
+
+		i = 0;
+		while (i < source.functions.size())
+		{
+			j = 0;
+			while (j < source.functions[i].checks.size())
+			{
+				const CheckResult	&check = source.functions[i].checks[j];
+
+				add_raw_check(target, check.label, check.status,
+					check.success, check.details);
+				j++;
+			}
+			i++;
+		}
+	}
+
+	inline unsigned int	default_seed(void)
+	{
+		return (static_cast<unsigned int>(
+			std::chrono::high_resolution_clock::now()
+				.time_since_epoch().count()));
+	}
+
+	inline unsigned int	&current_seed(void)
+	{
+		static unsigned int	seed = default_seed();
+
+		return (seed);
+	}
+
+	inline std::mt19937	&random_engine(void)
+	{
+		static std::mt19937	engine(current_seed());
+
+		return (engine);
+	}
+
+	inline void	set_random_seed(unsigned int seed)
+	{
+		current_seed() = seed;
+		random_engine().seed(seed);
 	}
 
 	inline bool	expect(Report &report, const std::string &label, bool condition)
@@ -638,12 +703,29 @@ namespace tester
 			<< ",\"timeout\":" << counts.timeout;
 	}
 
+	inline void	print_json_check(const CheckResult &check)
+	{
+		std::cout << "{\"status\":\"" << json_escape(check.status)
+			<< "\",\"success\":" << (check.success ? "true" : "false")
+			<< ",\"label\":\"" << json_escape(check.label)
+			<< "\",\"details\":\"" << json_escape(check.details) << "\"}";
+	}
+
 	inline void	print_json_report(const Report &report)
 	{
 		size_t	i;
 
 		std::cout << "{";
-		std::cout << "\"checks\":" << report.checks
+		std::cout << "\"version\":\"" << json_escape(report.version)
+			<< "\",\"seed\":" << report.seed
+			<< ",\"repeats\":" << report.repeat_count
+			<< ",\"timeout_ms\":" << report.timeout_ms
+			<< ",\"duration_ms\":" << report.duration_ms
+			<< ",\"suite_filter\":\"" << json_escape(report.suite_filter)
+			<< "\",\"function_filter\":\""
+			<< json_escape(report.function_filter)
+			<< "\",\"fail_fast\":" << (report.fail_fast ? "true" : "false")
+			<< ",\"checks\":" << report.checks
 			<< ",\"failures\":" << report.failures
 			<< ",\"ok\":" << report.ok_count
 			<< ",\"nok\":" << report.nok_count
@@ -664,7 +746,16 @@ namespace tester
 				<< ",\"total\":" << function.checks.size()
 				<< ",\"counts\":{";
 			print_json_counts(counts);
-			std::cout << "}}";
+			std::cout << "},\"checks\":[";
+			size_t	j = 0;
+			while (j < function.checks.size())
+			{
+				if (j > 0)
+					std::cout << ",";
+				print_json_check(function.checks[j]);
+				j++;
+			}
+			std::cout << "]}";
 			i++;
 		}
 		std::cout << "]}\n";
@@ -680,17 +771,27 @@ namespace tester
 		percent = 100;
 		if (report.checks > 0)
 			percent = (passed * 100) / report.checks;
-		if (!options.quiet)
+		if (!options.quiet && !options.summary_only)
 		{
 			print_banner();
+			if (report.seed != 0)
+				std::cout << paint(dim) << "seed: " << report.seed
+					<< " | repeats: " << report.repeat_count
+					<< " | duration: " << report.duration_ms << "ms"
+					<< paint(reset) << "\n";
 			if (!options.filter.empty())
 				std::cout << paint(dim) << "filter: " << options.filter
 					<< paint(reset) << "\n";
 		}
-		if (!options.quiet)
+		if (!options.quiet && !options.summary_only)
 			print_function_results(report, options);
-		print_failure_details(report);
+		if (!options.summary_only)
+			print_failure_details(report);
 		std::cout << "\n" << paint(bold) << "Summary" << paint(reset) << "\n  ";
+		if (options.summary_only && report.seed != 0)
+			std::cout << "seed: " << report.seed
+				<< " | repeats: " << report.repeat_count
+				<< " | duration: " << report.duration_ms << "ms\n  ";
 		print_status_count("OK", report.ok_count, true);
 		print_status_count("MOK", report.mok_count, true);
 		print_status_count("NOK", report.nok_count, false);

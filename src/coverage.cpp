@@ -26,20 +26,20 @@ namespace coverage
 			{"ft_isprint", "ctype", "classification", "full signed/unsigned char range, printable limits, controls", "none"},
 			{"ft_toupper", "ctype", "conversion", "full signed/unsigned char range, lowercase, uppercase, symbols", "none"},
 			{"ft_tolower", "ctype", "conversion", "full signed/unsigned char range, uppercase, lowercase, symbols", "none"},
-			{"ft_strlen", "strings", "string length", "empty string, normal text, whitespace, punctuation, early NUL", "none"},
-			{"ft_strchr", "strings", "string search", "found, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL", "none"},
-			{"ft_strrchr", "strings", "string search", "last match, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL", "none"},
-			{"ft_strncmp", "strings", "string compare", "zero length, equal, prefix, negative diff, positive diff, shorter string, unsigned chars", "none"},
-			{"ft_strnstr", "strings", "bounded search", "empty needle, zero length, exact fit, too short, start match, missing, partial end", "none"},
+			{"ft_strlen", "strings", "string length", "empty string, normal text, whitespace, punctuation, early NUL, seeded random strings", "none"},
+			{"ft_strchr", "strings", "string search", "found, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL, seeded random chars", "none"},
+			{"ft_strrchr", "strings", "string search", "last match, first char, missing, NUL terminator, empty string, wrapped char, stops at NUL, seeded random chars", "none"},
+			{"ft_strncmp", "strings", "string compare", "zero length, equal, prefix, negative diff, positive diff, shorter string, unsigned chars, seeded random signs", "none"},
+			{"ft_strnstr", "strings", "bounded search", "empty needle, zero length, exact fit, too short, start match, missing, partial end, seeded random offsets", "none"},
 			{"ft_strlcpy", "strings", "bounded copy", "size zero, size one, full copy, truncation, empty source, return length, buffer bytes", "none"},
 			{"ft_strlcat", "strings", "bounded append", "size smaller than dst, truncation, full append, size zero, empty dst, empty src, buffer bytes", "none"},
 			{"ft_strdup", "strings", "allocation copy", "normal text, empty string, copied content", "malloc failure"},
-			{"ft_memset", "memory", "memory write", "return pointer, fixed fill, zero size, unsigned char cast", "none"},
+			{"ft_memset", "memory", "memory write", "return pointer, fixed fill, zero size, unsigned char cast, seeded random sizes/values", "none"},
 			{"ft_bzero", "memory", "memory zero", "full clear, partial clear, zero size, one byte, surrounding bytes", "none"},
-			{"ft_memcpy", "memory", "memory copy", "return pointer, fixed copy, zero size, unchanged bytes, offset copy", "none"},
+			{"ft_memcpy", "memory", "memory copy", "return pointer, fixed copy, zero size, unchanged bytes, offset copy, seeded random bytes", "none"},
 			{"ft_memmove", "memory", "overlap copy", "return pointer, forward overlap, backward overlap, zero size, same pointer", "none"},
-			{"ft_memchr", "memory", "memory search", "first match, NUL byte, missing, zero size, stops before later match", "none"},
-			{"ft_memcmp", "memory", "memory compare", "equal buffers, zero size, unsigned diff, negative diff, equal prefix", "none"},
+			{"ft_memchr", "memory", "memory search", "first match, NUL byte, missing, zero size, stops before later match, seeded random values", "none"},
+			{"ft_memcmp", "memory", "memory compare", "equal buffers, zero size, unsigned diff, negative diff, equal prefix, seeded random signs", "none"},
 			{"ft_calloc", "memory", "zero allocation", "overflow protection, zero-filled blocks, one byte allocation", "malloc failure"},
 			{"ft_atoi", "atoi", "conversion", "zero, positive, negative, whitespace, signs, INT_MAX, INT_MIN, invalid prefixes, trailing text", "none"},
 			{"ft_substr", "string_utils", "allocation substring", "basic slice, long length, out of range, zero length, empty source", "malloc failure"},
@@ -105,6 +105,31 @@ namespace coverage
 				<< std::setw(15) << all[i].suite
 				<< std::setw(23) << all[i].group
 				<< all[i].malloc_cases << '\n';
+			i++;
+		}
+	}
+
+	void	print_markdown(void)
+	{
+		std::vector<Entry>	all;
+		size_t				i;
+
+		all = entries();
+		std::cout << "# Coverage Table\n\n";
+		std::cout << "This table is generated from `src/coverage.cpp`.\n\n";
+		std::cout << "```sh\n";
+		std::cout << "make ROOT_DIR=../libft coverage\n";
+		std::cout << "make ROOT_DIR=../libft explain FUNC=ft_split\n";
+		std::cout << "make ROOT_DIR=../libft coverage-docs\n";
+		std::cout << "```\n\n";
+		std::cout << "| Function | Suite | Group | Main cases | Malloc |\n";
+		std::cout << "| --- | --- | --- | --- | --- |\n";
+		i = 0;
+		while (i < all.size())
+		{
+			std::cout << "| `" << all[i].name << "` | `" << all[i].suite
+				<< "` | " << all[i].group << " | " << all[i].cases
+				<< " | " << all[i].malloc_cases << " |\n";
 			i++;
 		}
 	}

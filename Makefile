@@ -103,6 +103,12 @@ list: $(NAME)
 coverage: $(NAME)
 	@./$(NAME) --coverage
 
+# PT: Atualiza a documentacao de cobertura a partir do codigo.
+# EN: Updates coverage documentation from the code metadata.
+coverage-docs: $(NAME)
+	@./$(NAME) --coverage-md > docs/COVERAGE.md
+	@printf "Coverage documentation updated: docs/COVERAGE.md\n"
+
 # PT: Explica os casos testados para uma funcao. Usa FUNC=ft_split.
 # EN: Explains the cases tested for one function. Use FUNC=ft_split.
 explain: $(NAME)
@@ -122,6 +128,11 @@ json: $(NAME)
 # EN: Stable CI output: JSON and no colors.
 ci: $(NAME)
 	@./$(NAME) --json --no-color $(ARGS)
+
+# PT: Mostra apenas o resumo final.
+# EN: Shows only the final summary.
+summary: $(NAME)
+	@./$(NAME) --summary-only $(ARGS)
 
 # PT: Guarda output JSON num ficheiro para CI/artifacts.
 # EN: Saves JSON output to a file for CI/artifacts.
@@ -153,4 +164,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all check-root help run list coverage explain verbose json ci report leaks clean fclean re
+.PHONY: all check-root help run list coverage coverage-docs explain verbose json ci summary report leaks clean fclean re

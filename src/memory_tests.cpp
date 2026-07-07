@@ -13,6 +13,67 @@
 #include "malloc_fail.hpp"
 #include "test_modules.hpp"
 
+static void	fill_random_bytes(std::vector<unsigned char> &bytes,
+	std::mt19937 &rng)
+{
+	std::uniform_int_distribution<int>	byte_dist(0, 255);
+	size_t								i;
+
+	i = 0;
+	while (i < bytes.size())
+	{
+		bytes[i] = static_cast<unsigned char>(byte_dist(rng));
+		i++;
+	}
+}
+
+static void	test_memory_randomized(tester::Report &report)
+{
+	std::mt19937						&rng = tester::random_engine();
+	std::uniform_int_distribution<int>	size_dist(1, 64);
+	std::uniform_int_distribution<int>	byte_dist(0, 255);
+	int									round;
+
+	round = 0;
+	while (round < 8)
+	{
+		size_t						size = static_cast<size_t>(size_dist(rng));
+		std::vector<unsigned char>	src(size);
+		std::vector<unsigned char>	dst(size + 8, 0xAA);
+		std::vector<unsigned char>	ref(size + 8, 0xAA);
+		size_t						len;
+		int							value;
+
+		fill_random_bytes(src, rng);
+		len = static_cast<size_t>(std::uniform_int_distribution<int>(
+			0, static_cast<int>(size))(rng));
+		value = byte_dist(rng);
+		tester::expect_eq(report, "ft_memcpy random return", (void *)dst.data(),
+			ft_memcpy(dst.data(), src.data(), len));
+		std::memcpy(ref.data(), src.data(), len);
+		tester::expect_mem(report, "ft_memcpy random bytes", ref.data(),
+			dst.data(), dst.size());
+		std::memset(dst.data(), 0xAA, dst.size());
+		std::memset(ref.data(), 0xAA, ref.size());
+		tester::expect_eq(report, "ft_memset random return", (void *)dst.data(),
+			ft_memset(dst.data(), value, len));
+		std::memset(ref.data(), value, len);
+		tester::expect_mem(report, "ft_memset random bytes", ref.data(),
+			dst.data(), dst.size());
+		tester::expect_eq(report, "ft_memchr random",
+			std::memchr(src.data(), value, size),
+			ft_memchr(src.data(), value, size));
+		tester::expect(report, "ft_memcmp random sign",
+			(std::memcmp(src.data(), ref.data(), len) == 0
+				&& ft_memcmp(src.data(), ref.data(), len) == 0)
+			|| (std::memcmp(src.data(), ref.data(), len) < 0
+				&& ft_memcmp(src.data(), ref.data(), len) < 0)
+			|| (std::memcmp(src.data(), ref.data(), len) > 0
+				&& ft_memcmp(src.data(), ref.data(), len) > 0));
+		round++;
+	}
+}
+
 void	test_memory(tester::Report &report)
 {
 	{
@@ -173,4 +234,5 @@ void	test_memory(tester::Report &report)
 			std::free(byte);
 		}
 	}
+	test_memory_randomized(report);
 }

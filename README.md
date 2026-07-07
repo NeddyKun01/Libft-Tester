@@ -50,6 +50,9 @@ make
 - provides a `valgrind` leak-checking mode;
 - exports JSON for scripts and CI;
 - can stop early with `--fail-fast`;
+- can repeat runs with `--repeat`;
+- can reproduce pseudo-random tests with `--seed`;
+- can print a compact `--summary-only` view;
 - explains function coverage with `--explain`;
 - lists documented coverage with `--coverage`.
 
@@ -60,6 +63,7 @@ make ROOT_DIR=../libft
 make ROOT_DIR=../libft run
 make ROOT_DIR=../libft ci
 make ROOT_DIR=../libft report
+make ROOT_DIR=../libft summary
 make ROOT_DIR=../libft leaks
 ```
 
@@ -69,12 +73,14 @@ Filter by function or suite:
 make ROOT_DIR=../libft ARGS="--only ft_split"
 make ROOT_DIR=../libft ARGS="--suite memory --verbose"
 make ROOT_DIR=../libft ARGS="--fail-fast"
+make ROOT_DIR=../libft ARGS="--repeat 10 --seed 42"
 ```
 
 Explain one function:
 
 ```sh
 make ROOT_DIR=../libft explain FUNC=ft_lstmap
+make ROOT_DIR=../libft coverage-docs
 ```
 
 ## CLI
@@ -88,7 +94,10 @@ make ROOT_DIR=../libft explain FUNC=ft_lstmap
 ./libft_tester --only ft_split
 ./libft_tester --suite memory
 ./libft_tester --timeout 5000
+./libft_tester --repeat 10
+./libft_tester --seed 42
 ./libft_tester --fail-fast
+./libft_tester --summary-only
 ./libft_tester --verbose
 ./libft_tester --quiet
 ./libft_tester --json
@@ -152,14 +161,27 @@ NeddyKun01/Libft
 
 ```text
 include/
+├── coverage.hpp
 ├── malloc_fail.hpp
 ├── test_modules.hpp
 └── tester.hpp
 
 src/
 ├── *_tests.cpp
+├── coverage.cpp
 ├── main.cpp
 └── malloc_fail.cpp
+```
+
+## Reproducibility
+
+When `--seed` is provided, pseudo-random tests use the same generated cases on
+every run. If no seed is provided, the tester prints the generated seed in the
+summary and JSON output so the run can be repeated later.
+
+```sh
+./libft_tester --repeat 20 --seed 42
+./libft_tester --summary-only --repeat 20 --seed 42
 ```
 
 ## Note

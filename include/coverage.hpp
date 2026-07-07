@@ -30,6 +30,7 @@ namespace coverage
 	std::vector<Entry>			entries(void);
 	std::vector<std::string>	function_names(void);
 	void						print_table(void);
+	void						print_markdown(void);
 	bool						print_explain(const std::string &filter);
 }
 

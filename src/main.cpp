@@ -19,6 +19,8 @@ struct CliOptions
 	std::string	suite;
 	std::string	explain;
 	int			timeout_ms = 3000;
+	int			repeat_count = 1;
+	unsigned int	seed = 0;
 	bool		verbose = false;
 	bool		quiet = false;
 	bool		json = false;
@@ -26,7 +28,10 @@ struct CliOptions
 	bool		help = false;
 	bool		version = false;
 	bool		coverage = false;
+	bool		coverage_md = false;
 	bool		fail_fast = false;
+	bool		summary_only = false;
+	bool		has_seed = false;
 };
 
 static const char	*g_version = "1.0.0-dev";
@@ -51,11 +56,15 @@ static void	print_help(const char *program)
 		<< "  --version           Show tester version\n"
 		<< "  --list              List suites and functions\n"
 		<< "  --coverage          Show documented coverage table\n"
+		<< "  --coverage-md       Print documented coverage as Markdown\n"
 		<< "  --explain NAME      Explain what is tested for a function\n"
 		<< "  --suite NAME        Run only suites matching NAME\n"
 		<< "  --only NAME         Show only functions matching NAME\n"
 		<< "  --timeout MS        Timeout per suite in milliseconds\n"
+		<< "  --repeat N          Run the selected suites N times\n"
+		<< "  --seed N            Reproduce pseudo-random tests with seed N\n"
 		<< "  --fail-fast         Stop after the first failing suite\n"
+		<< "  --summary-only      Print only the final summary\n"
 		<< "  --verbose           Do not aggregate status tokens\n"
 		<< "  --quiet             Show only failures and summary\n"
 		<< "  --json              Print machine-readable JSON\n"
@@ -63,6 +72,7 @@ static void	print_help(const char *program)
 		<< "Examples:\n"
 		<< "  " << program << " --only ft_split\n"
 		<< "  " << program << " --suite lists --fail-fast\n"
+		<< "  " << program << " --repeat 10 --seed 42\n"
 		<< "  " << program << " --explain ft_lstmap\n"
 		<< "  " << program << " --suite memory --verbose\n"
 		<< "  " << program << " --json --no-color\n";
@@ -99,6 +109,32 @@ static bool	read_value(int argc, char **argv, int &index, std::string &value)
 	return (true);
 }
 
+static bool	parse_int_value(const std::string &value, int &number)
+{
+	char	*end;
+	long	parsed;
+
+	end = NULL;
+	parsed = std::strtol(value.c_str(), &end, 10);
+	if (!end || *end != '\0' || parsed < 1 || parsed > INT_MAX)
+		return (false);
+	number = static_cast<int>(parsed);
+	return (true);
+}
+
+static bool	parse_seed_value(const std::string &value, unsigned int &seed)
+{
+	char			*end;
+	unsigned long	parsed;
+
+	end = NULL;
+	parsed = std::strtoul(value.c_str(), &end, 10);
+	if (!end || *end != '\0' || parsed > UINT_MAX)
+		return (false);
+	seed = static_cast<unsigned int>(parsed);
+	return (true);
+}
+
 static bool	parse_args(int argc, char **argv, CliOptions &options)
 {
 	int			i;
@@ -116,6 +152,8 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.list = true;
 		else if (value == "--coverage")
 			options.coverage = true;
+		else if (value == "--coverage-md")
+			options.coverage_md = true;
 		else if (value == "--fail-fast")
 			options.fail_fast = true;
 		else if (value == "--verbose" || value == "-v")
@@ -126,6 +164,8 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.json = true;
 		else if (value == "--no-color")
 			setenv("NO_COLOR", "1", 1);
+		else if (value == "--summary-only")
+			options.summary_only = true;
 		else if (value == "--only" && read_value(argc, argv, i, options.only))
 			;
 		else if (value == "--explain"
@@ -134,7 +174,21 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 		else if (value == "--suite" && read_value(argc, argv, i, options.suite))
 			;
 		else if (value == "--timeout" && read_value(argc, argv, i, value))
-			options.timeout_ms = std::max(1, std::atoi(value.c_str()));
+		{
+			if (!parse_int_value(value, options.timeout_ms))
+				return (false);
+		}
+		else if (value == "--repeat" && read_value(argc, argv, i, value))
+		{
+			if (!parse_int_value(value, options.repeat_count))
+				return (false);
+		}
+		else if (value == "--seed" && read_value(argc, argv, i, value))
+		{
+			if (!parse_seed_value(value, options.seed))
+				return (false);
+			options.has_seed = true;
+		}
 		else
 		{
 			std::cerr << "Unknown or incomplete option: " << value << '\n';
@@ -154,8 +208,44 @@ static tester::OutputOptions	output_options(const CliOptions &cli)
 	options.verbose = cli.verbose;
 	options.quiet = cli.quiet;
 	options.json = cli.json;
+	options.summary_only = cli.summary_only;
 	options.filter = cli.only;
 	return (options);
+}
+
+static void	fill_report_metadata(tester::Report &report, const CliOptions &cli,
+	long long duration_ms, int executed_repeats)
+{
+	report.version = g_version;
+	report.seed = cli.seed;
+	report.repeat_count = executed_repeats;
+	report.timeout_ms = cli.timeout_ms;
+	report.duration_ms = duration_ms;
+	report.fail_fast = cli.fail_fast;
+	report.suite_filter = cli.suite;
+	report.function_filter = cli.only;
+}
+
+static tester::Report	run_repeated(tester::SuiteRunner &runner,
+	const CliOptions &cli, int &executed_repeats)
+{
+	tester::Report	report;
+	int				i;
+
+	i = 0;
+	while (i < cli.repeat_count)
+	{
+		tester::Report	iteration;
+
+		tester::set_random_seed(cli.seed + static_cast<unsigned int>(i));
+		iteration = runner.run_all(cli.timeout_ms, cli.suite, cli.fail_fast);
+		tester::append_report(report, iteration);
+		i++;
+		if (cli.fail_fast && report.failures > 0)
+			break ;
+	}
+	executed_repeats = i;
+	return (report);
 }
 
 int	main(int argc, char **argv)
@@ -163,6 +253,9 @@ int	main(int argc, char **argv)
 	tester::SuiteRunner	runner;
 	tester::Report		report;
 	CliOptions			cli;
+	std::chrono::steady_clock::time_point	start;
+	int					executed_repeats;
+	long long			duration_ms;
 
 	register_suites(runner);
 	if (!parse_args(argc, argv, cli))
@@ -190,9 +283,20 @@ int	main(int argc, char **argv)
 		coverage::print_table();
 		return (0);
 	}
+	if (cli.coverage_md)
+	{
+		coverage::print_markdown();
+		return (0);
+	}
 	if (!cli.explain.empty())
 		return (coverage::print_explain(cli.explain) ? 0 : 1);
-	report = runner.run_all(cli.timeout_ms, cli.suite, cli.fail_fast);
+	if (!cli.has_seed)
+		cli.seed = tester::default_seed();
+	start = std::chrono::steady_clock::now();
+	report = run_repeated(runner, cli, executed_repeats);
+	duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now() - start).count();
+	fill_report_metadata(report, cli, duration_ms, executed_repeats);
 	report = tester::filter_report(report, cli.only);
 	if (cli.json)
 		tester::print_json_report(report);
