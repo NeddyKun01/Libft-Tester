@@ -13,6 +13,13 @@ make ROOT_DIR=../libft diagnose
 This checks the student's `Makefile`, `libft.h`, source files, `libft.a`, and
 library symbols without compiling the C++ runner against a broken header.
 
+If the project is incomplete but `libft.a` exists, you can still test the real
+symbols that are present:
+
+```sh
+make ROOT_DIR=../libft rescue-test
+```
+
 ## `ROOT_DIR` Does Not Exist
 
 The tester could not find the Libft directory you passed.

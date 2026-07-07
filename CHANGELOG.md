@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 - Added `make diagnose` for Makefile/header/source/archive diagnostics.
+- Added `make rescue-test` to test only functions with real `libft.a` symbols.
+- Added weak rescue stubs for missing functions during partial testing.
 - Added known-good reference files in `templates/libft.h` and
   `templates/Makefile`.
 - Added `docs/DIAGNOSE.md`.

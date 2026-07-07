@@ -111,6 +111,11 @@ profiles: $(NAME)
 diagnose:
 	@bash scripts/diagnose.sh "$(ROOT_DIR)"
 
+# PT: Testa apenas funcoes com simbolos reais, usando header modelo e stubs.
+# EN: Tests only real symbols, using the model header and weak stubs.
+rescue-test:
+	@bash scripts/rescue_test.sh "$(ROOT_DIR)" $(ARGS)
+
 # PT: Mostra a tabela de cobertura documentada.
 # EN: Shows the documented coverage table.
 coverage: $(NAME)
@@ -203,4 +208,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all check-root help run list profiles diagnose coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re
+.PHONY: all check-root help run list profiles diagnose rescue-test coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re

@@ -71,6 +71,12 @@ Diagnose project-structure problems before running the full tester:
 make ROOT_DIR=../libft diagnose
 ```
 
+Test only functions that have real symbols in `libft.a`:
+
+```sh
+make ROOT_DIR=../libft rescue-test
+```
+
 ## Profiles
 
 Profiles are shortcuts for different levels of confidence.

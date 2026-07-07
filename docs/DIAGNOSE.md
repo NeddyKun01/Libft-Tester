@@ -61,3 +61,34 @@ and archive are fixed, run:
 ```sh
 make ROOT_DIR=../libft
 ```
+
+## Rescue Test
+
+If you want to test every function that is actually present in `libft.a`, even
+when other functions are missing, use:
+
+```sh
+make ROOT_DIR=../libft rescue-test
+```
+
+`rescue-test` builds a special runner with:
+
+- `templates/libft.h` instead of the student's possibly broken header;
+- weak fallback stubs for missing functions;
+- `libft.a` linked with `--whole-archive` so real symbols override stubs.
+
+Then it runs tests only for functions whose real symbols are present in
+`libft.a`. Missing symbols are reported as `SKIP`.
+
+Some functions may also be reported as indirect coverage. For example,
+`ft_lstdelone` is exercised through list cleanup paths, but it does not have a
+standalone direct rescue check.
+
+This does not make the project valid. It only helps answer a practical question:
+
+```text
+Which existing functions can still be tested right now?
+```
+
+Use `diagnose` to fix the project structure and the normal tester for final
+validation.
