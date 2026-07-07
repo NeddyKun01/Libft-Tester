@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- Nothing yet.
+- Reworked the README into a clearer public usage guide with quick-start,
+  command tables, output examples, diagnose/rescue explanations, and CI notes.
 
 ## 1.1.0 - 2026-07-07
 
