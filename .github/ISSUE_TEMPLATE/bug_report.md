@@ -1,38 +1,40 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a problem in Libft Tester
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Describe the problem
+Describe clearly the error, unexpected behavior, or failure you observed.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## Steps to reproduce
+1. Set up the tester and the libft repository as usual.
+2. Run a command such as:
+   ```sh
+   make ROOT_DIR=../libft
+   ```
+   or
+   ```sh
+   ./libft_tester --only ft_split --profile strict
+   ```
+3. Observe the unexpected behavior.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Expected behavior
+Explain what you expected to see instead.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Environment
+- OS:
+- Compiler / version:
+- Make version:
+- Libft repository / branch:
+- Tester commit or version:
+- Relevant flags used (for example: `--profile`, `--strict`, `--fail-fast`, `--json`, `--html`, `--hint`, `--suite`, `--only`):
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## Output / observed error
+Paste the relevant output, stack trace, error message, or screenshots here.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+## Additional information
+Include any useful details such as affected functions or suites, CI logs, Valgrind output, or coverage information.

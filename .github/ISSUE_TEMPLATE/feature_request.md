@@ -1,20 +1,28 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest an improvement for Libft Tester
 title: ''
-labels: ''
+labels: 'enhancement'
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Is this related to a problem?
+Describe the limitation, frustration, or gap you experience with the current tester.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Proposed solution
+Explain the feature or improvement you would like to see implemented.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## How would this help?
+Describe how this would improve local testing, debugging, CI, coverage, or peer evaluation.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## Alternatives considered
+List any other approaches, workarounds, or alternative features you considered.
+
+## Scope
+- Flag or command involved:
+- Suite or function affected:
+- Expected behavior:
+
+## Additional context
+Add examples, screenshots, or any other useful references.
