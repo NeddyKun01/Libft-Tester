@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Nothing yet.
+
+## 1.1.0 - 2026-07-07
+
 - Added `make diagnose` for Makefile/header/source/archive diagnostics.
 - Added `make rescue-test` to test only functions with real `libft.a` symbols.
 - Added weak rescue stubs for missing functions during partial testing.
