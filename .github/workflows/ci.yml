@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout tester
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run diagnose/rescue fixtures
         run: make self-test
@@ -34,13 +34,13 @@ jobs:
 
     steps:
       - name: Checkout libft under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.TARGET_LIBFT_REPOSITORY }}
           path: libft
 
       - name: Checkout tester
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: libft/tester
 
@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload JSON report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: libft-test-report
           path: libft/tester/libft-test-report.json
@@ -75,7 +75,7 @@ jobs:
 
       - name: Upload HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: libft-html-report
           path: libft/tester/libft-test-report.html
@@ -89,13 +89,13 @@ jobs:
 
     steps:
       - name: Checkout libft under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.TARGET_LIBFT_REPOSITORY }}
           path: libft
 
       - name: Checkout tester
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: libft/tester
 
@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload Valgrind report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: valgrind-report
           path: libft/tester/valgrind-report.txt
@@ -129,13 +129,13 @@ jobs:
 
     steps:
       - name: Checkout libft under test
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.TARGET_LIBFT_REPOSITORY }}
           path: libft
 
       - name: Checkout tester
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: libft/tester
 
@@ -148,7 +148,7 @@ jobs:
         run: cat coverage-report.txt
 
       - name: Upload coverage metadata
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: libft/tester/coverage-report.txt
