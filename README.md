@@ -171,7 +171,10 @@ timeout/fail-fast behavior but overrides the repeat count:
 
 ## Documentation
 
+- [Usage guide](docs/USAGE.md): commands, profiles, reports, and CI setup.
 - [Coverage table](docs/COVERAGE.md): tested cases per function.
+- [Troubleshooting](docs/TROUBLESHOOTING.md): common setup and failure fixes.
+- [Contributing tests](docs/CONTRIBUTING_TESTS.md): how to add reliable tests.
 - [Changelog](CHANGELOG.md): project history and pending changes.
 - [Contributing guide](CONTRIBUTING.md): how to add tests and coverage.
 - [GitHub Actions](.github/workflows/ci.yml): workflow ready to test an external Libft repository.

@@ -23,6 +23,9 @@ make ROOT_DIR=/path/to/libft coverage
 
 ## Adding Tests
 
+For the detailed test-writing guide, see
+[`docs/CONTRIBUTING_TESTS.md`](docs/CONTRIBUTING_TESTS.md).
+
 Tests live in `src/*_tests.cpp`, grouped by suite:
 
 - `ctype_tests.cpp`

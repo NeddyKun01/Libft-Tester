@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Nothing yet.
+
+## 1.0.0 - 2026-07-07
+
 - Added run profiles with `--profile quick|normal|strict|brutal`.
 - Added `--strict` shortcut for stronger local validation.
 - Added standalone HTML reports with `--html` and `make report-html`.
@@ -23,6 +27,8 @@ All notable changes to this project will be documented in this file.
 - Added documented coverage commands with `--coverage` and `--explain`.
 - Added GitHub Actions support for testing an external Libft repository.
 - Added `docs/COVERAGE.md` with per-function coverage documentation.
+- Added `docs/USAGE.md`, `docs/TROUBLESHOOTING.md`, and
+  `docs/CONTRIBUTING_TESTS.md`.
 
 ## 1.0.0-dev
 
