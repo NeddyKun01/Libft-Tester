@@ -106,6 +106,11 @@ list: $(NAME)
 profiles: $(NAME)
 	@./$(NAME) --profiles
 
+# PT: Diagnostica Makefile, header, sources e simbolos sem compilar o runner.
+# EN: Diagnoses Makefile, header, sources, and symbols without building runner.
+diagnose:
+	@bash scripts/diagnose.sh "$(ROOT_DIR)"
+
 # PT: Mostra a tabela de cobertura documentada.
 # EN: Shows the documented coverage table.
 coverage: $(NAME)
@@ -198,4 +203,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all check-root help run list profiles coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re
+.PHONY: all check-root help run list profiles diagnose coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re

@@ -65,6 +65,12 @@ Run with a reproducible seed:
 make ROOT_DIR=../libft ARGS="--seed 42"
 ```
 
+Diagnose project-structure problems before running the full tester:
+
+```sh
+make ROOT_DIR=../libft diagnose
+```
+
 ## Profiles
 
 Profiles are shortcuts for different levels of confidence.
@@ -171,4 +177,3 @@ After that, pushes to the tester repository run:
 
 You can also run the workflow manually with `workflow_dispatch` and provide an
 `owner/repo` value.
-

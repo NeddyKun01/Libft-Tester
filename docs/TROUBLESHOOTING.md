@@ -2,6 +2,17 @@
 
 This guide lists common setup and testing problems.
 
+## Start With Diagnose
+
+If the tester cannot build, run:
+
+```sh
+make ROOT_DIR=../libft diagnose
+```
+
+This checks the student's `Makefile`, `libft.h`, source files, `libft.a`, and
+library symbols without compiling the C++ runner against a broken header.
+
 ## `ROOT_DIR` Does Not Exist
 
 The tester could not find the Libft directory you passed.
@@ -125,4 +136,3 @@ the Libft project public while testing.
 
 GitHub may show a warning about official actions moving from Node.js 20 to a
 newer runtime. This is not a tester failure if all jobs are green.
-

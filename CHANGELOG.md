@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- Nothing yet.
+- Added `make diagnose` for Makefile/header/source/archive diagnostics.
+- Added known-good reference files in `templates/libft.h` and
+  `templates/Makefile`.
+- Added `docs/DIAGNOSE.md`.
 
 ## 1.0.0 - 2026-07-07
 

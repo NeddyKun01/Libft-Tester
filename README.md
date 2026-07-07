@@ -66,6 +66,7 @@ make
 make ROOT_DIR=../libft
 make ROOT_DIR=../libft run
 make ROOT_DIR=../libft ci
+make ROOT_DIR=../libft diagnose
 make ROOT_DIR=../libft report
 make ROOT_DIR=../libft report-html
 make ROOT_DIR=../libft summary
@@ -172,6 +173,7 @@ timeout/fail-fast behavior but overrides the repeat count:
 ## Documentation
 
 - [Usage guide](docs/USAGE.md): commands, profiles, reports, and CI setup.
+- [Diagnose mode](docs/DIAGNOSE.md): find Makefile/header/archive problems.
 - [Coverage table](docs/COVERAGE.md): tested cases per function.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): common setup and failure fixes.
 - [Contributing tests](docs/CONTRIBUTING_TESTS.md): how to add reliable tests.
