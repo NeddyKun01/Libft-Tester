@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.2.0 - 2026-07-08
+
 - Simplified the Makefile around an interactive `make` menu and moved advanced
   usage toward the `./libft_tester` CLI.
 - Polished the interactive menu with colored status labels, version display,
