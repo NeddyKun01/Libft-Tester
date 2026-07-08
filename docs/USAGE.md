@@ -12,6 +12,12 @@ broken target project, and explain fallback results before the target library is
 healthy enough to link. When real function tests are needed, it builds an
 internal suite at `build/libft_suite`.
 
+Use `--doctor` when you want a quick environment check:
+
+```sh
+./libft_tester --root ../libft --doctor
+```
+
 ## Project Layouts
 
 The tester can live next to your target repository:
@@ -67,6 +73,7 @@ Useful menu options:
 | `6) Rescue test` | Test real symbols in `libft.a` even if the project is incomplete. |
 | `7) Leak check` | Run a focused Valgrind check. |
 | `8) Explain or hint a function` | Read coverage notes or debugging hints. |
+| `d) Doctor environment` | Check required tools and target project shape. |
 | `9) Generate HTML report` | Write a standalone HTML report. |
 
 If `make` runs without an interactive terminal, it falls back to smart test
@@ -109,8 +116,23 @@ automatically:
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
+./libft_tester --doctor
 ./libft_tester --help
 ```
+
+## Doctor Mode
+
+Doctor mode checks the tester environment without running the full suite.
+
+It reports:
+
+- required tools: `make`, `c++`, `cc`, `ar`, `nm`;
+- optional tools: `valgrind`;
+- target files: `Makefile`, `libft.h`, `libft.a`;
+- tester internals such as templates and the internal suite path.
+
+Missing optional tools or a missing internal suite are warnings. Missing
+required tools or target files are errors.
 
 ## Profiles
 

@@ -37,7 +37,7 @@ ROOT_STAMP=$(BUILD_DIR)/root.stamp
 SUITE_NAME=$(BUILD_DIR)/libft_suite
 RESCUE_NAME=$(RESCUE_BUILD)/libft_suite_rescue
 
-DRIVER_SRCS=$(DRIVER_DIR)/main.cpp
+DRIVER_SRCS=$(wildcard $(DRIVER_DIR)/*.cpp)
 DRIVER_OBJS=$(DRIVER_SRCS:$(DRIVER_DIR)/%.cpp=$(DRIVER_BUILD)/%.o)
 
 SUITE_SRCS=$(wildcard $(SRC_DIR)/*.cpp)
@@ -76,8 +76,8 @@ $(ROOT_STAMP): FORCE | $(BUILD_DIR)
 		printf "%s" "$(ROOT_DIR)" > "$(ROOT_STAMP)"; \
 	fi
 
-$(DRIVER_BUILD)/%.o: $(DRIVER_DIR)/%.cpp | $(DRIVER_BUILD)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+$(DRIVER_BUILD)/%.o: $(DRIVER_DIR)/%.cpp $(DRIVER_DIR)/driver.hpp | $(DRIVER_BUILD)
+	@$(CXX) $(CXXFLAGS) -I$(DRIVER_DIR) -c $< -o $@
 
 $(NAME): $(DRIVER_OBJS)
 	@$(CXX) $(CXXFLAGS) $^ -o $@

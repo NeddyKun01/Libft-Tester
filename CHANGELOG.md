@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Split the C++ driver into smaller modules for process helpers, diagnose,
+  rescue/smart run, menu, self-test, and doctor checks.
+- Added `./libft_tester --doctor` to check required tools and target project
+  shape without running the full suite.
+
 ## 1.3.0 - 2026-07-08
 
 - Replaced the shell-script entrypoints with a standalone C++ driver for menu,

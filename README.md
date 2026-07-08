@@ -47,6 +47,12 @@ You need:
 | `ar`, `nm` | Used by the target build and diagnostics. |
 | `valgrind` | Optional, only needed for leak checks. |
 
+You can check your local setup with:
+
+```sh
+./libft_tester --doctor
+```
+
 Your target project should contain at least:
 
 ```text
@@ -58,6 +64,16 @@ libft/
 
 The target `Makefile` should build a library named `libft.a` with its default
 `make` target.
+
+## Why No Shell Scripts?
+
+The tester is intentionally driven by C++ instead of shell helper scripts.
+That makes it friendlier on school, shared, or restricted machines where script
+execution permissions can be annoying.
+
+`./libft_tester` is the standalone driver. It opens the menu, runs diagnose,
+handles rescue mode, performs self-tests, and builds the internal test suite
+only when real function checks are needed.
 
 ## Quick Start
 
@@ -154,6 +170,7 @@ Debugging
   6) Rescue test
   7) Leak check
   8) Explain or hint a function
+  d) Doctor environment
 
 Reports and help
   9) Generate HTML report
@@ -237,6 +254,7 @@ when a command needs to execute tests against your `libft.a`:
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
+./libft_tester --doctor
 ./libft_tester --help
 ```
 
