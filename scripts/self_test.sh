@@ -209,6 +209,7 @@ test_broken_makefile()
 {
 	local root="${TMP_ROOT}/broken_makefile"
 	local smart_log="${TMP_ROOT}/broken_makefile_smart.log"
+	local menu_log="${TMP_ROOT}/broken_makefile_menu.log"
 
 	write_broken_makefile_libft "$root"
 	if bash "${TESTER_DIR}/scripts/smart_run.sh" "$root" --seed 42 \
@@ -223,6 +224,14 @@ test_broken_makefile()
 		"smart run skips rescue when archive is missing" "$smart_log"
 	assert_output_contains "Final Health Summary" \
 		"smart run summarizes broken Makefile case" "$smart_log"
+	if bash "${TESTER_DIR}/scripts/menu.sh" "$root" --seed 42 \
+		>"$menu_log" 2>&1; then
+		fail "menu falls back to smart run without TTY"
+	else
+		pass "menu falls back to smart run without TTY"
+	fi
+	assert_output_contains "Libft Tester Smart Run" \
+		"menu non-interactive fallback prints smart run" "$menu_log"
 }
 
 printf "\nLibft Tester Self-Test\n"

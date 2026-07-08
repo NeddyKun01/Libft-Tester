@@ -2,23 +2,28 @@
 
 This guide lists common setup and testing problems.
 
-## Start With Diagnose
+## Start With The Menu
 
-If the tester cannot build, run:
-
-```sh
-make ROOT_DIR=../libft diagnose
-```
-
-This checks the student's `Makefile`, `libft.h`, source files, `libft.a`, and
-library symbols without compiling the C++ runner against a broken header.
-
-If the project is incomplete but `libft.a` exists, you can still test the real
-symbols that are present:
+For most problems, run:
 
 ```sh
-make ROOT_DIR=../libft rescue-test
+make ROOT_DIR=../libft
 ```
+
+Then choose:
+
+```text
+5) Diagnose project
+```
+
+If `libft.a` exists and the project is incomplete, choose:
+
+```text
+6) Rescue test
+```
+
+Diagnose explains structure problems. Rescue tests real symbols that already
+exist in `libft.a`.
 
 ## `ROOT_DIR` Does Not Exist
 
@@ -28,6 +33,12 @@ Use an absolute path if you are unsure:
 
 ```sh
 make ROOT_DIR=/home/user/projects/libft
+```
+
+You can also change it from the menu:
+
+```text
+r) Change ROOT_DIR
 ```
 
 ## `libft.h` Was Not Found
@@ -46,28 +57,36 @@ libft/
 
 ## `libft.a` Is Missing
 
-The tester runs `make -C $(ROOT_DIR)` before linking. If `libft.a` is missing,
-check that the Libft `Makefile` builds the library with the default `make`
-target.
+The tester builds the target Libft before linking `./libft_tester`. If
+`libft.a` is missing, check that the Libft `Makefile` builds the library with
+the default `make` target.
+
+Use menu option `5) Diagnose project` to see the build error.
 
 ## A Function Shows `NOK`
+
+Build the runner:
+
+```sh
+make ROOT_DIR=../libft build
+```
 
 Run only that function in verbose mode:
 
 ```sh
-make ROOT_DIR=../libft ARGS="--only ft_split --verbose"
+./libft_tester --only ft_split --verbose
 ```
 
-Then ask the tester for hints:
+Then ask for hints:
 
 ```sh
-make ROOT_DIR=../libft hint FUNC=ft_split
+./libft_tester --hint ft_split
 ```
 
 If the failing case is random, repeat it with the printed seed:
 
 ```sh
-make ROOT_DIR=../libft ARGS="--only ft_strlen --seed 42"
+./libft_tester --only ft_strlen --seed 42
 ```
 
 ## A Function Shows `MNOK`
@@ -80,10 +99,13 @@ Common causes:
 - previous allocations are not freed after a later allocation fails;
 - the result is not allocated when it should be.
 
-Run a focused leak check:
+Use menu option `7) Leak check`, or run Valgrind manually:
 
 ```sh
-make ROOT_DIR=../libft leaks ARGS="--only ft_split --no-color"
+LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
+  --show-leak-kinds=all --track-origins=yes \
+  --errors-for-leak-kinds=all --error-exitcode=42 \
+  ./libft_tester --only ft_split --no-color
 ```
 
 ## A Suite Shows `SEGV`, `BUS`, `ABRT`, Or `FPE`
@@ -91,13 +113,12 @@ make ROOT_DIR=../libft leaks ARGS="--only ft_split --no-color"
 The suite crashed. Use a focused run:
 
 ```sh
-make ROOT_DIR=../libft ARGS="--suite strings --verbose --fail-fast"
+./libft_tester --suite strings --verbose --fail-fast
 ```
 
-If needed, run under a debugger from the tester directory after building:
+If needed, run under a debugger after building:
 
 ```sh
-make ROOT_DIR=../libft help
 gdb --args ./libft_tester --only ft_split
 ```
 
@@ -108,7 +129,7 @@ The function may have an infinite loop or may be much slower than expected.
 Run only the related suite with a larger timeout:
 
 ```sh
-make ROOT_DIR=../libft ARGS="--suite lists --timeout 10000 --verbose"
+./libft_tester --suite lists --timeout 10000 --verbose
 ```
 
 ## GitHub Actions Does Not Run The Real Tests
@@ -138,8 +159,3 @@ Possible causes:
 
 For private repositories, use a token with access to both repositories or keep
 the Libft project public while testing.
-
-## The Node.js Warning In GitHub Actions
-
-GitHub may show a warning about official actions moving from Node.js 20 to a
-newer runtime. This is not a tester failure if all jobs are green.

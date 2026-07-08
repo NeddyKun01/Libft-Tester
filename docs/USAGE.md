@@ -1,7 +1,9 @@
 # Usage Guide
 
-This guide explains how to use Libft Tester in day-to-day development, deeper
-validation, and GitHub Actions.
+This guide explains the two intended ways to use Libft Tester:
+
+- `make` for the interactive menu;
+- `./libft_tester` for advanced direct CLI usage.
 
 ## Repository Layouts
 
@@ -33,59 +35,66 @@ cd libft/tester
 make
 ```
 
-## Common Commands
+## Interactive Menu
 
-Run everything:
+`make` opens the menu when used from a normal terminal.
+
+The menu gives access to:
+
+- smart test;
+- quick test;
+- full test;
+- strict test;
+- diagnose project;
+- rescue test;
+- leak check;
+- function explain/hint;
+- HTML report generation;
+- advanced CLI help.
+
+If `make` is executed without an interactive terminal, it falls back to the
+smart test instead of waiting for keyboard input. This keeps CI and scripts safe.
+
+## Minimal Make Commands
+
+| Command | Purpose |
+| --- | --- |
+| `make ROOT_DIR=../libft` | Open the menu. |
+| `make ROOT_DIR=../libft build` | Build `./libft_tester`. |
+| `make self-test` | Validate the tester's own fallback behavior. |
+| `make clean` | Remove tester build files and reports. |
+| `make fclean` | Same as `clean`. |
+| `make re ROOT_DIR=../libft` | Rebuild the runner. |
+
+## Advanced CLI
+
+Build first:
 
 ```sh
-make ROOT_DIR=../libft
+make ROOT_DIR=../libft build
 ```
 
-Run a single function:
+Then run the binary:
 
 ```sh
-make ROOT_DIR=../libft ARGS="--only ft_split"
-```
-
-Run a suite:
-
-```sh
-make ROOT_DIR=../libft ARGS="--suite memory"
-```
-
-Show only the final summary:
-
-```sh
-make ROOT_DIR=../libft summary
-```
-
-Run with a reproducible seed:
-
-```sh
-make ROOT_DIR=../libft ARGS="--seed 42"
-```
-
-Diagnose project-structure problems before running the full tester:
-
-```sh
-make ROOT_DIR=../libft diagnose
-```
-
-Test only functions that have real symbols in `libft.a`:
-
-```sh
-make ROOT_DIR=../libft rescue-test
-```
-
-Validate the tester's own diagnose/rescue behavior:
-
-```sh
-make self-test
+./libft_tester --summary-only
+./libft_tester --only ft_split
+./libft_tester --suite memory
+./libft_tester --profile quick
+./libft_tester --profile strict
+./libft_tester --profile brutal --seed 42
+./libft_tester --repeat 10 --seed 42
+./libft_tester --fail-fast
+./libft_tester --verbose
+./libft_tester --json --no-color
+./libft_tester --html --no-color
+./libft_tester --explain ft_lstmap
+./libft_tester --hint ft_split
+./libft_tester --coverage
+./libft_tester --help
 ```
 
 ## Profiles
-
-Profiles are shortcuts for different levels of confidence.
 
 | Profile | Repeats | Timeout | Fail-fast | Best for |
 | --- | --- | --- | --- | --- |
@@ -94,83 +103,37 @@ Profiles are shortcuts for different levels of confidence.
 | `strict` | 10 | 6000 ms | no | deeper validation before push |
 | `brutal` | 25 | 9000 ms | no | final stress run before release |
 
-Examples:
-
-```sh
-make ROOT_DIR=../libft quick ARGS="--only ft_split"
-make ROOT_DIR=../libft strict
-make ROOT_DIR=../libft brutal ARGS="--summary-only --seed 42"
-```
-
-The shortcut `--strict` is the same idea as `--profile strict`:
-
-```sh
-./libft_tester --strict --summary-only
-```
-
-Manual options override profile defaults:
-
-```sh
-./libft_tester --profile brutal --repeat 3
-```
-
 ## Reports
 
-Generate JSON for scripts and CI:
+Use the menu option:
 
-```sh
-make ROOT_DIR=../libft report
+```text
+9) Generate HTML report
 ```
 
-Generate a standalone HTML report:
-
-```sh
-make ROOT_DIR=../libft report-html
-```
-
-Direct CLI usage:
+Or use the CLI directly:
 
 ```sh
 ./libft_tester --json --no-color > libft-test-report.json
 ./libft_tester --html --no-color > libft-test-report.html
 ```
 
-## Hints And Coverage
-
-Show what one function is expected to cover:
-
-```sh
-make ROOT_DIR=../libft explain FUNC=ft_lstmap
-```
-
-Show debugging hints:
-
-```sh
-make ROOT_DIR=../libft hint FUNC=ft_split
-```
-
-Show the documented coverage table:
-
-```sh
-make ROOT_DIR=../libft coverage
-```
-
-Regenerate the coverage documentation from code metadata:
-
-```sh
-make ROOT_DIR=../libft coverage-docs
-```
-
 ## Valgrind
 
-Run a focused Valgrind check:
+Use the menu option:
 
-```sh
-make ROOT_DIR=../libft leaks ARGS="--only ft_split --no-color"
+```text
+7) Leak check
 ```
 
-The leak target disables fork isolation internally so Valgrind can inspect the
-tested code more directly.
+Or run Valgrind manually after building:
+
+```sh
+LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
+  --show-leak-kinds=all --track-origins=yes \
+  --errors-for-leak-kinds=all --error-exitcode=42 \
+  ./libft_tester --only ft_split --no-color
+```
 
 ## GitHub Actions
 
@@ -185,7 +148,8 @@ After that, pushes to the tester repository run:
 - the main JSON suite;
 - a standalone HTML report artifact;
 - a focused Valgrind leak check;
-- coverage metadata generation.
+- coverage metadata generation;
+- the tester self-test.
 
 You can also run the workflow manually with `workflow_dispatch` and provide an
 `owner/repo` value.

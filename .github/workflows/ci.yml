@@ -46,7 +46,7 @@ jobs:
 
       - name: Build tester
         working-directory: libft/tester
-        run: make help
+        run: make build
 
       - name: Run full suite as JSON
         working-directory: libft/tester
@@ -104,11 +104,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y valgrind
 
+      - name: Build tester
+        working-directory: libft/tester
+        run: make build
+
       - name: Run focused leak check
         working-directory: libft/tester
         run: |
           set +e
-          make leaks ARGS="--only ft_split --no-color" > valgrind-report.txt 2>&1
+          LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
+            --show-leak-kinds=all --track-origins=yes \
+            --errors-for-leak-kinds=all --error-exitcode=42 \
+            ./libft_tester --only ft_split --no-color > valgrind-report.txt 2>&1
           status=$?
           cat valgrind-report.txt
           exit $status
@@ -139,9 +146,13 @@ jobs:
         with:
           path: libft/tester
 
+      - name: Build tester
+        working-directory: libft/tester
+        run: make build
+
       - name: Generate coverage metadata
         working-directory: libft/tester
-        run: make coverage > coverage-report.txt
+        run: ./libft_tester --coverage > coverage-report.txt
 
       - name: Show coverage metadata
         working-directory: libft/tester

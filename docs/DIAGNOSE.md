@@ -7,8 +7,10 @@ the student's `Makefile`, `libft.h`, or archive contents are incomplete.
 
 ## Run It
 
-```sh
-make ROOT_DIR=../libft diagnose
+Run `make` and choose:
+
+```text
+5) Diagnose project
 ```
 
 Unlike the normal tester, this command does not need to compile the C++ test
@@ -56,19 +58,15 @@ student can compare their project against a clean expected structure.
 `diagnose` is not a replacement for the normal tester.
 
 Use it first when the project is structurally broken. Once the header, Makefile,
-and archive are fixed, run:
-
-```sh
-make ROOT_DIR=../libft
-```
+and archive are fixed, run `make` and choose a normal test from the menu.
 
 ## Rescue Test
 
 If you want to test every function that is actually present in `libft.a`, even
-when other functions are missing, use:
+when other functions are missing, run `make` and choose:
 
-```sh
-make ROOT_DIR=../libft rescue-test
+```text
+6) Rescue test
 ```
 
 `rescue-test` builds a special runner with:

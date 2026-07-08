@@ -3,9 +3,10 @@
 This table is generated from `src/coverage.cpp`.
 
 ```sh
-make ROOT_DIR=../libft coverage
-make ROOT_DIR=../libft explain FUNC=ft_split
-make ROOT_DIR=../libft coverage-docs
+make ROOT_DIR=../libft build
+./libft_tester --coverage
+./libft_tester --explain ft_split
+./libft_tester --coverage-md > docs/COVERAGE.md
 ```
 
 | Function | Suite | Group | Main cases | Malloc |

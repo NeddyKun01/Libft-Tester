@@ -8,6 +8,7 @@ EXTRA_ARGS=("$@")
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTER_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LIBFT="${ROOT_DIR}/libft.a"
+RUNNER="${TESTER_DIR}/libft_tester"
 ARG_STRING="${EXTRA_ARGS[*]}"
 
 normal_status=0
@@ -46,8 +47,10 @@ print_normal_excerpt()
 
 run_normal()
 {
-	make -s -C "$TESTER_DIR" normal ROOT_DIR="$ROOT_DIR" \
-		ARGS="$ARG_STRING" >"$normal_log" 2>&1
+	{
+		make -s -C "$TESTER_DIR" build ROOT_DIR="$ROOT_DIR" \
+			&& "$RUNNER" "${EXTRA_ARGS[@]}"
+	} >"$normal_log" 2>&1
 }
 
 run_diagnose()
