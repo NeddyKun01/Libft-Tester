@@ -7,6 +7,11 @@ Libft Tester has two workflows:
 
 If you are unsure, start with the menu.
 
+`./libft_tester` is a standalone C++ driver. It can run the menu, diagnose a
+broken target project, and explain fallback results before the target library is
+healthy enough to link. When real function tests are needed, it builds an
+internal suite at `build/libft_suite`.
+
 ## Project Layouts
 
 The tester can live next to your target repository:
@@ -72,21 +77,22 @@ instead of waiting for keyboard input. This keeps CI and scripts safe.
 | Command | Purpose |
 | --- | --- |
 | `make ROOT_DIR=../libft` | Open the menu. |
-| `make ROOT_DIR=../libft build` | Build `./libft_tester`. |
+| `make ROOT_DIR=../libft build` | Build the standalone `./libft_tester` driver. |
 | `make self-test` | Validate the tester's own fallback behavior. |
 | `make clean` | Remove tester build files and reports. |
 | `make fclean` | Same as `clean`. |
-| `make re ROOT_DIR=../libft` | Rebuild the runner. |
+| `make re ROOT_DIR=../libft` | Rebuild the driver. |
 
 ## Direct CLI Workflow
 
-Build first:
+Build the driver first:
 
 ```sh
 make ROOT_DIR=../libft build
 ```
 
-Then run the binary:
+Then run the binary. Commands that need real tests build the internal suite
+automatically:
 
 ```sh
 ./libft_tester --summary-only
@@ -138,13 +144,14 @@ Use the menu option:
 7) Leak check
 ```
 
-Or run Valgrind manually after building:
+Or run Valgrind manually against the internal suite:
 
 ```sh
+make ROOT_DIR=../libft suite
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  ./libft_tester --only ft_split --no-color
+  build/libft_suite --only ft_split --no-color
 ```
 
 ## GitHub Actions

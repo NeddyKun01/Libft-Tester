@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Replaced the shell-script entrypoints with a standalone C++ driver for menu,
+  diagnose, smart run, rescue mode, and self-test.
+- Split the executable architecture so `./libft_tester` no longer links against
+  the target Libft directly; real function tests run through an internal
+  `build/libft_suite` binary.
+
 ## 1.2.0 - 2026-07-08
 
 - Simplified the Makefile around an interactive `make` menu and moved advanced

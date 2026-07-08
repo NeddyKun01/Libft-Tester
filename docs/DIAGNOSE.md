@@ -13,9 +13,9 @@ Run `make` and choose:
 5) Diagnose project
 ```
 
-Unlike the normal tester, diagnose mode does not compile the C++ runner against
-the target `libft.h`. It is a shell-based diagnostic pass, so it can still help
-when the target header is broken.
+Unlike the real function suite, diagnose mode does not compile against the
+target `libft.h`. It runs inside the standalone C++ driver, so it can still help
+when the target header or Makefile is broken.
 
 ## What Diagnose Checks
 
@@ -58,7 +58,7 @@ when other functions are missing, run `make` and choose:
 6) Rescue test
 ```
 
-Rescue mode builds a special runner with:
+Rescue mode builds a special internal suite with:
 
 - `templates/libft.h` instead of the target project's possibly broken header;
 - weak fallback stubs for missing functions;

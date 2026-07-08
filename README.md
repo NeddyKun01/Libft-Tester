@@ -19,8 +19,8 @@ The main command is intentionally simple:
 make
 ```
 
-That opens an interactive menu. If you prefer direct commands, build the runner
-and use `./libft_tester`.
+That opens an interactive menu. If you prefer direct commands, build the
+standalone driver and use `./libft_tester`.
 
 ## What It Checks
 
@@ -42,10 +42,9 @@ You need:
 | Tool | Why |
 | --- | --- |
 | `make` | Opens the menu and builds the tester. |
-| `c++` | Compiles the C++17 runner. |
+| `c++` | Compiles the C++17 driver and internal test suite. |
 | `cc` | Builds the target C library. |
 | `ar`, `nm` | Used by the target build and diagnostics. |
-| `bash` | Runs the menu and helper scripts. |
 | `valgrind` | Optional, only needed for leak checks. |
 
 Your target project should contain at least:
@@ -138,7 +137,7 @@ The menu is designed for day-to-day use:
  Makefile:  OK
  libft.h:   OK
  libft.a:   OK
- runner:    OK
+ suite:     OK
 ------------------------------------------------------------
  Recommended: Full test
  Project shape looks ready for the full suite.
@@ -215,13 +214,14 @@ Fix the diagnose problems first, then run make again.
 
 ## Advanced CLI
 
-Build the runner:
+Build the tester driver:
 
 ```sh
 make ROOT_DIR=../libft build
 ```
 
-Then run direct commands:
+Then run direct commands. The driver builds the internal suite automatically
+when a command needs to execute tests against your `libft.a`:
 
 ```sh
 ./libft_tester --summary-only
@@ -250,11 +250,11 @@ The Makefile is intentionally small:
 | Command | Purpose |
 | --- | --- |
 | `make ROOT_DIR=../libft` | Open the interactive menu. |
-| `make ROOT_DIR=../libft build` | Build `./libft_tester`. |
+| `make ROOT_DIR=../libft build` | Build the standalone `./libft_tester` driver. |
 | `make self-test` | Validate the tester's own fallback behavior. |
 | `make clean` | Remove tester build files and reports. |
 | `make fclean` | Same as `clean`. |
-| `make re ROOT_DIR=../libft` | Rebuild the runner. |
+| `make re ROOT_DIR=../libft` | Rebuild the driver. |
 
 Everything else is available in the menu or through `./libft_tester`.
 

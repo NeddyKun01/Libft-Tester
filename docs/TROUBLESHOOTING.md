@@ -65,7 +65,7 @@ Use menu option `5) Diagnose project` to see the build error.
 
 ## A Function Shows `NOK`
 
-Build the runner:
+Build the driver:
 
 ```sh
 make ROOT_DIR=../libft build
