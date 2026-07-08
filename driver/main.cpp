@@ -17,7 +17,7 @@
 
 namespace fs = std::filesystem;
 
-static const char	*g_version = "1.2.0";
+static const char	*g_version = "1.3.0";
 
 struct FunctionInfo
 {
