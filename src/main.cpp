@@ -43,7 +43,7 @@ struct CliOptions
 	bool		fail_fast_set = false;
 };
 
-static const char	*g_version = "1.1.0";
+static const char	*g_version = "1.1.1";
 
 static void	register_suites(tester::SuiteRunner &runner)
 {
