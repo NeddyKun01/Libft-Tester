@@ -1,40 +1,57 @@
 ---
 name: Bug report
 about: Report a problem in Libft Tester
-title: ''
-labels: 'bug'
-assignees: ''
-
+title: "[Bug]: "
+labels: bug
+assignees: ""
 ---
 
-## Describe the problem
-Describe clearly the error, unexpected behavior, or failure you observed.
+## Summary
 
-## Steps to reproduce
-1. Set up the tester and the libft repository as usual.
-2. Run a command such as:
-   ```sh
-   make ROOT_DIR=../libft
-   ```
-   or
-   ```sh
-   ./libft_tester --only ft_split --profile strict
-   ```
-3. Observe the unexpected behavior.
+Describe the problem clearly.
 
-## Expected behavior
-Explain what you expected to see instead.
+## Steps To Reproduce
+
+1. Set up the tester and target library.
+2. Run the command or menu option that fails.
+3. Paste the relevant output below.
+
+Example commands:
+
+```sh
+make ROOT_DIR=../libft
+make ROOT_DIR=../libft build
+./libft_tester --only ft_split --profile strict
+```
+
+## Expected Behavior
+
+What did you expect to happen?
+
+## Actual Behavior
+
+What happened instead?
 
 ## Environment
+
 - OS:
-- Compiler / version:
+- Shell:
+- Compiler and version:
 - Make version:
-- Libft repository / branch:
-- Tester commit or version:
-- Relevant flags used (for example: `--profile`, `--strict`, `--fail-fast`, `--json`, `--html`, `--hint`, `--suite`, `--only`):
+- Tester version or commit:
+- Target repository or commit:
+- Command, flags, or menu option used:
 
-## Output / observed error
-Paste the relevant output, stack trace, error message, or screenshots here.
+## Output
 
-## Additional information
-Include any useful details such as affected functions or suites, CI logs, Valgrind output, or coverage information.
+Paste relevant terminal output, CI logs, Valgrind output, screenshots, or report
+snippets.
+
+```text
+paste output here
+```
+
+## Additional Context
+
+Mention affected functions, suites, reports, or anything else that may help
+reproduce the issue.

@@ -2,28 +2,67 @@
 
 ![CI](https://github.com/NeddyKun01/Libft-Tester/actions/workflows/ci.yml/badge.svg)
 ![Language](https://img.shields.io/badge/language-C%2B%2B17-00599C)
-![Project](https://img.shields.io/badge/project-42%20libft-111111)
+![Project](https://img.shields.io/badge/project-libft-111111)
 ![Output](https://img.shields.io/badge/output-OK%20%7C%20MOK%20%7C%20NOK%20%7C%20MNOK-informational)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A fast, strict, and beginner-friendly tester for the 42 `libft` project.
+Libft Tester is an interactive and CI-friendly tester for `libft` projects.
 
-The main idea is simple:
+It is useful for students, reviewers, maintainers, and anyone working on a
+small C standard-library-style project that exposes the usual `ft_*` functions.
+It was built with the 42 `libft` subject in mind, but the workflow is meant to
+be understandable even if you are not from 42.
+
+The main command is intentionally simple:
 
 ```sh
 make
 ```
 
-`make` opens an interactive terminal menu. Advanced users and CI can use the
-compiled runner directly:
+That opens an interactive menu. If you prefer direct commands, build the runner
+and use `./libft_tester`.
 
-```sh
-./libft_tester --help
+## What It Checks
+
+The tester covers:
+
+- character checks such as `ft_isalpha`, `ft_isdigit`, `ft_toupper`;
+- memory functions such as `ft_memcpy`, `ft_memmove`, `ft_calloc`;
+- string functions such as `ft_strlen`, `ft_strncmp`, `ft_strnstr`;
+- allocation helpers such as `ft_split`, `ft_itoa`, `ft_strtrim`;
+- output helpers such as `ft_putnbr_fd`;
+- linked-list helpers such as `ft_lstmap` and `ft_lstclear`;
+- malloc-failure behavior for allocating functions;
+- crashes, timeouts, and common build/setup problems.
+
+## Requirements
+
+You need:
+
+| Tool | Why |
+| --- | --- |
+| `make` | Opens the menu and builds the tester. |
+| `c++` | Compiles the C++17 runner. |
+| `cc` | Builds the target C library. |
+| `ar`, `nm` | Used by the target build and diagnostics. |
+| `bash` | Runs the menu and helper scripts. |
+| `valgrind` | Optional, only needed for leak checks. |
+
+Your target project should contain at least:
+
+```text
+libft/
+├── Makefile
+├── libft.h
+└── ft_*.c
 ```
+
+The target `Makefile` should build a library named `libft.a` with its default
+`make` target.
 
 ## Quick Start
 
-Clone the tester next to your Libft repository:
+Clone this tester next to your target project:
 
 ```text
 projects/
@@ -38,7 +77,7 @@ cd Libft-Tester
 make ROOT_DIR=../libft
 ```
 
-If the tester lives inside the Libft repository:
+If the tester is inside your `libft` repository:
 
 ```text
 libft/
@@ -51,30 +90,65 @@ libft/
 Run:
 
 ```sh
-cd libft/tester
+cd tester
 make
+```
+
+If your target project is somewhere else, pass an absolute path:
+
+```sh
+make ROOT_DIR=/absolute/path/to/libft
+```
+
+## First Run Recommendation
+
+When the menu opens, start with:
+
+```text
+1) Smart test
+```
+
+Smart test tries the normal tester first. If the target project cannot build,
+link, or include its own header correctly, it automatically runs diagnostics,
+tries rescue mode when `libft.a` exists, and prints a final health summary.
+
+If everything is ready, try:
+
+```text
+3) Full test
+4) Strict test
+```
+
+If something looks broken, try:
+
+```text
+5) Diagnose project
+6) Rescue test
 ```
 
 ## Interactive Menu
 
-The menu is designed for normal day-to-day use:
+The menu is designed for day-to-day use:
 
 ```text
 ============================================================
- Libft Tester
+ Libft Tester (v1.1.1)
 ============================================================
- root:     ../libft
- Makefile: OK
- libft.h:  OK
- libft.a:  OK
- runner:   OK
+ root:      ../libft
+ Makefile:  OK
+ libft.h:   OK
+ libft.a:   OK
+ runner:    OK
+------------------------------------------------------------
+ Recommended: Full test
+ Project shape looks ready for the full suite.
 ============================================================
 
 Recommended
-  1) Smart test
-  2) Quick test
-  3) Full test
-  4) Strict test
+  1) Smart test      best default, auto fallback
+  2) Quick test      fast feedback
+  3) Full test       normal suite
+  4) Strict test     stronger validation
 
 Debugging
   5) Diagnose project
@@ -89,61 +163,32 @@ Reports and help
   0) Exit
 ```
 
-Use the menu if you want the tester to guide you.
+The menu uses colors when supported and respects `NO_COLOR=1`.
 
-Use `./libft_tester` if you already know exactly what you want to run.
+## Understanding Results
 
-## Advanced CLI
-
-Build the runner:
-
-```sh
-make ROOT_DIR=../libft build
-```
-
-Then use the binary directly:
-
-```sh
-./libft_tester --summary-only
-./libft_tester --profile quick
-./libft_tester --profile strict
-./libft_tester --profile brutal --seed 42
-./libft_tester --only ft_split --verbose
-./libft_tester --suite memory
-./libft_tester --repeat 10 --seed 42
-./libft_tester --fail-fast
-./libft_tester --json --no-color
-./libft_tester --html --no-color
-./libft_tester --explain ft_lstmap
-./libft_tester --hint ft_split
-./libft_tester --coverage
-./libft_tester --help
-```
-
-## Minimal Makefile Commands
-
-The Makefile intentionally stays small:
-
-| Command | Purpose |
+| Status | Meaning |
 | --- | --- |
-| `make ROOT_DIR=../libft` | Open the interactive menu. |
-| `make ROOT_DIR=../libft build` | Build `./libft_tester`. |
-| `make self-test` | Test the tester's own diagnose/rescue behavior. |
-| `make clean` | Remove tester build files and reports. |
-| `make fclean` | Same as `clean`. |
-| `make re ROOT_DIR=../libft` | Rebuild the runner. |
+| `OK` | A normal behavior check passed. |
+| `MOK` | A malloc-failure expectation passed. |
+| `NOK` | A normal behavior check failed. |
+| `MNOK` | A malloc-failure expectation failed. |
+| `SEGV` | The tested code caused a segmentation fault. |
+| `BUS` | The tested code caused a bus error. |
+| `ABRT` | The tested code aborted. |
+| `FPE` | The tested code caused an arithmetic error. |
+| `TIMEOUT` | The suite took too long and was stopped. |
 
-Everything else is either in the menu or in `./libft_tester`.
+Example summary:
 
-## Smart Test
+```text
+Summary
+  OKx3004 MOKx61
+  checks: 3065 | failures: 0 | verdict: PASS
+  pass rate: 100%
+```
 
-The menu's smart test is the safest default.
-
-It tries the normal tester first. If the Libft cannot build, link, or include
-its own header correctly, it automatically runs diagnostics, tries rescue mode
-when `libft.a` exists, and prints a final health summary.
-
-Example:
+Example health summary when the project still needs fixes:
 
 ```text
 Final Health Summary
@@ -168,38 +213,54 @@ Next action:
 Fix the diagnose problems first, then run make again.
 ```
 
-This means the project still needs fixes, but the tester was able to test the
-valid functions that already exist in `libft.a`.
+## Advanced CLI
 
-## Statuses
+Build the runner:
 
-| Status | Meaning |
+```sh
+make ROOT_DIR=../libft build
+```
+
+Then run direct commands:
+
+```sh
+./libft_tester --summary-only
+./libft_tester --profile quick
+./libft_tester --profile strict
+./libft_tester --profile brutal --seed 42
+./libft_tester --only ft_split --verbose
+./libft_tester --suite memory
+./libft_tester --repeat 10 --seed 42
+./libft_tester --fail-fast
+./libft_tester --json --no-color
+./libft_tester --html --no-color
+./libft_tester --explain ft_lstmap
+./libft_tester --hint ft_split
+./libft_tester --coverage
+./libft_tester --help
+```
+
+Use the menu when you want guidance. Use the CLI when you want automation,
+filters, reports, or reproducible commands.
+
+## Minimal Makefile Commands
+
+The Makefile is intentionally small:
+
+| Command | Purpose |
 | --- | --- |
-| `OK` | A normal test passed. |
-| `MOK` | A malloc-failure test passed. |
-| `NOK` | A normal test failed. |
-| `MNOK` | A malloc-failure test failed. |
-| `SEGV` | The function crashed with a segmentation fault. |
-| `BUS` | The function crashed with a bus error. |
-| `ABRT` | The function aborted. |
-| `FPE` | The function crashed with an arithmetic error. |
-| `TIMEOUT` | The function took too long and was stopped. |
+| `make ROOT_DIR=../libft` | Open the interactive menu. |
+| `make ROOT_DIR=../libft build` | Build `./libft_tester`. |
+| `make self-test` | Validate the tester's own fallback behavior. |
+| `make clean` | Remove tester build files and reports. |
+| `make fclean` | Same as `clean`. |
+| `make re ROOT_DIR=../libft` | Rebuild the runner. |
 
-## Tested Suites
-
-| Suite | Functions |
-| --- | --- |
-| `ctype` | `ft_isalpha`, `ft_isdigit`, `ft_isalnum`, `ft_isascii`, `ft_isprint`, `ft_toupper`, `ft_tolower` |
-| `memory` | `ft_memset`, `ft_bzero`, `ft_memcpy`, `ft_memmove`, `ft_memchr`, `ft_memcmp`, `ft_calloc` |
-| `atoi` | `ft_atoi` |
-| `strings` | `ft_strlen`, `ft_strchr`, `ft_strrchr`, `ft_strncmp`, `ft_strnstr`, `ft_strlcpy`, `ft_strlcat`, `ft_strdup` |
-| `string_utils` | `ft_substr`, `ft_strjoin`, `ft_strtrim`, `ft_split`, `ft_itoa`, `ft_strmapi`, `ft_striteri` |
-| `output` | `ft_putchar_fd`, `ft_putstr_fd`, `ft_putendl_fd`, `ft_putnbr_fd` |
-| `lists` | `ft_lstnew`, `ft_lstadd_front`, `ft_lstsize`, `ft_lstlast`, `ft_lstadd_back`, `ft_lstdelone`, `ft_lstclear`, `ft_lstiter`, `ft_lstmap` |
+Everything else is available in the menu or through `./libft_tester`.
 
 ## Reports
 
-From the menu, choose:
+From the menu:
 
 ```text
 9) Generate HTML report
@@ -214,8 +275,7 @@ From the CLI:
 
 ## GitHub Actions
 
-This repository includes a workflow designed to test an external Libft
-repository.
+This repository includes a workflow for testing another repository.
 
 Set this repository variable:
 
@@ -245,15 +305,14 @@ self-test.
 | [Changelog](CHANGELOG.md) | Project history and releases. |
 | [Contributing guide](CONTRIBUTING.md) | How to contribute to the tester. |
 
-## Requirements
+## Contributing
 
-| Tool | Why |
-| --- | --- |
-| `make` | Opens the menu and builds the runner. |
-| `c++` | Compiles the C++17 tester. |
-| `ar`, `nm` | Used by Libft builds and diagnostics. |
-| `bash` | Runs the menu and diagnostic helpers. |
-| `valgrind` | Optional, used by the leak-check menu option. |
+Contributions are welcome. If you want to add tests, fix docs, improve the UI,
+or report a bug, start with:
+
+- [Contributing guide](CONTRIBUTING.md)
+- [Contributing tests](docs/CONTRIBUTING_TESTS.md)
+- [Issue templates](.github/ISSUE_TEMPLATE)
 
 ## License
 

@@ -1,13 +1,15 @@
 # Usage Guide
 
-This guide explains the two intended ways to use Libft Tester:
+Libft Tester has two workflows:
 
-- `make` for the interactive menu;
-- `./libft_tester` for advanced direct CLI usage.
+- use `make` for the interactive menu;
+- use `./libft_tester` for direct commands, scripts, and CI.
 
-## Repository Layouts
+If you are unsure, start with the menu.
 
-The tester can live next to your Libft repository:
+## Project Layouts
+
+The tester can live next to your target repository:
 
 ```text
 projects/
@@ -20,7 +22,7 @@ cd Libft-Tester
 make ROOT_DIR=../libft
 ```
 
-It can also live inside your Libft repository:
+The tester can also live inside the target repository:
 
 ```text
 libft/
@@ -31,29 +33,39 @@ libft/
 ```
 
 ```sh
-cd libft/tester
+cd tester
 make
 ```
 
-## Interactive Menu
+## Menu Workflow
 
 `make` opens the menu when used from a normal terminal.
 
-The menu gives access to:
+Start with:
 
-- smart test;
-- quick test;
-- full test;
-- strict test;
-- diagnose project;
-- rescue test;
-- leak check;
-- function explain/hint;
-- HTML report generation;
-- advanced CLI help.
+```text
+1) Smart test
+```
 
-If `make` is executed without an interactive terminal, it falls back to the
-smart test instead of waiting for keyboard input. This keeps CI and scripts safe.
+Smart test tries a normal run first. If the target project is structurally
+broken, it falls back to diagnostics and rescue testing when possible.
+
+Useful menu options:
+
+| Option | Use |
+| --- | --- |
+| `1) Smart test` | Best first run. |
+| `2) Quick test` | Fast feedback while editing code. |
+| `3) Full test` | Normal full run. |
+| `4) Strict test` | Stronger validation before sharing work. |
+| `5) Diagnose project` | Explain Makefile/header/archive problems. |
+| `6) Rescue test` | Test real symbols in `libft.a` even if the project is incomplete. |
+| `7) Leak check` | Run a focused Valgrind check. |
+| `8) Explain or hint a function` | Read coverage notes or debugging hints. |
+| `9) Generate HTML report` | Write a standalone HTML report. |
+
+If `make` runs without an interactive terminal, it falls back to smart test
+instead of waiting for keyboard input. This keeps CI and scripts safe.
 
 ## Minimal Make Commands
 
@@ -66,7 +78,7 @@ smart test instead of waiting for keyboard input. This keeps CI and scripts safe
 | `make fclean` | Same as `clean`. |
 | `make re ROOT_DIR=../libft` | Rebuild the runner. |
 
-## Advanced CLI
+## Direct CLI Workflow
 
 Build first:
 
@@ -98,10 +110,10 @@ Then run the binary:
 
 | Profile | Repeats | Timeout | Fail-fast | Best for |
 | --- | --- | --- | --- | --- |
-| `quick` | 1 | 1500 ms | yes | fast checks while coding |
-| `normal` | 1 | 3000 ms | no | regular local testing |
-| `strict` | 10 | 6000 ms | no | deeper validation before push |
-| `brutal` | 25 | 9000 ms | no | final stress run before release |
+| `quick` | 1 | 1500 ms | yes | Fast checks while coding. |
+| `normal` | 1 | 3000 ms | no | Regular local testing. |
+| `strict` | 10 | 6000 ms | no | Deeper validation before sharing work. |
+| `brutal` | 25 | 9000 ms | no | Final stress run before release. |
 
 ## Reports
 
@@ -138,6 +150,12 @@ LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
 ## GitHub Actions
 
 Set the repository variable `LIBFT_REPOSITORY` in the tester repository:
+
+```text
+owner/repository
+```
+
+Example:
 
 ```text
 NeddyKun01/Libft

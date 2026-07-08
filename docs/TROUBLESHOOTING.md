@@ -27,7 +27,7 @@ exist in `libft.a`.
 
 ## `ROOT_DIR` Does Not Exist
 
-The tester could not find the Libft directory you passed.
+The tester could not find the target directory you passed.
 
 Use an absolute path if you are unsure:
 
@@ -43,8 +43,8 @@ r) Change ROOT_DIR
 
 ## `libft.h` Was Not Found
 
-`ROOT_DIR` must point to the root of a Libft project, not to the tester folder
-or to a subdirectory.
+`ROOT_DIR` must point to the root of the target project, not to the tester
+folder or to a subdirectory.
 
 Expected layout:
 
@@ -57,8 +57,8 @@ libft/
 
 ## `libft.a` Is Missing
 
-The tester builds the target Libft before linking `./libft_tester`. If
-`libft.a` is missing, check that the Libft `Makefile` builds the library with
+The tester builds the target project before linking `./libft_tester`. If
+`libft.a` is missing, check that the target `Makefile` builds the library with
 the default `make` target.
 
 Use menu option `5) Diagnose project` to see the build error.
@@ -147,15 +147,15 @@ NeddyKun01/Libft
 ```
 
 Without that variable, the workflow shows a configuration-help job instead of
-testing a Libft repository.
+testing a target repository.
 
-## GitHub Actions Cannot Checkout The Libft Repository
+## GitHub Actions Cannot Checkout The Target Repository
 
 Possible causes:
 
 - the `LIBFT_REPOSITORY` value is misspelled;
-- the Libft repository is private and the workflow token cannot access it;
+- the target repository is private and the workflow token cannot access it;
 - the repository does not exist under that owner.
 
 For private repositories, use a token with access to both repositories or keep
-the Libft project public while testing.
+the target project public while testing.

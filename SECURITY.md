@@ -2,39 +2,50 @@
 
 ## Supported Versions
 
-This repository is a C++ tester for 42 libft projects. Security fixes are only provided for the latest supported release line.
+Security fixes are provided for the latest released version and the current
+`main` branch.
 
 | Version | Supported |
-| ------- | --------- |
-| 1.0.x   | :white_check_mark: |
-| < 1.0.0 | :x:               |
+| --- | --- |
+| latest release | yes |
+| `main` | yes |
+| older releases | no |
 
-## Reporting a Vulnerability
+## Reporting A Vulnerability
 
-Please report suspected security issues privately through GitHub's private vulnerability reporting mechanism for this repository, if available. If that channel is not available, contact the maintainer directly through GitHub and do not open a public issue.
+Please report suspected security issues privately through GitHub's private
+vulnerability reporting mechanism for this repository, if available.
 
-Please include the following information in your report:
+If that channel is not available, contact the maintainer directly through
+GitHub. Please do not open a public issue for a private security concern.
+
+Include:
 
 - a clear description of the vulnerability;
-- the affected version(s);
+- the affected version or commit;
 - steps to reproduce the issue;
-- any relevant logs, proof-of-concept code, or sample inputs;
+- relevant logs, proof-of-concept code, or sample inputs;
 - the target repository or commit being tested, when relevant.
 
 What to expect:
 
-- Acknowledgement within 5 business days;
-- An assessment of the report and triage status;
-- Coordination of a fix and release if the issue is accepted;
-- Updates on remediation progress until the issue is resolved.
+- acknowledgement within 5 business days;
+- triage and an initial assessment;
+- coordination of a fix and release if the report is accepted;
+- updates until the issue is resolved or closed.
 
-Please do not disclose the vulnerability publicly until a fix has been released or the report has been closed.
+Please do not disclose the vulnerability publicly until a fix has been released
+or the report has been closed.
 
 ## Scope
 
-This project is primarily a local and CI test harness. Security concerns relevant to this repository include:
+This project is a local and CI test harness. Security concerns relevant to this
+repository include:
 
 - unsafe handling of repository paths or test inputs;
-- command execution or subprocess behavior in the test runner;
-- issues affecting the build, test, or reporting workflow;
-- problems in the CI configuration that could expose sensitive data.
+- command execution or subprocess behavior;
+- issues affecting build, test, or report generation;
+- CI configuration problems that could expose sensitive data.
+
+Issues in a user's target implementation are usually not vulnerabilities in this
+tester unless the tester handles them unsafely.

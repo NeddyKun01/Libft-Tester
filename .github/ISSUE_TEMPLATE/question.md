@@ -1,26 +1,43 @@
 ---
 name: Question / Help
-about: Ask for help or clarification about using Libft Tester
-title: ''
-labels: 'question'
-assignees: ''
-
+about: Ask for help using Libft Tester
+title: "[Question]: "
+labels: question
+assignees: ""
 ---
 
-## What do you need help with?
-Describe your question clearly.
+## Question
 
-## What have you tried?
-Mention the commands, flags, or workflow you already attempted.
+What do you need help with?
+
+## What You Tried
+
+Mention the menu option or command you already used.
+
+Examples:
+
+```sh
+make ROOT_DIR=../libft
+make ROOT_DIR=../libft build
+./libft_tester --only ft_split --verbose
+```
 
 ## Environment
+
 - OS:
-- Compiler / version:
-- Libft repository / branch:
-- Tester command used:
+- Shell:
+- Compiler and version:
+- Tester version or commit:
+- Target repository or commit:
 
-## Expected outcome
-Explain what you were trying to achieve.
+## Goal
 
-## Additional context
-Add any relevant logs, output, or screenshots.
+What were you trying to achieve?
+
+## Output Or Context
+
+Paste logs, screenshots, or terminal output if useful.
+
+```text
+paste output here
+```

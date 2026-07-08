@@ -1,28 +1,40 @@
 ---
 name: Feature request
 about: Suggest an improvement for Libft Tester
-title: ''
-labels: 'enhancement'
-assignees: ''
-
+title: "[Feature]: "
+labels: enhancement
+assignees: ""
 ---
 
-## Is this related to a problem?
-Describe the limitation, frustration, or gap you experience with the current tester.
+## Summary
 
-## Proposed solution
-Explain the feature or improvement you would like to see implemented.
+Describe the feature or improvement you would like to see.
 
-## How would this help?
-Describe how this would improve local testing, debugging, CI, coverage, or peer evaluation.
+## Problem Or Motivation
 
-## Alternatives considered
-List any other approaches, workarounds, or alternative features you considered.
+What limitation, frustration, or missing workflow does this solve?
+
+## Proposed Solution
+
+Explain how you imagine the feature working.
+
+If it affects the UI, include an example:
+
+```text
+Example terminal output or menu flow
+```
 
 ## Scope
-- Flag or command involved:
-- Suite or function affected:
-- Expected behavior:
 
-## Additional context
-Add examples, screenshots, or any other useful references.
+- Area affected: menu / CLI / tests / reports / CI / docs / other
+- Function or suite affected, if any:
+- New flag or command, if any:
+
+## Alternatives Considered
+
+List workarounds or alternative designs you considered.
+
+## Additional Context
+
+Add screenshots, links, examples, or references that would help evaluate the
+request.

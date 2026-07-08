@@ -1,11 +1,11 @@
-# Diagnose Mode
+# Diagnose And Rescue Modes
 
-`diagnose` is a structural checker for Libft projects.
+Diagnose mode is a structural checker for target `libft` projects.
 
-It is meant for the situation where the normal tester cannot even build because
-the student's `Makefile`, `libft.h`, or archive contents are incomplete.
+It is useful when the normal tester cannot build because the target `Makefile`,
+`libft.h`, source files, or archive contents are incomplete.
 
-## Run It
+## Run Diagnose
 
 Run `make` and choose:
 
@@ -13,33 +13,29 @@ Run `make` and choose:
 5) Diagnose project
 ```
 
-Unlike the normal tester, this command does not need to compile the C++ test
-runner against the student's `libft.h`. It is a shell-based diagnostic pass.
+Unlike the normal tester, diagnose mode does not compile the C++ runner against
+the target `libft.h`. It is a shell-based diagnostic pass, so it can still help
+when the target header is broken.
 
-## What It Checks
+## What Diagnose Checks
 
 - `ROOT_DIR` exists.
 - `Makefile` exists.
 - `libft.h` exists.
-- `make` can build the project.
+- `make` can build the target project.
 - `libft.a` is produced.
 - `libft.h` declares expected functions.
 - each expected `ft_*.c` source file exists.
 - `libft.a` contains expected symbols.
 
-## Why It Helps
-
-Normal testing is strict: if the project cannot build, it should fail.
-
-`diagnose` is different. It tries to explain why the project cannot build or why
-some functions cannot be tested:
+## Example Output
 
 ```text
 ft_split          yes     no      yes     MISSING_HEADER   add prototype: char **ft_split(char const *s, char c);
 ft_lstmap         yes     yes     no      MISSING_SYMBOL   add ft_lstmap.c to SRCS/Makefile
 ```
 
-This separates implementation bugs from project-structure bugs.
+This separates project-structure bugs from function-behavior bugs.
 
 ## Model Files
 
@@ -50,17 +46,10 @@ templates/libft.h
 templates/Makefile
 ```
 
-They are not copied automatically and they do not hide mistakes. They exist so a
-student can compare their project against a clean expected structure.
+They are references only. They are not copied automatically and they do not hide
+mistakes in the target project.
 
-## Important
-
-`diagnose` is not a replacement for the normal tester.
-
-Use it first when the project is structurally broken. Once the header, Makefile,
-and archive are fixed, run `make` and choose a normal test from the menu.
-
-## Rescue Test
+## Run Rescue
 
 If you want to test every function that is actually present in `libft.a`, even
 when other functions are missing, run `make` and choose:
@@ -69,9 +58,9 @@ when other functions are missing, run `make` and choose:
 6) Rescue test
 ```
 
-`rescue-test` builds a special runner with:
+Rescue mode builds a special runner with:
 
-- `templates/libft.h` instead of the student's possibly broken header;
+- `templates/libft.h` instead of the target project's possibly broken header;
 - weak fallback stubs for missing functions;
 - `libft.a` linked with `--whole-archive` so real symbols override stubs.
 
@@ -82,19 +71,20 @@ Some functions may also be reported as indirect coverage. For example,
 `ft_lstdelone` is exercised through list cleanup paths, but it does not have a
 standalone direct rescue check.
 
-This does not make the project valid. It only helps answer a practical question:
+Rescue mode does not make an incomplete project valid. It only answers this
+practical question:
 
 ```text
 Which existing functions can still be tested right now?
 ```
 
-Use `diagnose` to fix the project structure and the normal tester for final
+Use diagnose mode to fix project structure. Use the normal tester for final
 validation.
 
 ## Tester Self-Test
 
-The tester also has a small self-test suite that creates temporary broken Libft
-fixtures under `/tmp`:
+The tester has a self-test suite that creates temporary broken target projects
+under `/tmp`:
 
 ```sh
 make self-test
@@ -102,7 +92,8 @@ make self-test
 
 It checks that:
 
-- `diagnose` fails and explains a missing `libft.h`;
-- `diagnose` detects a partial `libft.a`;
-- `rescue-test` runs an existing `ft_strlen`;
-- `rescue-test` skips missing symbols such as `ft_split`.
+- diagnose fails and explains a missing `libft.h`;
+- diagnose detects a partial `libft.a`;
+- rescue runs an existing `ft_strlen`;
+- rescue skips missing symbols such as `ft_split`;
+- the menu falls back safely when there is no interactive terminal.

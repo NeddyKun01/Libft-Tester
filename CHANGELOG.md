@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
   usage toward the `./libft_tester` CLI.
 - Polished the interactive menu with colored status labels, version display,
   contextual recommendations, and a clearer health summary.
+- Reworked public documentation, contribution docs, security policy, and issue
+  templates for clearer English onboarding beyond school-specific audiences.
 
 ## 1.1.1 - 2026-07-08
 
