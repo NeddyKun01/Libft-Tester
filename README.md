@@ -29,6 +29,11 @@ cd Libft-Tester
 make ROOT_DIR=../libft
 ```
 
+`make` is a smart entrypoint. It first tries the normal tester. If the Libft
+cannot build, link, or include its own header correctly, it automatically runs
+diagnose mode, tries rescue mode when `libft.a` exists, and prints a final
+health summary.
+
 If your Libft is somewhere else, pass the absolute path:
 
 ```sh
@@ -100,7 +105,8 @@ The important idea:
 
 | Command | Use when you want to... |
 | --- | --- |
-| `make ROOT_DIR=../libft` | Build and run the default tester. |
+| `make ROOT_DIR=../libft` | Run the smart tester with automatic diagnose/rescue fallback. |
+| `make ROOT_DIR=../libft normal` | Run the old pure build-and-test flow without fallback. |
 | `make ROOT_DIR=../libft summary` | See only the compact final result. |
 | `make ROOT_DIR=../libft quick` | Get very fast feedback while coding. |
 | `make ROOT_DIR=../libft strict` | Run stronger validation before a push. |
@@ -131,6 +137,9 @@ make ROOT_DIR=../libft coverage-docs
 ```
 
 ## Diagnose Mode
+
+The default `make` target already calls this automatically when the normal
+tester cannot finish successfully.
 
 `make diagnose` is the best command when the tester cannot build, when symbols
 are missing, or when you are not sure if the Libft project follows the expected
@@ -164,6 +173,9 @@ How to read it:
 
 ## Rescue Test Mode
 
+The default `make` target already tries this automatically when the normal
+tester fails and a `libft.a` archive exists.
+
 `make rescue-test` exists for a very practical reason: sometimes a Libft has a
 broken header, a missing prototype, or a partial archive, but many functions are
 still valid and deserve to be tested.
@@ -196,6 +208,34 @@ failed tested functions: 0
 Important: rescue mode does not hide structural problems. Use it together with
 `make diagnose`. Diagnose tells you what must be fixed; rescue-test tells you
 what can still be tested safely.
+
+## Smart Run Summary
+
+When the normal tester fails before finishing, the default `make` target prints
+a final summary like this:
+
+```text
+Final Health Summary
+------------------------------------------------------------
+Normal tests: FAILED
+Diagnose: PROBLEMS FOUND
+Rescue test: OK
+
+Problem counters:
+- structure/build errors: 1
+- structure/build warnings: 0
+- missing source files: 12
+- missing header declarations: 0
+- missing library symbols: 12
+
+Rescue counters:
+- real symbols found: 31
+- missing symbols skipped: 12
+- failed tested functions: 0
+```
+
+This means the project still needs fixes, but the tester was able to test the
+valid functions that already exist in `libft.a`.
 
 ## Profiles
 

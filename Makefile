@@ -81,9 +81,14 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADERS) $(LIBFT) | $(BUILD_DIR)
 $(NAME): $(OBJS)
 	@$(CXX) $(CXXFLAGS) $^ $(LIBFT) $(LDFLAGS) -o $@
 
-# PT: Compila o tester e corre a suite toda.
-# EN: Builds the tester and runs the full suite.
-all: $(NAME)
+# PT: Corre o modo inteligente: tenta normal, diagnose e rescue se precisar.
+# EN: Runs smart mode: tries normal, diagnose, and rescue when needed.
+all:
+	@bash scripts/smart_run.sh "$(ROOT_DIR)" $(ARGS)
+
+# PT: Comportamento antigo puro: compila e corre a suite toda.
+# EN: Old pure behavior: builds and runs the full suite.
+normal: $(NAME)
 	@./$(NAME) $(ARGS)
 
 # PT: Mostra a ajuda do tester.
@@ -213,4 +218,4 @@ re: fclean all
 
 # PT: Alvos que nao criam ficheiros.
 # EN: Targets that do not create files.
-.PHONY: all check-root help run list profiles diagnose rescue-test self-test coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re
+.PHONY: all normal check-root help run list profiles diagnose rescue-test self-test coverage coverage-docs explain hint verbose json ci summary quick strict brutal report report-html leaks clean fclean re

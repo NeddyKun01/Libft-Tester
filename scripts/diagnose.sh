@@ -270,8 +270,8 @@ print_summary()
 	else
 		printf "Fix the reported Makefile/header/source issues first.\n"
 		printf "Use the known-good models only as references:\n"
-		printf "- %s\n" "$MODEL_HEADER"
-		printf "- %s\n" "$MODEL_MAKEFILE"
+		printf "%s\n" "- $MODEL_HEADER"
+		printf "%s\n" "- $MODEL_MAKEFILE"
 	fi
 }
 

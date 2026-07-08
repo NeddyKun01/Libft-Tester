@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 - Reworked the README into a clearer public usage guide with quick-start,
   command tables, output examples, diagnose/rescue explanations, and CI notes.
+- Added a smart default `make` flow that falls back to diagnose/rescue and
+  prints a final health summary when the normal tester cannot finish.
 
 ## 1.1.0 - 2026-07-07
 
