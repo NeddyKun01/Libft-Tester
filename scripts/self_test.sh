@@ -199,9 +199,9 @@ test_partial_libft()
 	fi
 	assert_output_contains "Final Health Summary" \
 		"smart run prints final health summary" "$smart_log"
-	assert_output_contains "Diagnose: PROBLEMS FOUND" \
+	assert_output_contains "Diagnose:     PROBLEMS FOUND" \
 		"smart run reports diagnose problems" "$smart_log"
-	assert_output_contains "Rescue test: OK" \
+	assert_output_contains "Rescue:       OK" \
 		"smart run still runs valid rescue checks" "$smart_log"
 }
 
@@ -220,7 +220,7 @@ test_broken_makefile()
 	fi
 	assert_output_contains "make failed" \
 		"smart run shows Makefile build failure" "$smart_log"
-	assert_output_contains "Rescue test: SKIPPED because libft.a was not available" \
+	assert_output_contains "Rescue:       SKIPPED, libft.a was not available" \
 		"smart run skips rescue when archive is missing" "$smart_log"
 	assert_output_contains "Final Health Summary" \
 		"smart run summarizes broken Makefile case" "$smart_log"

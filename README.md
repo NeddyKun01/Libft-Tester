@@ -148,9 +148,10 @@ Example:
 ```text
 Final Health Summary
 ------------------------------------------------------------
-Normal tests: FAILED
-Diagnose: PROBLEMS FOUND
-Rescue test: OK
+Status:       NEEDS FIXES
+Normal:       FAILED
+Diagnose:     PROBLEMS FOUND
+Rescue:       OK
 
 Problem counters:
 - structure/build errors: 1
@@ -162,6 +163,9 @@ Rescue counters:
 - real symbols found: 31
 - missing symbols skipped: 12
 - failed tested functions: 0
+
+Next action:
+Fix the diagnose problems first, then run make again.
 ```
 
 This means the project still needs fixes, but the tester was able to test the

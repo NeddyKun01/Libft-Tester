@@ -16,6 +16,24 @@ diagnose_status=0
 rescue_status=0
 rescue_ran=0
 
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-}" != "dumb" ]; then
+	BOLD="$(printf '\033[1m')"
+	DIM="$(printf '\033[2m')"
+	RED="$(printf '\033[31m')"
+	GREEN="$(printf '\033[32m')"
+	YELLOW="$(printf '\033[33m')"
+	CYAN="$(printf '\033[36m')"
+	RESET="$(printf '\033[0m')"
+else
+	BOLD=""
+	DIM=""
+	RED=""
+	GREEN=""
+	YELLOW=""
+	CYAN=""
+	RESET=""
+fi
+
 cleanup()
 {
 	rm -f "$normal_log" "$diagnose_log" "$rescue_log"
@@ -23,7 +41,7 @@ cleanup()
 
 section()
 {
-	printf "\n%s\n" "$1"
+	printf "\n%s%s%s\n" "$BOLD" "$1" "$RESET"
 	printf "%s\n" "------------------------------------------------------------"
 }
 
@@ -75,6 +93,8 @@ print_final_summary()
 	local real_symbols
 	local skipped_symbols
 	local failed_functions
+	local diagnose_label
+	local rescue_label
 
 	build_errors="$(value_from_log "structure/build errors" "$diagnose_log")"
 	build_warnings="$(value_from_log "structure/build warnings" "$diagnose_log")"
@@ -84,14 +104,27 @@ print_final_summary()
 	real_symbols="$(value_from_log "real symbols found" "$rescue_log")"
 	skipped_symbols="$(value_from_log "missing symbols skipped" "$rescue_log")"
 	failed_functions="$(value_from_log "failed tested functions" "$rescue_log")"
+	if [ "$diagnose_status" -eq 0 ]; then
+		diagnose_label="${GREEN}OK${RESET}"
+	else
+		diagnose_label="${YELLOW}PROBLEMS FOUND${RESET}"
+	fi
+	if [ "$rescue_ran" -eq 1 ] && [ "$rescue_status" -eq 0 ]; then
+		rescue_label="${GREEN}OK${RESET}"
+	elif [ "$rescue_ran" -eq 1 ]; then
+		rescue_label="${RED}FAILED${RESET}"
+	else
+		rescue_label="${DIM}SKIPPED${RESET}"
+	fi
 
 	section "Final Health Summary"
-	printf "Normal tests: FAILED\n"
-	printf "Diagnose: %s\n" "$([ "$diagnose_status" -eq 0 ] && printf "OK" || printf "PROBLEMS FOUND")"
+	printf "Status:       %sNEEDS FIXES%s\n" "$YELLOW" "$RESET"
+	printf "Normal:       %sFAILED%s\n" "$RED" "$RESET"
+	printf "Diagnose:     %s\n" "$diagnose_label"
 	if [ "$rescue_ran" -eq 1 ]; then
-		printf "Rescue test: %s\n" "$([ "$rescue_status" -eq 0 ] && printf "OK" || printf "FAILED")"
+		printf "Rescue:       %s\n" "$rescue_label"
 	else
-		printf "Rescue test: SKIPPED because libft.a was not available\n"
+		printf "Rescue:       %s, libft.a was not available\n" "$rescue_label"
 	fi
 	printf "\nProblem counters:\n"
 	printf "%s\n" "- structure/build errors: ${build_errors:-unknown}"
@@ -105,7 +138,7 @@ print_final_summary()
 		printf "%s\n" "- missing symbols skipped: ${skipped_symbols:-unknown}"
 		printf "%s\n" "- failed tested functions: ${failed_functions:-unknown}"
 	fi
-	printf "\nRecommendation:\n"
+	printf "\nNext action:\n"
 	if [ "$diagnose_status" -ne 0 ]; then
 		printf "Fix the diagnose problems first, then run make again.\n"
 	elif [ "$rescue_status" -ne 0 ]; then
@@ -130,9 +163,10 @@ main()
 	if run_normal; then
 		cat "$normal_log"
 		section "Final Health Summary"
-		printf "Normal tests: OK\n"
-		printf "Diagnose: not needed\n"
-		printf "Rescue test: not needed\n"
+		printf "Status:       %sPASS%s\n" "$GREEN" "$RESET"
+		printf "Normal:       %sOK%s\n" "$GREEN" "$RESET"
+		printf "Diagnose:     not needed\n"
+		printf "Rescue:       not needed\n"
 		exit 0
 	fi
 	normal_status=$?

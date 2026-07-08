@@ -15,14 +15,37 @@ if [ ! -t 0 ] || [ ! -t 1 ]; then
 	exit $?
 fi
 
+if [ -z "${NO_COLOR:-}" ] && [ "${TERM:-}" != "dumb" ]; then
+	BOLD="$(printf '\033[1m')"
+	DIM="$(printf '\033[2m')"
+	RED="$(printf '\033[31m')"
+	GREEN="$(printf '\033[32m')"
+	YELLOW="$(printf '\033[33m')"
+	CYAN="$(printf '\033[36m')"
+	RESET="$(printf '\033[0m')"
+else
+	BOLD=""
+	DIM=""
+	RED=""
+	GREEN=""
+	YELLOW=""
+	CYAN=""
+	RESET=""
+fi
+
+paint()
+{
+	printf "%s%s%s" "$1" "$2" "$RESET"
+}
+
 ok()
 {
-	printf "OK"
+	paint "$GREEN" "OK"
 }
 
 missing()
 {
-	printf "missing"
+	paint "$RED" "missing"
 }
 
 status_file()
@@ -32,6 +55,55 @@ status_file()
 	else
 		missing
 	fi
+}
+
+tester_version()
+{
+	local version
+
+	if [ -x "$RUNNER" ]; then
+		version="$("$RUNNER" --version 2>/dev/null | sed -n 's/^libft_tester //p')"
+	else
+		version="$(sed -n 's/.*g_version = "\([^"]*\)".*/\1/p' \
+			"${TESTER_DIR}/src/main.cpp")"
+	fi
+	printf "%s" "${version:-unknown}"
+}
+
+recommended_action()
+{
+	if [ ! -d "$ROOT_DIR" ]; then
+		printf "Change ROOT_DIR"
+	elif [ ! -f "${ROOT_DIR}/Makefile" ] || [ ! -f "${ROOT_DIR}/libft.h" ]; then
+		printf "Diagnose project"
+	elif [ ! -f "${ROOT_DIR}/libft.a" ]; then
+		printf "Smart test"
+	elif [ ! -x "$RUNNER" ]; then
+		printf "Quick test"
+	else
+		printf "Full test"
+	fi
+}
+
+recommendation_hint()
+{
+	case "$(recommended_action)" in
+		"Change ROOT_DIR")
+			printf "The target folder does not exist."
+			;;
+		"Diagnose project")
+			printf "Project files are missing or incomplete."
+			;;
+		"Smart test")
+			printf "Build/check the project and fall back if needed."
+			;;
+		"Quick test")
+			printf "The runner is not built yet; start with fast feedback."
+			;;
+		*)
+			printf "Project shape looks ready for the full suite."
+			;;
+	esac
 }
 
 pause()
@@ -78,39 +150,51 @@ run_and_pause()
 
 print_header()
 {
+	local action
+
+	action="$(recommended_action)"
 	clear 2>/dev/null || true
 	printf "\n"
-	printf "============================================================\n"
-	printf " Libft Tester\n"
-	printf "============================================================\n"
-	printf " root:     %s\n" "$ROOT_DIR"
-	printf " Makefile: %s\n" "$(status_file "${ROOT_DIR}/Makefile")"
-	printf " libft.h:  %s\n" "$(status_file "${ROOT_DIR}/libft.h")"
-	printf " libft.a:  %s\n" "$(status_file "${ROOT_DIR}/libft.a")"
-	printf " runner:   %s\n" "$(status_file "$RUNNER")"
-	printf "============================================================\n"
+	printf "%s\n" "============================================================"
+	printf " %sLibft Tester%s %s(v%s)%s\n" \
+		"$BOLD" "$RESET" "$DIM" "$(tester_version)" "$RESET"
+	printf "%s\n" "============================================================"
+	printf " %-10s %s\n" "root:" "$ROOT_DIR"
+	printf " %-10s %s\n" "Makefile:" "$(status_file "${ROOT_DIR}/Makefile")"
+	printf " %-10s %s\n" "libft.h:" "$(status_file "${ROOT_DIR}/libft.h")"
+	printf " %-10s %s\n" "libft.a:" "$(status_file "${ROOT_DIR}/libft.a")"
+	printf " %-10s %s\n" "runner:" "$(status_file "$RUNNER")"
+	printf "%s\n" "------------------------------------------------------------"
+	printf " %sRecommended:%s %s%s%s\n" \
+		"$BOLD" "$RESET" "$CYAN" "$action" "$RESET"
+	printf " %s%s%s\n" "$DIM" "$(recommendation_hint)" "$RESET"
+	printf "%s\n" "============================================================"
 }
 
 print_menu()
 {
 	printf "\n"
-	printf "Recommended\n"
-	printf "  1) Smart test\n"
-	printf "  2) Quick test\n"
-	printf "  3) Full test\n"
-	printf "  4) Strict test\n"
+	printf "%sRecommended%s\n" "$BOLD" "$RESET"
+	printf "  %s1%s) Smart test      %sbest default, auto fallback%s\n" \
+		"$CYAN" "$RESET" "$DIM" "$RESET"
+	printf "  %s2%s) Quick test      %sfast feedback%s\n" \
+		"$CYAN" "$RESET" "$DIM" "$RESET"
+	printf "  %s3%s) Full test       %snormal suite%s\n" \
+		"$CYAN" "$RESET" "$DIM" "$RESET"
+	printf "  %s4%s) Strict test     %sstronger validation%s\n" \
+		"$CYAN" "$RESET" "$DIM" "$RESET"
 	printf "\n"
-	printf "Debugging\n"
-	printf "  5) Diagnose project\n"
-	printf "  6) Rescue test\n"
-	printf "  7) Leak check\n"
-	printf "  8) Explain or hint a function\n"
+	printf "%sDebugging%s\n" "$BOLD" "$RESET"
+	printf "  %s5%s) Diagnose project\n" "$YELLOW" "$RESET"
+	printf "  %s6%s) Rescue test\n" "$YELLOW" "$RESET"
+	printf "  %s7%s) Leak check\n" "$YELLOW" "$RESET"
+	printf "  %s8%s) Explain or hint a function\n" "$YELLOW" "$RESET"
 	printf "\n"
-	printf "Reports and help\n"
-	printf "  9) Generate HTML report\n"
-	printf "  h) Advanced CLI help\n"
-	printf "  r) Change ROOT_DIR\n"
-	printf "  0) Exit\n"
+	printf "%sReports and help%s\n" "$BOLD" "$RESET"
+	printf "  %s9%s) Generate HTML report\n" "$GREEN" "$RESET"
+	printf "  %sh%s) Advanced CLI help\n" "$GREEN" "$RESET"
+	printf "  %sr%s) Change ROOT_DIR\n" "$GREEN" "$RESET"
+	printf "  %s0%s) Exit\n" "$GREEN" "$RESET"
 	printf "\nChoice: "
 }
 
@@ -167,7 +251,7 @@ main_loop()
 			9) run_and_pause generate_html ;;
 			h|H) run_and_pause run_runner --help ;;
 			r|R) change_root ;;
-			0) printf "Bye.\n"; exit 0 ;;
+			0) printf "%s\n" "Bye."; exit 0 ;;
 			*) printf "Invalid choice.\n"; pause ;;
 		esac
 	done
