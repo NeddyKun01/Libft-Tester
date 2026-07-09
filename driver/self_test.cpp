@@ -205,6 +205,10 @@ void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 		fail(out, failures, "doctor fails when ROOT_DIR is missing", log.str());
 	assert_contains(out, failures, "ROOT_DIR does not exist",
 		"doctor explains missing ROOT_DIR", log.str());
+	assert_contains(out, failures, "Fix: pass the correct target path",
+		"doctor suggests fixing ROOT_DIR", log.str());
+	assert_contains(out, failures, "Next action: fix required errors",
+		"doctor gives next action for missing ROOT_DIR", log.str());
 	log.str("");
 	log.clear();
 	root = tmp / "doctor_missing_makefile";
@@ -220,6 +224,8 @@ void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 		fail(out, failures, "doctor fails when Makefile is missing", log.str());
 	assert_contains(out, failures, "Makefile missing",
 		"doctor explains missing Makefile", log.str());
+	assert_contains(out, failures, "Fix: restore the target Makefile",
+		"doctor suggests fixing missing Makefile", log.str());
 	log.str("");
 	log.clear();
 	root = tmp / "doctor_missing_header";
@@ -235,6 +241,8 @@ void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 		fail(out, failures, "doctor fails when libft.h is missing", log.str());
 	assert_contains(out, failures, "libft.h missing",
 		"doctor explains missing libft.h", log.str());
+	assert_contains(out, failures, "Fix: restore the target header",
+		"doctor suggests fixing missing libft.h", log.str());
 	log.str("");
 	log.clear();
 	root = tmp / "doctor_partial_libft";
@@ -248,8 +256,12 @@ void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 		fail(out, failures, "doctor accepts missing libft.a as warning", log.str());
 	assert_contains(out, failures, "libft.a missing",
 		"doctor reports missing libft.a warning", log.str());
+	assert_contains(out, failures, "Fix: run `make` inside ROOT_DIR",
+		"doctor suggests building missing libft.a", log.str());
 	assert_contains(out, failures, "Doctor verdict: OK",
 		"doctor keeps warning-only projects usable", log.str());
+	assert_contains(out, failures, "Next action: you can run `make ROOT_DIR=",
+		"doctor gives next action for warnings", log.str());
 	log.str("");
 	log.clear();
 	root = tmp / "doctor_valid_libft";
@@ -264,6 +276,8 @@ void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 		fail(out, failures, "doctor passes when required project files exist", log.str());
 	assert_contains(out, failures, "libft.a found",
 		"doctor sees generated libft.a", log.str());
+	assert_contains(out, failures, "Next action: you can run `make ROOT_DIR=",
+		"doctor still suggests safe next action with optional warnings", log.str());
 }
 
 int	Driver::run_self_test(std::ostream &out)

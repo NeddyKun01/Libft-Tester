@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
   shape without running the full suite.
 - Added self-test coverage for doctor mode diagnostics and warning-only
   project states.
+- Improved doctor output with per-problem `Fix:` hints and a final
+  `Next action:` recommendation.
 
 ## 1.3.0 - 2026-07-08
 

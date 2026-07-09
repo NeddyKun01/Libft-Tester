@@ -50,16 +50,21 @@ static void	print_tool(std::ostream &out, const std::string &name,
 	{
 		errors++;
 		out << "[ERROR] " << name << " missing\n";
+		out << "        Fix: install " << name
+			<< " and make sure it is available in PATH.\n";
 	}
 	else
 	{
 		warnings++;
 		out << "[WARN]  " << name << " missing, optional feature unavailable\n";
+		out << "        Fix: install " << name
+			<< " if you want to use this optional feature.\n";
 	}
 }
 
 static void	print_file_check(std::ostream &out, const std::string &label,
-	const fs::path &path, bool required, int &errors, int &warnings)
+	const fs::path &path, bool required, const std::string &fix,
+	int &errors, int &warnings)
 {
 	if (fs::exists(path))
 	{
@@ -70,12 +75,34 @@ static void	print_file_check(std::ostream &out, const std::string &label,
 	{
 		errors++;
 		out << "[ERROR] " << label << " missing: " << path << "\n";
+		out << "        Fix: " << fix << "\n";
 	}
 	else
 	{
 		warnings++;
 		out << "[WARN]  " << label << " missing: " << path << "\n";
+		out << "        Fix: " << fix << "\n";
 	}
+}
+
+static void	print_next_action(std::ostream &out, int errors, int warnings,
+	const std::string &root_dir)
+{
+	out << "\nNext action: ";
+	if (errors > 0)
+	{
+		out << "fix required errors, then run ";
+		out << "`./libft_tester --root " << root_dir << " --doctor` again.\n";
+		return;
+	}
+	if (warnings > 0)
+	{
+		out << "you can run `make ROOT_DIR=" << root_dir;
+		out << "` or continue with smart test.\n";
+		return;
+	}
+	out << "run `./libft_tester --root " << root_dir;
+	out << " --summary-only` or choose Full test from the menu.\n";
 }
 
 int	Driver::run_doctor(std::ostream &out)
@@ -102,17 +129,32 @@ int	Driver::run_doctor(std::ostream &out)
 	{
 		errors++;
 		out << "[ERROR] ROOT_DIR does not exist: " << root_path() << "\n";
+		out << "        Fix: pass the correct target path with ";
+		out << "`--root /path/to/libft` or `make ROOT_DIR=/path/to/libft`.\n";
 	}
-	print_file_check(out, "Makefile", makefile_path(), true, errors, warnings);
-	print_file_check(out, "libft.h", header_path(), true, errors, warnings);
-	print_file_check(out, "libft.a", libft_path(), false, errors, warnings);
+	print_file_check(out, "Makefile", makefile_path(), true,
+		"restore the target Makefile or compare with " + model_makefile().string(),
+		errors, warnings);
+	print_file_check(out, "libft.h", header_path(), true,
+		"restore the target header or compare with " + model_header().string(),
+		errors, warnings);
+	print_file_check(out, "libft.a", libft_path(), false,
+		"run `make` inside ROOT_DIR or let Smart test build it for you",
+		errors, warnings);
 	out << "\nTester internals\n";
-	print_file_check(out, "model header", model_header(), true, errors, warnings);
-	print_file_check(out, "model makefile", model_makefile(), true, errors, warnings);
-	print_file_check(out, "internal suite", suite_path(), false, errors, warnings);
+	print_file_check(out, "model header", model_header(), true,
+		"restore templates/libft.h from the tester repository",
+		errors, warnings);
+	print_file_check(out, "model makefile", model_makefile(), true,
+		"restore templates/Makefile from the tester repository",
+		errors, warnings);
+	print_file_check(out, "internal suite", suite_path(), false,
+		"run a real test command; the driver builds this file automatically",
+		errors, warnings);
 	out << "\nSummary\n";
 	out << "errors: " << errors << "\n";
 	out << "warnings: " << warnings << "\n";
+	print_next_action(out, errors, warnings, root_dir);
 	if (errors == 0)
 	{
 		out << "\nDoctor verdict: OK\n";

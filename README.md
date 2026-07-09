@@ -53,6 +53,9 @@ You can check your local setup with:
 ./libft_tester --doctor
 ```
 
+Doctor mode prints required fixes and a recommended next action when something
+is missing.
+
 Your target project should contain at least:
 
 ```text

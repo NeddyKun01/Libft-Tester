@@ -134,6 +134,9 @@ It reports:
 Missing optional tools or a missing internal suite are warnings. Missing
 required tools or target files are errors.
 
+For each problem, doctor mode prints a short `Fix:` hint. At the end, it also
+prints a `Next action:` line so new users know what to run next.
+
 ## Profiles
 
 | Profile | Repeats | Timeout | Fail-fast | Best for |
