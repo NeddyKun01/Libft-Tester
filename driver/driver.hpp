@@ -148,6 +148,8 @@ private:
 					int &failures);
 	void	test_broken_makefile(std::ostream &out, const fs::path &tmp,
 					int &failures);
+	void	test_doctor(std::ostream &out, const fs::path &tmp,
+					int &failures);
 };
 
 #endif

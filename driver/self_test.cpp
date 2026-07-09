@@ -187,6 +187,85 @@ void	Driver::test_broken_makefile(std::ostream &out, const fs::path &tmp,
 	root_dir = old_root;
 }
 
+void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path			root;
+	std::ostringstream	log;
+	std::string			old_root = root_dir;
+	int					status;
+
+	root = tmp / "doctor_missing_root";
+	root_dir = root.string();
+	status = run_doctor(log);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "doctor fails when ROOT_DIR is missing");
+	else
+		fail(out, failures, "doctor fails when ROOT_DIR is missing", log.str());
+	assert_contains(out, failures, "ROOT_DIR does not exist",
+		"doctor explains missing ROOT_DIR", log.str());
+	log.str("");
+	log.clear();
+	root = tmp / "doctor_missing_makefile";
+	fs::create_directories(root);
+	fs::copy_file(model_header(), root / "libft.h",
+		fs::copy_options::overwrite_existing);
+	root_dir = root.string();
+	status = run_doctor(log);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "doctor fails when Makefile is missing");
+	else
+		fail(out, failures, "doctor fails when Makefile is missing", log.str());
+	assert_contains(out, failures, "Makefile missing",
+		"doctor explains missing Makefile", log.str());
+	log.str("");
+	log.clear();
+	root = tmp / "doctor_missing_header";
+	fs::create_directories(root);
+	fs::copy_file(model_makefile(), root / "Makefile",
+		fs::copy_options::overwrite_existing);
+	root_dir = root.string();
+	status = run_doctor(log);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "doctor fails when libft.h is missing");
+	else
+		fail(out, failures, "doctor fails when libft.h is missing", log.str());
+	assert_contains(out, failures, "libft.h missing",
+		"doctor explains missing libft.h", log.str());
+	log.str("");
+	log.clear();
+	root = tmp / "doctor_partial_libft";
+	write_partial_libft(root);
+	root_dir = root.string();
+	status = run_doctor(log);
+	root_dir = old_root;
+	if (status == 0)
+		pass(out, "doctor accepts missing libft.a as warning");
+	else
+		fail(out, failures, "doctor accepts missing libft.a as warning", log.str());
+	assert_contains(out, failures, "libft.a missing",
+		"doctor reports missing libft.a warning", log.str());
+	assert_contains(out, failures, "Doctor verdict: OK",
+		"doctor keeps warning-only projects usable", log.str());
+	log.str("");
+	log.clear();
+	root = tmp / "doctor_valid_libft";
+	write_partial_libft(root);
+	run_process({"make", "-s", "-C", root.string()});
+	root_dir = root.string();
+	status = run_doctor(log);
+	root_dir = old_root;
+	if (status == 0)
+		pass(out, "doctor passes when required project files exist");
+	else
+		fail(out, failures, "doctor passes when required project files exist", log.str());
+	assert_contains(out, failures, "libft.a found",
+		"doctor sees generated libft.a", log.str());
+}
+
 int	Driver::run_self_test(std::ostream &out)
 {
 	fs::path	tmp = fs::temp_directory_path()
@@ -200,6 +279,7 @@ int	Driver::run_self_test(std::ostream &out)
 	test_missing_header(out, tmp, failures);
 	test_partial_libft(out, tmp, failures);
 	test_broken_makefile(out, tmp, failures);
+	test_doctor(out, tmp, failures);
 	fs::remove_all(tmp);
 	out << "\nSelf-test failures: " << failures << "\n";
 	return (failures == 0 ? 0 : 1);

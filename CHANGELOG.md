@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
   rescue/smart run, menu, self-test, and doctor checks.
 - Added `./libft_tester --doctor` to check required tools and target project
   shape without running the full suite.
+- Added self-test coverage for doctor mode diagnostics and warning-only
+  project states.
 
 ## 1.3.0 - 2026-07-08
 
