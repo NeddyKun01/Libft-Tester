@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.4.0 - 2026-07-12
+
 - Rescue failures now print inline terminal details instead of sending users to
   per-function `.log` files.
 - Suite crashes are now shown as separate `Runner Issues` instead of being

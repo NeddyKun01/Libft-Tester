@@ -150,7 +150,7 @@ The menu is designed for day-to-day use:
 
 ```text
 ============================================================
- Libft Tester (v1.3.1)
+ Libft Tester (v1.4.0)
 ============================================================
  root:      ../libft
  Makefile:  OK
