@@ -470,6 +470,27 @@ namespace tester
 		return (function.passed != static_cast<int>(function.checks.size()));
 	}
 
+	inline bool	is_runner_issue(const CheckResult &check)
+	{
+		return (check.label == "runner issue");
+	}
+
+	inline bool	function_is_runner_issues(const FunctionReport &function)
+	{
+		size_t	i;
+
+		if (function.checks.empty())
+			return (false);
+		i = 0;
+		while (i < function.checks.size())
+		{
+			if (!is_runner_issue(function.checks[i]))
+				return (false);
+			i++;
+		}
+		return (true);
+	}
+
 	struct StatusCounts
 	{
 		size_t	ok = 0;
@@ -628,6 +649,11 @@ namespace tester
 		{
 			const FunctionReport	&function = report.functions[i];
 
+			if (function_is_runner_issues(function))
+			{
+				i++;
+				continue ;
+			}
 			std::cout << paint(cyan) << std::left << std::setw(20)
 				<< function.name << paint(reset);
 			print_score(function);
@@ -640,15 +666,12 @@ namespace tester
 		}
 	}
 
-	inline void	print_failure_details(const Report &report)
+	inline void	print_runner_issues(const Report &report)
 	{
 		size_t	i;
 		size_t	j;
+		bool	printed = false;
 
-		if (report.failures == 0)
-			return ;
-		std::cout << "\n" << paint(bold) << "Failure Details"
-			<< paint(reset) << "\n";
 		i = 0;
 		while (i < report.functions.size())
 		{
@@ -657,8 +680,50 @@ namespace tester
 			{
 				const CheckResult	&check = report.functions[i].checks[j];
 
-				if (!check.success)
+				if (is_runner_issue(check) && !check.success)
 				{
+					if (!printed)
+					{
+						std::cout << "\n" << paint(bold) << "Runner Issues"
+							<< paint(reset) << "\n";
+						std::cout << paint(dim)
+							<< "These are tester/suite crashes, not Libft "
+							<< "function names.\n" << paint(reset);
+						printed = true;
+					}
+					std::cout << paint(red) << check.status << paint(reset)
+						<< " " << check.details << '\n';
+				}
+				j++;
+			}
+			i++;
+		}
+	}
+
+	inline void	print_failure_details(const Report &report)
+	{
+		size_t	i;
+		size_t	j;
+		bool	printed = false;
+
+		if (report.failures == 0)
+			return ;
+		i = 0;
+		while (i < report.functions.size())
+		{
+			j = 0;
+			while (j < report.functions[i].checks.size())
+			{
+				const CheckResult	&check = report.functions[i].checks[j];
+
+				if (!check.success && !is_runner_issue(check))
+				{
+					if (!printed)
+					{
+						std::cout << "\n" << paint(bold) << "Failure Details"
+							<< paint(reset) << "\n";
+						printed = true;
+					}
 					std::cout << paint(red) << check.status << paint(reset) << " "
 						<< check.label << '\n';
 					if (!check.details.empty())
@@ -672,6 +737,28 @@ namespace tester
 			}
 			i++;
 		}
+	}
+
+	inline int	count_runner_issues(const Report &report)
+	{
+		size_t	i;
+		size_t	j;
+		int		count = 0;
+
+		i = 0;
+		while (i < report.functions.size())
+		{
+			j = 0;
+			while (j < report.functions[i].checks.size())
+			{
+				if (is_runner_issue(report.functions[i].checks[j])
+					&& !report.functions[i].checks[j].success)
+					count++;
+				j++;
+			}
+			i++;
+		}
+		return (count);
 	}
 
 	inline std::string	json_escape(const std::string &value)
@@ -902,8 +989,10 @@ namespace tester
 	{
 		int	passed;
 		int	percent;
+		int	runner_issues;
 
 		passed = report.checks - report.failures;
+		runner_issues = count_runner_issues(report);
 		percent = 100;
 		if (report.checks > 0)
 			percent = (passed * 100) / report.checks;
@@ -923,6 +1012,8 @@ namespace tester
 		if (!options.quiet && !options.summary_only)
 			print_function_results(report, options);
 		if (!options.summary_only)
+			print_runner_issues(report);
+		if (!options.summary_only)
 			print_failure_details(report);
 		std::cout << "\n" << paint(bold) << "Summary" << paint(reset) << "\n  ";
 		if (options.summary_only && report.seed != 0)
@@ -934,6 +1025,10 @@ namespace tester
 		print_status_count("MOK", report.mok_count, true);
 		print_status_count("NOK", report.nok_count, false);
 		print_status_count("MNOK", report.mnok_count, false);
+		if (runner_issues > 0)
+			std::cout << "\n  function failures: "
+				<< (report.failures - runner_issues)
+				<< " | runner issues: " << runner_issues;
 		std::cout << "\n  checks: " << report.checks
 			<< " | failures: ";
 		if (report.failures == 0)
@@ -943,7 +1038,7 @@ namespace tester
 		else
 			std::cout << paint(red) << report.failures << paint(reset)
 				<< " | verdict: " << paint(red) << "FAIL"
-				<< paint(reset) << " | check failure details above\n";
+				<< paint(reset) << " | see details above\n";
 		std::cout << "  pass rate: " << percent << "%\n";
 	}
 
@@ -1109,6 +1204,16 @@ namespace tester
 		return (std::string("SIG") + text(signal));
 	}
 
+	inline std::string	suite_signal_details(const std::string &suite,
+		int signal)
+	{
+		return ("suite \"" + suite + "\" stopped with "
+			+ signal_status(signal)
+			+ " before it could report the exact function. This usually means "
+			+ "one function used inside that suite crashed; it is not a Libft "
+			+ "function named \"" + suite + "\".");
+	}
+
 	inline void	read_available(int fd, std::string &data)
 	{
 		char	buffer[4096];
@@ -1206,8 +1311,9 @@ namespace tester
 
 			if (pipe(pipe_fd) == -1)
 			{
-				add_raw_check(report, suite.name + " pipe", "NOK", false,
-					"pipe() failed");
+				add_raw_check(report, "runner issue", "NOK", false,
+					"internal pipe setup failed while preparing suite \""
+					+ suite.name + "\"");
 				return ;
 			}
 			pid = fork();
@@ -1215,8 +1321,9 @@ namespace tester
 			{
 				close(pipe_fd[0]);
 				close(pipe_fd[1]);
-				add_raw_check(report, suite.name + " fork", "NOK", false,
-					"fork() failed");
+				add_raw_check(report, "runner issue", "NOK", false,
+					"internal fork setup failed while preparing suite \""
+					+ suite.name + "\"");
 				return ;
 			}
 			if (pid == 0)
@@ -1259,8 +1366,8 @@ namespace tester
 				{
 					kill(pid, SIGKILL);
 					waitpid(pid, &status, 0);
-					add_raw_check(report, suite.name + " timeout", "TIMEOUT",
-						false, "suite exceeded timeout");
+					add_raw_check(report, "runner issue", "TIMEOUT", false,
+						"suite \"" + suite.name + "\" exceeded timeout");
 					done = true;
 				}
 				else
@@ -1270,12 +1377,12 @@ namespace tester
 			close(pipe_fd[0]);
 			parse_report_data(report, data);
 			if (WIFSIGNALED(status) && WTERMSIG(status) != SIGKILL)
-				add_raw_check(report, suite.name + " signal",
+				add_raw_check(report, "runner issue",
 					signal_status(WTERMSIG(status)), false,
-					"suite stopped by signal");
+					suite_signal_details(suite.name, WTERMSIG(status)));
 			else if (data.empty() && !WIFEXITED(status))
-				add_raw_check(report, suite.name + " no report", "NOK",
-					false, "suite did not return a report");
+				add_raw_check(report, "runner issue", "NOK", false,
+					"suite \"" + suite.name + "\" did not return a report");
 		}
 
 		static bool	timeout_reached(
@@ -1288,6 +1395,88 @@ namespace tester
 				now - start).count() > timeout_ms);
 		}
 	};
+
+	inline bool	isolated_timeout_reached(
+		const std::chrono::steady_clock::time_point &start, int timeout_ms)
+	{
+		std::chrono::steady_clock::time_point	now;
+
+		now = std::chrono::steady_clock::now();
+		return (std::chrono::duration_cast<std::chrono::milliseconds>(
+			now - start).count() > timeout_ms);
+	}
+
+	template <typename Fn>
+	inline void	run_isolated(Report &report, const std::string &name, Fn fn,
+		int timeout_ms = 3000)
+	{
+		int										pipe_fd[2];
+		pid_t									pid;
+		std::chrono::steady_clock::time_point	start;
+		std::string								data;
+		int										status;
+		bool									done;
+
+		if (pipe(pipe_fd) == -1)
+		{
+			add_raw_check(report, name + " runner", "NOK", false,
+				"internal pipe setup failed while isolating this function");
+			return ;
+		}
+		pid = fork();
+		if (pid == -1)
+		{
+			close(pipe_fd[0]);
+			close(pipe_fd[1]);
+			add_raw_check(report, name + " runner", "NOK", false,
+				"internal fork setup failed while isolating this function");
+			return ;
+		}
+		if (pid == 0)
+		{
+			Report	child_report;
+
+			close(pipe_fd[0]);
+			fn(child_report);
+			serialize_report(pipe_fd[1], child_report);
+			close(pipe_fd[1]);
+			std::exit(child_report.failures == 0
+				? EXIT_SUCCESS : EXIT_FAILURE);
+		}
+		close(pipe_fd[1]);
+		fcntl(pipe_fd[0], F_SETFL, O_NONBLOCK);
+		start = std::chrono::steady_clock::now();
+		done = false;
+		status = 0;
+		while (!done)
+		{
+			pid_t	result = waitpid(pid, &status, WNOHANG);
+
+			read_available(pipe_fd[0], data);
+			if (result == pid)
+				done = true;
+			else if (isolated_timeout_reached(start, timeout_ms))
+			{
+				kill(pid, SIGKILL);
+				waitpid(pid, &status, 0);
+				add_raw_check(report, name + " timeout", "TIMEOUT", false,
+					"function tests exceeded timeout");
+				done = true;
+			}
+			else
+				usleep(1000);
+		}
+		read_available(pipe_fd[0], data);
+		close(pipe_fd[0]);
+		parse_report_data(report, data);
+		if (WIFSIGNALED(status) && WTERMSIG(status) != SIGKILL)
+			add_raw_check(report, name + " crash",
+				signal_status(WTERMSIG(status)), false,
+				"crashed while running isolated tests for " + name);
+		else if (data.empty() && !WIFEXITED(status))
+			add_raw_check(report, name + " no report", "NOK", false,
+				"isolated function tests did not return a report");
+	}
 
 	inline void	allocation_section()
 	{

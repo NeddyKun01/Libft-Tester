@@ -37,7 +37,7 @@ that something is missing.
 
 ```text
 [ERROR] Makefile missing: ../libft/Makefile
-        Fix: restore the target Makefile or compare with templates/Makefile
+        Fix: restore the target Makefile or compare with tester/templates/Makefile
 
 Next action: fix required errors, then run
 `./libft_tester --root ../libft --doctor` again.

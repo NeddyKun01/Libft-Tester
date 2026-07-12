@@ -14,9 +14,9 @@ moves the project to a standalone C++ driver.
   - self-test.
 - Shell helper scripts were removed.
 - Real Libft behavior tests now run through an internal suite binary:
-  - `build/libft_suite`
+  - `tester/build/libft_suite`
 - Rescue checks run through:
-  - `build/rescue/libft_suite_rescue`
+  - `tester/build/rescue/libft_suite_rescue`
 - The driver can still diagnose broken target projects before the target
   `libft.h` is safe to compile against.
 
@@ -44,7 +44,7 @@ The tester is now split into two layers:
 ./libft_tester
   standalone C++ driver, does not link directly against the target Libft
 
-build/libft_suite
+tester/build/libft_suite
   internal test suite, built only when real function tests are needed
 ```
 

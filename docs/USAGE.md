@@ -10,7 +10,7 @@ If you are unsure, start with the menu.
 `./libft_tester` is a standalone C++ driver. It can run the menu, diagnose a
 broken target project, and explain fallback results before the target library is
 healthy enough to link. When real function tests are needed, it builds an
-internal suite at `build/libft_suite`.
+internal suite at `tester/build/libft_suite`.
 
 Use `--doctor` when you want a quick environment check:
 
@@ -176,7 +176,7 @@ make ROOT_DIR=../libft suite
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  build/libft_suite --only ft_split --no-color
+  tester/build/libft_suite --only ft_split --no-color
 ```
 
 ## GitHub Actions

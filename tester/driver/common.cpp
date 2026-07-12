@@ -188,10 +188,20 @@ fs::path	Driver::root_path() const { return (fs::path(root_dir)); }
 fs::path	Driver::libft_path() const { return (root_path() / "libft.a"); }
 fs::path	Driver::header_path() const { return (root_path() / "libft.h"); }
 fs::path	Driver::makefile_path() const { return (root_path() / "Makefile"); }
-fs::path	Driver::model_header() const { return (tester_dir / "templates" / "libft.h"); }
-fs::path	Driver::model_makefile() const { return (tester_dir / "templates" / "Makefile"); }
-fs::path	Driver::suite_path() const { return (tester_dir / "build" / "libft_suite"); }
-fs::path	Driver::rescue_path() const { return (tester_dir / "build" / "rescue" / "libft_suite_rescue"); }
+fs::path	Driver::model_header() const { return (tester_dir / "tester" / "templates" / "libft.h"); }
+fs::path	Driver::model_makefile() const { return (tester_dir / "tester" / "templates" / "Makefile"); }
+
+static fs::path	internal_build_dir(const fs::path &tester_dir)
+{
+	const char	*self_test = std::getenv("LIBFT_TESTER_SELF_TEST");
+
+	if (self_test && std::string(self_test) == "1")
+		return (tester_dir / "tester" / "build-self-test");
+	return (tester_dir / "tester" / "build");
+}
+
+fs::path	Driver::suite_path() const { return (internal_build_dir(tester_dir) / "libft_suite"); }
+fs::path	Driver::rescue_path() const { return (internal_build_dir(tester_dir) / "rescue" / "libft_suite_rescue"); }
 
 std::vector<std::string>	Driver::with_args(std::vector<std::string> base,
 	const std::vector<std::string> &args)
@@ -241,7 +251,7 @@ int	Driver::print_help()
 int	Driver::build_suite(std::ostream &out, bool rescue)
 {
 	std::vector<std::string>	cmd = {
-		"make", "-s", "-C", tester_dir.string(),
+		"make", "-s", "-j4", "-C", tester_dir.string(),
 		rescue ? "rescue-suite" : "suite",
 		"ROOT_DIR=" + root_dir
 	};

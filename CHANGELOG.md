@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Rescue failures now print inline terminal details instead of sending users to
+  per-function `.log` files.
+- Suite crashes are now shown as separate `Runner Issues` instead of being
+  mixed into the function results as confusing pseudo-function failures.
+- High-risk `string_utils` and `output` checks now run with per-function/case
+  isolation so crashes point to the exact Libft function and scenario.
+- Reorganized tests into `tester/tests/` with one `.cpp` file per Libft
+  function, leaving `tester/src/` focused on the tester runtime.
+- Moved tester source code under `tester/` so the repository root stays focused
+  on project docs, metadata, and the main Makefile.
+
 ## 1.3.1 - 2026-07-09
 
 - Split the C++ driver into smaller modules for process helpers, diagnose,
@@ -21,7 +32,7 @@ All notable changes to this project will be documented in this file.
   diagnose, smart run, rescue mode, and self-test.
 - Split the executable architecture so `./libft_tester` no longer links against
   the target Libft directly; real function tests run through an internal
-  `build/libft_suite` binary.
+  `tester/build/libft_suite` binary.
 - Removed the `scripts/` helpers after moving their behavior into the C++
   driver.
 
@@ -50,8 +61,8 @@ All notable changes to this project will be documented in this file.
 - Added weak rescue stubs for missing functions during partial testing.
 - Added `make self-test` with temporary broken Libft fixtures.
 - Added a GitHub Actions self-test job for diagnose/rescue fixtures.
-- Added known-good reference files in `templates/libft.h` and
-  `templates/Makefile`.
+- Added known-good reference files in `tester/templates/libft.h` and
+  `tester/templates/Makefile`.
 - Added `docs/DIAGNOSE.md`.
 
 ## 1.0.0 - 2026-07-07

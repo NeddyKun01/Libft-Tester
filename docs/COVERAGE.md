@@ -1,6 +1,6 @@
 # Coverage Table
 
-This table is generated from `src/coverage.cpp`.
+This table is generated from `tester/src/coverage.cpp`.
 
 ```sh
 make ROOT_DIR=../libft build

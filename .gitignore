@@ -1,4 +1,6 @@
 build/
+tester/build/
+tester/build-self-test/
 libft_tester
 *.o
 *.a

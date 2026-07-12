@@ -116,7 +116,7 @@ namespace coverage
 
 		all = entries();
 		std::cout << "# Coverage Table\n\n";
-		std::cout << "This table is generated from `src/coverage.cpp`.\n\n";
+		std::cout << "This table is generated from `tester/src/coverage.cpp`.\n\n";
 		std::cout << "```sh\n";
 		std::cout << "make ROOT_DIR=../libft coverage\n";
 		std::cout << "make ROOT_DIR=../libft explain FUNC=ft_split\n";

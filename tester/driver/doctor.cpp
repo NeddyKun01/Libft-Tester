@@ -143,10 +143,10 @@ int	Driver::run_doctor(std::ostream &out)
 		errors, warnings);
 	out << "\nTester internals\n";
 	print_file_check(out, "model header", model_header(), true,
-		"restore templates/libft.h from the tester repository",
+		"restore tester/templates/libft.h from the tester repository",
 		errors, warnings);
 	print_file_check(out, "model makefile", model_makefile(), true,
-		"restore templates/Makefile from the tester repository",
+		"restore tester/templates/Makefile from the tester repository",
 		errors, warnings);
 	print_file_check(out, "internal suite", suite_path(), false,
 		"run a real test command; the driver builds this file automatically",

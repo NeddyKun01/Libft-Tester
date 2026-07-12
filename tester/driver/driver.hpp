@@ -115,6 +115,9 @@ private:
 	void	print_final_summary(std::ostream &out, const std::string &diagnose,
 					const std::string &rescue, int diagnose_status,
 					int rescue_status, bool rescue_ran);
+	void	print_rescue_failure(std::ostream &out, const FunctionInfo &fn,
+					const std::vector<std::string> &args,
+					const CommandResult &summary);
 	int		run_rescue_function(std::ostream &out, const FunctionInfo &fn,
 					const std::vector<std::string> &args);
 	std::string	recommended_action();
@@ -141,12 +144,15 @@ private:
 					const std::string &needle, const std::string &label,
 					const std::string &log);
 	void	write_partial_libft(const fs::path &root);
+	void	write_bad_strlen_libft(const fs::path &root);
 	void	write_broken_makefile_libft(const fs::path &root);
 	void	test_missing_header(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_partial_libft(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_broken_makefile(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_rescue_failure_output(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_doctor(std::ostream &out, const fs::path &tmp,
 					int &failures);

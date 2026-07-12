@@ -8,8 +8,8 @@ This release focuses on broken or incomplete Libft projects.
 - Added `make rescue-test` for partial testing of real symbols in `libft.a`.
 - Added weak rescue stubs so incomplete libraries can still be linked safely.
 - Added known-good reference files:
-  - `templates/libft.h`
-  - `templates/Makefile`
+  - `tester/templates/libft.h`
+  - `tester/templates/Makefile`
 - Added `make self-test` with temporary broken Libft fixtures.
 - Added a GitHub Actions self-test job for diagnose/rescue behavior.
 - Added `docs/DIAGNOSE.md`.
@@ -35,4 +35,3 @@ missing symbols as `SKIP`.
 
 The new behavior is covered by `make self-test`, which creates broken temporary
 fixtures under `/tmp` and checks that diagnose/rescue respond correctly.
-

@@ -1,5 +1,61 @@
 #include "driver.hpp"
 
+static bool	is_rescue_output_option(const std::string &arg)
+{
+	return (arg == "--summary-only" || arg == "--quiet"
+		|| arg == "--json" || arg == "--html" || arg == "--coverage"
+		|| arg == "--coverage-md" || arg == "--list" || arg == "--help"
+		|| arg == "--version" || arg == "--no-color");
+}
+
+static bool	is_rescue_scoped_option(const std::string &arg)
+{
+	return (arg == "--suite" || arg == "--only" || arg == "--explain"
+		|| arg == "--hint");
+}
+
+static std::vector<std::string>	filter_rescue_args(
+	const std::vector<std::string> &args)
+{
+	std::vector<std::string>	filtered;
+	size_t					i = 0;
+
+	while (i < args.size())
+	{
+		if (is_rescue_scoped_option(args[i]) && i + 1 < args.size())
+			i += 2;
+		else if (is_rescue_output_option(args[i]))
+			i++;
+		else
+			filtered.push_back(args[i++]);
+	}
+	return (filtered);
+}
+
+void	Driver::print_rescue_failure(std::ostream &out,
+	const FunctionInfo &fn, const std::vector<std::string> &args,
+	const CommandResult &summary)
+{
+	std::vector<std::string>	cmd = {rescue_path().string(), "--suite",
+		fn.suite, "--only", fn.name, "--no-color", "--verbose"};
+	CommandResult			detail;
+
+	cmd.insert(cmd.end(), args.begin(), args.end());
+	detail = run_process(cmd);
+	out << "\n" << red << "+-- Failure details: " << fn.name
+		<< reset << "\n";
+	out << "| command: " << join_args(cmd) << "\n";
+	out << "| exit: " << detail.status << "\n";
+	out << "| output:\n";
+	if (!detail.output.empty())
+		print_prefixed_excerpt(out, detail.output, "|   ", 120);
+	else if (!summary.output.empty())
+		print_prefixed_excerpt(out, summary.output, "|   ", 120);
+	else
+		out << "|   No output was produced by the test runner.\n";
+	out << "+-- end of " << fn.name << " failure\n\n";
+}
+
 void	Driver::print_final_summary(std::ostream &out,
 	const std::string &diagnose, const std::string &rescue,
 	int diagnose_status, int rescue_status, bool rescue_ran)
@@ -51,20 +107,20 @@ void	Driver::print_final_summary(std::ostream &out,
 int	Driver::run_rescue_function(std::ostream &out, const FunctionInfo &fn,
 	const std::vector<std::string> &args)
 {
-	fs::path					log_file = tester_dir / "build" / "rescue" / (fn.name + ".log");
 	std::vector<std::string>	cmd = {rescue_path().string(), "--suite", fn.suite,
 		"--only", fn.name, "--summary-only", "--no-color"};
+	std::vector<std::string>	safe_args = filter_rescue_args(args);
 	CommandResult				result;
 
-	cmd.insert(cmd.end(), args.begin(), args.end());
+	cmd.insert(cmd.end(), safe_args.begin(), safe_args.end());
 	result = run_process(cmd);
-	write_file(log_file, result.output);
 	if (result.status == 0)
 	{
 		out << pad(fn.name, 17) << "OK\n";
 		return (0);
 	}
-	out << pad(fn.name, 17) << "NOK see " << log_file << "\n";
+	out << pad(fn.name, 17) << "NOK\n";
+	print_rescue_failure(out, fn, safe_args, result);
 	return (1);
 }
 

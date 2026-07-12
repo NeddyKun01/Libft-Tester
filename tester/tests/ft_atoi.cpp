@@ -1,18 +1,6 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   atoi_tests.cpp                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: neddykun <neddykun@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/06 22:53:29 by neddykun          #+#    #+#             */
-/*   Updated: 2026/07/06 22:53:30 by neddykun         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
+#include "test_helpers.hpp"
 
-#include "test_modules.hpp"
-
-void	test_atoi(tester::Report &report)
+void	test_ft_atoi(tester::Report &report)
 {
 	tester::expect_eq(report, "ft_atoi zero", 0, ft_atoi("0"));
 	tester::expect_eq(report, "ft_atoi positive", 42, ft_atoi("42"));

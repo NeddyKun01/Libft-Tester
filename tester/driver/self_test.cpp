@@ -95,6 +95,18 @@ void	Driver::write_broken_makefile_libft(const fs::path &root)
 		"}\n");
 }
 
+void	Driver::write_bad_strlen_libft(const fs::path &root)
+{
+	write_partial_libft(root);
+	write_file(root / "ft_strlen.c",
+		"#include \"libft.h\"\n\n"
+		"size_t\tft_strlen(const char *s)\n"
+		"{\n"
+		"\t(void)s;\n"
+		"\treturn (0);\n"
+		"}\n");
+}
+
 void	Driver::test_missing_header(std::ostream &out, const fs::path &tmp,
 	int &failures)
 {
@@ -159,6 +171,33 @@ void	Driver::test_partial_libft(std::ostream &out, const fs::path &tmp,
 	assert_contains(out, failures, "Rescue:       OK",
 		"smart run still runs valid rescue checks", smart.str());
 	root_dir = old_root;
+}
+
+void	Driver::test_rescue_failure_output(std::ostream &out,
+	const fs::path &tmp, int &failures)
+{
+	fs::path			root = tmp / "bad_strlen";
+	std::ostringstream	rescue;
+	std::string			old_root = root_dir;
+	int					status;
+
+	write_bad_strlen_libft(root);
+	run_process({"make", "-s", "-C", root.string(), "fclean"});
+	run_process({"make", "-s", "-C", root.string()});
+	root_dir = root.string();
+	status = run_rescue(rescue, {"--seed", "42"});
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "rescue mode fails when an existing function is wrong");
+	else
+		fail(out, failures, "rescue mode fails when an existing function is wrong",
+			rescue.str());
+	assert_contains(out, failures, "ft_strlen        NOK",
+		"rescue mode marks the broken function as NOK", rescue.str());
+	assert_contains(out, failures, "Failure details: ft_strlen",
+		"rescue mode prints inline failure details", rescue.str());
+	assert_contains(out, failures, "Failure Details",
+		"rescue mode includes the detailed failed checks", rescue.str());
 }
 
 void	Driver::test_broken_makefile(std::ostream &out, const fs::path &tmp,
@@ -285,16 +324,26 @@ int	Driver::run_self_test(std::ostream &out)
 	fs::path	tmp = fs::temp_directory_path()
 		/ ("libft_tester_self_test_" + std::to_string(getpid()));
 	int			failures = 0;
+	const char	*old_mode = std::getenv("LIBFT_TESTER_SELF_TEST");
+	std::string	old_value;
 
+	if (old_mode)
+		old_value = old_mode;
+	setenv("LIBFT_TESTER_SELF_TEST", "1", 1);
 	fs::remove_all(tmp);
 	fs::create_directories(tmp);
 	out << "\nLibft Tester Self-Test\n";
 	out << "tmp: " << tmp << "\n\n";
 	test_missing_header(out, tmp, failures);
 	test_partial_libft(out, tmp, failures);
+	test_rescue_failure_output(out, tmp, failures);
 	test_broken_makefile(out, tmp, failures);
 	test_doctor(out, tmp, failures);
 	fs::remove_all(tmp);
+	if (old_mode)
+		setenv("LIBFT_TESTER_SELF_TEST", old_value.c_str(), 1);
+	else
+		unsetenv("LIBFT_TESTER_SELF_TEST");
 	out << "\nSelf-test failures: " << failures << "\n";
 	return (failures == 0 ? 0 : 1);
 }

@@ -115,7 +115,7 @@ jobs:
           LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
             --show-leak-kinds=all --track-origins=yes \
             --errors-for-leak-kinds=all --error-exitcode=42 \
-            build/libft_suite --only ft_split --no-color > valgrind-report.txt 2>&1
+            tester/build/libft_suite --only ft_split --no-color > valgrind-report.txt 2>&1
           status=$?
           cat valgrind-report.txt
           exit $status

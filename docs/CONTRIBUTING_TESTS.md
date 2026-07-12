@@ -5,21 +5,25 @@ to maintain.
 
 ## Where Tests Live
 
-Tests are grouped by subject area:
+Runtime code lives in `tester/src/`. Function tests live in `tester/tests/`.
 
-| File | Suite |
+Use one `.cpp` file per Libft function:
+
+| File pattern | Purpose |
 | --- | --- |
-| `src/ctype_tests.cpp` | `ctype` |
-| `src/memory_tests.cpp` | `memory` |
-| `src/atoi_tests.cpp` | `atoi` |
-| `src/string_tests.cpp` | `strings` |
-| `src/string_utils_tests.cpp` | `string_utils` |
-| `src/output_tests.cpp` | `output` |
-| `src/list_tests.cpp` | `lists` |
+| `tester/tests/ft_strlen.cpp` | Tests for `ft_strlen`. |
+| `tester/tests/ft_split.cpp` | Tests for `ft_split`. |
+| `tester/tests/ft_lstmap.cpp` | Tests for `ft_lstmap`. |
+| `tester/tests/suites.cpp` | Groups function tests into suites. |
+| `tester/tests/test_helpers.hpp` | Shared helpers used only by tests. |
+
+When adding a new function test, place the checks in
+`tester/tests/ft_function.cpp` and register that function in
+`tester/tests/suites.cpp`.
 
 ## Check Helpers
 
-Use the helpers from `include/tester.hpp`:
+Use the helpers from `tester/include/tester.hpp`:
 
 ```cpp
 tester::expect(report, "ft_isalpha letter", condition);
@@ -83,7 +87,7 @@ not make the tester slow for no reason.
 
 When a test adds meaningful coverage, update:
 
-- `src/coverage.cpp`
+- `tester/src/coverage.cpp`
 - `docs/COVERAGE.md`
 
 The docs can be regenerated with:
@@ -98,7 +102,7 @@ make ROOT_DIR=/path/to/libft build
 Hints live in:
 
 ```text
-src/hints.cpp
+tester/src/hints.cpp
 ```
 
 A good hint is short, specific, and explains the most likely mistake without

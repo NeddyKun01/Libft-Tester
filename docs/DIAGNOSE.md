@@ -42,8 +42,8 @@ This separates project-structure bugs from function-behavior bugs.
 The tester includes two known-good reference files:
 
 ```text
-templates/libft.h
-templates/Makefile
+tester/templates/libft.h
+tester/templates/Makefile
 ```
 
 They are references only. They are not copied automatically and they do not hide
@@ -60,7 +60,7 @@ when other functions are missing, run `make` and choose:
 
 Rescue mode builds a special internal suite with:
 
-- `templates/libft.h` instead of the target project's possibly broken header;
+- `tester/templates/libft.h` instead of the target project's possibly broken header;
 - weak fallback stubs for missing functions;
 - `libft.a` linked with `--whole-archive` so real symbols override stubs.
 

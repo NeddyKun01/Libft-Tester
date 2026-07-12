@@ -56,19 +56,21 @@ LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
 For the detailed test-writing guide, see
 [`docs/CONTRIBUTING_TESTS.md`](docs/CONTRIBUTING_TESTS.md).
 
-Tests live in `src/*_tests.cpp`, grouped by suite:
+Runtime code lives in `tester/src/`. Function tests live in `tester/tests/`.
 
-| File | Suite |
-| --- | --- |
-| `src/ctype_tests.cpp` | `ctype` |
-| `src/memory_tests.cpp` | `memory` |
-| `src/atoi_tests.cpp` | `atoi` |
-| `src/string_tests.cpp` | `strings` |
-| `src/string_utils_tests.cpp` | `string_utils` |
-| `src/output_tests.cpp` | `output` |
-| `src/list_tests.cpp` | `lists` |
+Each Libft function has its own test file:
 
-Use the helpers from `include/tester.hpp`:
+```text
+tester/tests/ft_strlen.cpp
+tester/tests/ft_split.cpp
+tester/tests/ft_lstmap.cpp
+```
+
+`tester/tests/suites.cpp` only groups those function files into the public suites
+shown by `./libft_tester --list`. Shared test-only helpers live in
+`tester/tests/test_helpers.hpp`.
+
+Use the helpers from `tester/include/tester.hpp`:
 
 | Helper | Use |
 | --- | --- |
@@ -132,7 +134,7 @@ Examples normally avoided:
 
 When a test adds meaningful coverage, update:
 
-- `src/coverage.cpp`;
+- `tester/src/coverage.cpp`;
 - `docs/COVERAGE.md`.
 
 You can regenerate the Markdown table with:
@@ -147,7 +149,7 @@ make ROOT_DIR=/path/to/libft build
 Hints live in:
 
 ```text
-src/hints.cpp
+tester/src/hints.cpp
 ```
 
 A good hint is short, specific, and explains the most likely mistake without
