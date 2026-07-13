@@ -1,6 +1,6 @@
 #include "driver.hpp"
 
-const char	*g_version = "1.4.0";
+const char	*g_version = "1.5.0";
 
 const std::vector<FunctionInfo>	&functions()
 {
@@ -191,17 +191,40 @@ fs::path	Driver::makefile_path() const { return (root_path() / "Makefile"); }
 fs::path	Driver::model_header() const { return (tester_dir / "tester" / "templates" / "libft.h"); }
 fs::path	Driver::model_makefile() const { return (tester_dir / "tester" / "templates" / "Makefile"); }
 
-static fs::path	internal_build_dir(const fs::path &tester_dir)
+static std::string	root_hash(const std::string &root)
 {
-	const char	*self_test = std::getenv("LIBFT_TESTER_SELF_TEST");
+	unsigned long long	hash = 1469598103934665603ULL;
+	std::ostringstream	out;
 
-	if (self_test && std::string(self_test) == "1")
-		return (tester_dir / "tester" / "build-self-test");
-	return (tester_dir / "tester" / "build");
+	for (unsigned char c : root)
+	{
+		hash ^= c;
+		hash *= 1099511628211ULL;
+	}
+	out << hash;
+	return (out.str());
 }
 
-fs::path	Driver::suite_path() const { return (internal_build_dir(tester_dir) / "libft_suite"); }
-fs::path	Driver::rescue_path() const { return (internal_build_dir(tester_dir) / "rescue" / "libft_suite_rescue"); }
+fs::path	Driver::build_path() const
+{
+	const char	*self_test;
+
+	self_test = std::getenv("LIBFT_TESTER_SELF_TEST");
+	if (self_test && std::string(self_test) == "1")
+		return (tester_dir / "tester" / "build-self-test" / root_hash(root_dir));
+	return (tester_dir / "tester" / "build" / root_hash(root_dir));
+}
+
+fs::path	Driver::suite_path() const { return (build_path() / "libft_suite"); }
+fs::path	Driver::rescue_path() const { return (build_path() / "rescue" / "libft_suite_rescue"); }
+
+std::map<std::string, std::string>	Driver::suite_env() const
+{
+	std::map<std::string, std::string>	env;
+
+	env["LIBFT_TESTER_ROOT"] = root_dir;
+	return (env);
+}
 
 std::vector<std::string>	Driver::with_args(std::vector<std::string> base,
 	const std::vector<std::string> &args)
@@ -229,8 +252,9 @@ int	Driver::print_help()
 	std::cout
 		<< "Libft Tester " << g_version << "\n\n"
 		<< "Default use:\n"
-		<< "  make ROOT_DIR=../libft\n"
-		<< "  ./libft_tester --root ../libft --summary-only\n\n"
+		<< "  ./libft_tester --root ../libft\n"
+		<< "  ./libft_tester --root ../libft --summary-only\n"
+		<< "  make build\n\n"
 		<< "Driver options:\n"
 		<< "  --root PATH         Target Libft directory, default: ..\n"
 		<< "  --menu              Open the interactive menu\n"
@@ -241,10 +265,19 @@ int	Driver::print_help()
 		<< "  --self-test         Validate tester fallback behavior\n"
 		<< "  --version           Show tester version\n"
 		<< "  --help              Show this help message\n\n"
-		<< "Suite options are forwarded after building the internal suite:\n"
+		<< "Info options, no target build needed:\n"
+		<< "  --coverage, --coverage-md\n"
+		<< "  --explain NAME, --hint NAME\n\n"
+		<< "Test options, forwarded after building the internal suite:\n"
 		<< "  --profile quick|normal|strict|brutal\n"
 		<< "  --summary-only, --only NAME, --suite NAME, --json, --html\n"
-		<< "  --coverage, --explain NAME, --hint NAME, --fail-fast\n";
+		<< "  --fail-fast, --seed N, --repeat N, --verbose\n\n"
+		<< "Recommended examples:\n"
+		<< "  ./libft_tester --root ../libft\n"
+		<< "  ./libft_tester --root ../libft --only ft_split --verbose\n"
+		<< "  ./libft_tester --root ../libft --profile strict --seed 42\n"
+		<< "  ./libft_tester --hint ft_split\n"
+		<< "  ./libft_tester --coverage\n";
 	return (0);
 }
 
@@ -253,7 +286,8 @@ int	Driver::build_suite(std::ostream &out, bool rescue)
 	std::vector<std::string>	cmd = {
 		"make", "-s", "-j4", "-C", tester_dir.string(),
 		rescue ? "rescue-suite" : "suite",
-		"ROOT_DIR=" + root_dir
+		"ROOT_DIR=" + root_dir,
+		"BUILD_DIR=" + build_path().string()
 	};
 	CommandResult			result = run_process(cmd);
 
@@ -268,7 +302,8 @@ int	Driver::run_suite(const std::vector<std::string> &args, std::ostream &out)
 
 	if (status != 0)
 		return (status);
-	CommandResult result = run_process(with_args({suite_path().string()}, args));
+	CommandResult result = run_process(with_args({suite_path().string()}, args),
+		fs::path(), suite_env());
 	out << result.output;
 	return (result.status);
 }

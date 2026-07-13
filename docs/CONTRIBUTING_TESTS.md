@@ -93,7 +93,7 @@ When a test adds meaningful coverage, update:
 The docs can be regenerated with:
 
 ```sh
-make ROOT_DIR=/path/to/libft build
+make build
 ./libft_tester --coverage-md > docs/COVERAGE.md
 ```
 
@@ -113,10 +113,10 @@ pretending to know the exact bug.
 Before opening a pull request, run:
 
 ```sh
-make ROOT_DIR=/path/to/libft build
-./libft_tester --summary-only --seed 42
-./libft_tester --json --no-color --only ft_strlen --seed 42 > libft-test-report.json
-./libft_tester --html --no-color --only ft_strlen --seed 42 > libft-test-report.html
+make build
+./libft_tester --root /path/to/libft --summary-only --seed 42
+./libft_tester --root /path/to/libft --json --no-color --only ft_strlen --seed 42 > libft-test-report.json
+./libft_tester --root /path/to/libft --html --no-color --only ft_strlen --seed 42 > libft-test-report.html
 ./libft_tester --coverage
 ```
 
@@ -126,5 +126,5 @@ If the change touches allocation behavior, also run:
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  ./libft_tester --only ft_split --no-color
+  ./libft_tester --root /path/to/libft --only ft_split --no-color
 ```

@@ -1,4 +1,6 @@
 #include "driver.hpp"
+#include "coverage.hpp"
+#include "hints.hpp"
 
 static fs::path	executable_dir(const char *argv0)
 {
@@ -64,5 +66,19 @@ int	main(int argc, char **argv)
 		return (driver.run_doctor(std::cout));
 	if (args[0] == "--self-test")
 		return (driver.run_self_test(std::cout));
+	if (args[0] == "--coverage")
+	{
+		coverage::print_table();
+		return (0);
+	}
+	if (args[0] == "--coverage-md")
+	{
+		coverage::print_markdown();
+		return (0);
+	}
+	if (args[0] == "--explain" && args.size() > 1)
+		return (coverage::print_explain(args[1]) ? 0 : 1);
+	if (args[0] == "--hint" && args.size() > 1)
+		return (hints::print_for_function(args[1]) ? 0 : 1);
 	return (driver.run_suite(args, std::cout));
 }

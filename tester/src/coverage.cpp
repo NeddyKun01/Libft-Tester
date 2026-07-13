@@ -11,10 +11,37 @@
 /* ************************************************************************** */
 
 #include "coverage.hpp"
-#include "tester.hpp"
+
+#include <cctype>
+#include <iomanip>
+#include <iostream>
 
 namespace coverage
 {
+	static std::string	lower_copy(const std::string &value)
+	{
+		std::string	result;
+		size_t		i;
+
+		result = value;
+		i = 0;
+		while (i < result.size())
+		{
+			result[i] = static_cast<char>(std::tolower(
+				static_cast<unsigned char>(result[i])));
+			i++;
+		}
+		return (result);
+	}
+
+	static bool	name_matches(const std::string &name,
+		const std::string &filter)
+	{
+		if (filter.empty())
+			return (true);
+		return (lower_copy(name).find(lower_copy(filter)) != std::string::npos);
+	}
+
 	std::vector<Entry>	entries(void)
 	{
 		std::vector<Entry>	result;
@@ -118,9 +145,9 @@ namespace coverage
 		std::cout << "# Coverage Table\n\n";
 		std::cout << "This table is generated from `tester/src/coverage.cpp`.\n\n";
 		std::cout << "```sh\n";
-		std::cout << "make ROOT_DIR=../libft coverage\n";
-		std::cout << "make ROOT_DIR=../libft explain FUNC=ft_split\n";
-		std::cout << "make ROOT_DIR=../libft coverage-docs\n";
+		std::cout << "./libft_tester --coverage\n";
+		std::cout << "./libft_tester --explain ft_split\n";
+		std::cout << "./libft_tester --coverage-md > docs/COVERAGE.md\n";
 		std::cout << "```\n\n";
 		std::cout << "| Function | Suite | Group | Main cases | Malloc |\n";
 		std::cout << "| --- | --- | --- | --- | --- |\n";
@@ -145,7 +172,7 @@ namespace coverage
 		i = 0;
 		while (i < all.size())
 		{
-			if (tester::name_matches(all[i].name, filter))
+			if (name_matches(all[i].name, filter))
 			{
 				if (found)
 					std::cout << '\n';

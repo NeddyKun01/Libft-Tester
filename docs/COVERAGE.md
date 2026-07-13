@@ -3,7 +3,6 @@
 This table is generated from `tester/src/coverage.cpp`.
 
 ```sh
-make ROOT_DIR=../libft build
 ./libft_tester --coverage
 ./libft_tester --explain ft_split
 ./libft_tester --coverage-md > docs/COVERAGE.md

@@ -41,7 +41,7 @@ void	Driver::print_rescue_failure(std::ostream &out,
 	CommandResult			detail;
 
 	cmd.insert(cmd.end(), args.begin(), args.end());
-	detail = run_process(cmd);
+	detail = run_process(cmd, fs::path(), suite_env());
 	out << "\n" << red << "+-- Failure details: " << fn.name
 		<< reset << "\n";
 	out << "| command: " << join_args(cmd) << "\n";
@@ -113,7 +113,7 @@ int	Driver::run_rescue_function(std::ostream &out, const FunctionInfo &fn,
 	CommandResult				result;
 
 	cmd.insert(cmd.end(), safe_args.begin(), safe_args.end());
-	result = run_process(cmd);
+	result = run_process(cmd, fs::path(), suite_env());
 	if (result.status == 0)
 	{
 		out << pad(fn.name, 17) << "OK\n";

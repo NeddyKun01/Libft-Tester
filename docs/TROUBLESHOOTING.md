@@ -7,7 +7,7 @@ This guide lists common setup and testing problems.
 For most problems, run:
 
 ```sh
-make ROOT_DIR=../libft
+./libft_tester --root ../libft
 ```
 
 Then choose:
@@ -32,7 +32,7 @@ The tester could not find the target directory you passed.
 Use an absolute path if you are unsure:
 
 ```sh
-make ROOT_DIR=/home/user/projects/libft
+./libft_tester --root /home/user/projects/libft
 ```
 
 You can also change it from the menu:
@@ -68,13 +68,13 @@ Use menu option `5) Diagnose project` to see the build error.
 Build the driver:
 
 ```sh
-make ROOT_DIR=../libft build
+make build
 ```
 
 Run only that function in verbose mode:
 
 ```sh
-./libft_tester --only ft_split --verbose
+./libft_tester --root ../libft --only ft_split --verbose
 ```
 
 Then ask for hints:
@@ -86,8 +86,30 @@ Then ask for hints:
 If the failing case is random, repeat it with the printed seed:
 
 ```sh
-./libft_tester --only ft_strlen --seed 42
+./libft_tester --root ../libft --only ft_strlen --seed 42
 ```
+
+## Use `Debug Focus`
+
+When one or more functions fail, the tester prints a `Debug Focus` block after
+the failure details.
+
+Copy the first suggested command, fix that function, then rerun the same seed.
+This keeps the feedback loop small and reproducible:
+
+```text
+Debug Focus
+  failed functions: ft_striteri, ft_putstr_fd, ft_putendl_fd, ft_lstmap
+  try next:
+    ./libft_tester --root '../libft' --only ft_striteri --verbose --seed 42
+    ./libft_tester --root '../libft' --only ft_putstr_fd --verbose --seed 42
+    ./libft_tester --root '../libft' --only ft_putendl_fd --verbose --seed 42
+    ... and 1 more failed function(s)
+    ./libft_tester --hint ft_striteri
+```
+
+Prefer fixing one function at a time. After it passes, run the full tester
+again to see what remains.
 
 ## A Function Shows `MNOK`
 
@@ -105,7 +127,7 @@ Use menu option `7) Leak check`, or run Valgrind manually:
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  ./libft_tester --only ft_split --no-color
+  ./libft_tester --root ../libft --only ft_split --no-color
 ```
 
 ## A Suite Shows `SEGV`, `BUS`, `ABRT`, Or `FPE`
@@ -113,13 +135,13 @@ LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
 The suite crashed. Use a focused run:
 
 ```sh
-./libft_tester --suite strings --verbose --fail-fast
+./libft_tester --root ../libft --suite strings --verbose --fail-fast
 ```
 
 If needed, run under a debugger after building:
 
 ```sh
-gdb --args ./libft_tester --only ft_split
+gdb --args ./libft_tester --root ../libft --only ft_split
 ```
 
 ## A Suite Shows `TIMEOUT`
@@ -129,7 +151,7 @@ The function may have an infinite loop or may be much slower than expected.
 Run only the related suite with a larger timeout:
 
 ```sh
-./libft_tester --suite lists --timeout 10000 --verbose
+./libft_tester --root ../libft --suite lists --timeout 10000 --verbose
 ```
 
 ## GitHub Actions Does Not Run The Real Tests

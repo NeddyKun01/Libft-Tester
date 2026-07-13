@@ -16,11 +16,13 @@ be understandable even if you are not from 42.
 The main command is intentionally simple:
 
 ```sh
-make
+./libft_tester --root ../libft
 ```
 
-That opens an interactive menu. If you prefer direct commands, build the
-standalone driver and use `./libft_tester`.
+That opens an interactive menu when your terminal supports input. If the driver
+is not built yet, run `make build` once first. The `make` command still exists as
+a convenience shortcut, but the day-to-day interface is the standalone
+`./libft_tester` binary.
 
 ## What It Checks
 
@@ -50,7 +52,7 @@ You need:
 You can check your local setup with:
 
 ```sh
-./libft_tester --doctor
+./libft_tester --root ../libft --doctor
 ```
 
 Doctor mode prints required fixes and a recommended next action when something
@@ -92,7 +94,8 @@ Run:
 
 ```sh
 cd Libft-Tester
-make ROOT_DIR=../libft
+make build
+./libft_tester --root ../libft
 ```
 
 If the tester is inside your `libft` repository:
@@ -109,13 +112,14 @@ Run:
 
 ```sh
 cd tester
-make
+make build
+./libft_tester --root ..
 ```
 
 If your target project is somewhere else, pass an absolute path:
 
 ```sh
-make ROOT_DIR=/absolute/path/to/libft
+./libft_tester --root /absolute/path/to/libft
 ```
 
 ## First Run Recommendation
@@ -149,37 +153,36 @@ If something looks broken, try:
 The menu is designed for day-to-day use:
 
 ```text
-============================================================
- Libft Tester (v1.4.0)
-============================================================
- root:      ../libft
- Makefile:  OK
- libft.h:   OK
- libft.a:   OK
- suite:     OK
++------------------------------------------------------------+
+|                        LIBFT TESTER                        |
++------------------------------------------------------------+
+ Libft Tester (v1.5.0)
+ target:    ../libft
+ health:    Makefile OK  libft.h OK  libft.a OK  suite OK
 ------------------------------------------------------------
- Recommended: Full test
- Project shape looks ready for the full suite.
-============================================================
+ recommended: [3] Full test
+ why:         Project shape looks ready for the full suite.
+ CLI:         ./libft_tester --root '../libft'
+------------------------------------------------------------
 
-Recommended
-  1) Smart test      best default, auto fallback
-  2) Quick test      fast feedback
-  3) Full test       normal suite
-  4) Strict test     stronger validation
+Test Runs
+  1) Smart test            best first run, auto fallback
+  2) Quick test            fast feedback while coding
+  3) Full test             normal complete suite
+  4) Strict test           deeper validation before sharing
 
-Debugging
-  5) Diagnose project
-  6) Rescue test
-  7) Leak check
-  8) Explain or hint a function
-  d) Doctor environment
+Fix And Inspect
+  5) Diagnose project      Makefile/header/source checks
+  6) Rescue test           test valid symbols even if incomplete
+  7) Leak check            focused Valgrind run
+  8) Explain or hint       coverage notes or debugging hint
+  d) Doctor environment    tools and target sanity check
 
-Reports and help
-  9) Generate HTML report
-  h) Advanced CLI help
-  r) Change ROOT_DIR
-  0) Exit
+Reports And Setup
+  9) Generate HTML report  standalone visual report
+  h) Advanced CLI help     all command-line options
+  r) Change ROOT_DIR       point tester at another Libft
+  0) Exit                  close the tester
 ```
 
 The menu uses colors when supported and respects `NO_COLOR=1`.
@@ -229,37 +232,57 @@ Rescue counters:
 - failed tested functions: 0
 
 Next action:
-Fix the diagnose problems first, then run make again.
+Fix the diagnose problems first, then run ./libft_tester again.
+```
+
+When a real function test fails, the tester also prints a focused next step:
+
+```text
+Failure Details
+MNOK ft_lstmap failure returns null
+  hint: Create a new list with f(content); if any allocation fails, clear everything already created.
+
+Debug Focus
+  failed functions: ft_striteri, ft_putstr_fd, ft_putendl_fd, ft_lstmap
+  try next:
+    ./libft_tester --root '../libft' --only ft_striteri --verbose --seed 42
+    ./libft_tester --root '../libft' --only ft_putstr_fd --verbose --seed 42
+    ./libft_tester --root '../libft' --only ft_putendl_fd --verbose --seed 42
+    ... and 1 more failed function(s)
+    ./libft_tester --hint ft_striteri
 ```
 
 ## Advanced CLI
 
-Build the tester driver:
+Build the tester driver once:
 
 ```sh
-make ROOT_DIR=../libft build
+make build
 ```
 
 Then run direct commands. The driver builds the internal suite automatically
 when a command needs to execute tests against your `libft.a`:
 
 ```sh
-./libft_tester --summary-only
-./libft_tester --profile quick
-./libft_tester --profile strict
-./libft_tester --profile brutal --seed 42
-./libft_tester --only ft_split --verbose
-./libft_tester --suite memory
-./libft_tester --repeat 10 --seed 42
-./libft_tester --fail-fast
-./libft_tester --json --no-color
-./libft_tester --html --no-color
+./libft_tester --root ../libft --summary-only
+./libft_tester --root ../libft --profile quick
+./libft_tester --root ../libft --profile strict
+./libft_tester --root ../libft --profile brutal --seed 42
+./libft_tester --root ../libft --only ft_split --verbose
+./libft_tester --root ../libft --suite memory
+./libft_tester --root ../libft --repeat 10 --seed 42
+./libft_tester --root ../libft --fail-fast
+./libft_tester --root ../libft --json --no-color
+./libft_tester --root ../libft --html --no-color
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
-./libft_tester --doctor
+./libft_tester --root ../libft --doctor
 ./libft_tester --help
 ```
+
+`--explain`, `--hint`, and `--coverage` are documentation commands. They do not
+need the target project to build successfully.
 
 Use the menu when you want guidance. Use the CLI when you want automation,
 filters, reports, or reproducible commands.
@@ -270,12 +293,12 @@ The Makefile is intentionally small:
 
 | Command | Purpose |
 | --- | --- |
-| `make ROOT_DIR=../libft` | Open the interactive menu. |
-| `make ROOT_DIR=../libft build` | Build the standalone `./libft_tester` driver. |
+| `make build` | Build the standalone `./libft_tester` driver. |
+| `make ROOT_DIR=../libft` | Build, then open the menu as a shortcut. |
 | `make self-test` | Validate the tester's own fallback behavior. |
 | `make clean` | Remove tester build files and reports. |
 | `make fclean` | Same as `clean`. |
-| `make re ROOT_DIR=../libft` | Rebuild the driver. |
+| `make re` | Rebuild the driver. |
 
 Everything else is available in the menu or through `./libft_tester`.
 

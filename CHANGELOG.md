@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.5.0 - 2026-07-13
+
+- Polished the interactive menu with a compact health line, explicit
+  recommended key, and matching CLI command for the current target.
+- Added `Debug Focus` after failing runs, including copy/paste-ready commands
+  for the first failed functions, the active `--root`, and the run seed.
+- Made `--coverage`, `--coverage-md`, `--explain`, and `--hint` available
+  directly from the driver without requiring the target Libft to build.
+- Isolated internal build directories by target `ROOT_DIR` to avoid collisions
+  between different targets or concurrent self-test/full-test runs.
+- Updated README, usage, troubleshooting, and contribution docs around the
+  `./libft_tester`-first workflow.
+- Improved `--help` with recommended modern examples.
+
 ## 1.4.0 - 2026-07-12
 
 - Rescue failures now print inline terminal details instead of sending users to

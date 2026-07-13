@@ -89,8 +89,10 @@ private:
 	fs::path	makefile_path() const;
 	fs::path	model_header() const;
 	fs::path	model_makefile() const;
+	fs::path	build_path() const;
 	fs::path	suite_path() const;
 	fs::path	rescue_path() const;
+	std::map<std::string, std::string>	suite_env() const;
 	static std::vector<std::string>	with_args(std::vector<std::string> base,
 					const std::vector<std::string> &args);
 	static std::vector<std::string>	append(std::vector<std::string> base,
@@ -122,7 +124,11 @@ private:
 					const std::vector<std::string> &args);
 	std::string	recommended_action();
 	std::string	recommendation_hint();
+	std::string	recommended_command();
 	std::string	status_file(const fs::path &path);
+	void	print_menu_item(const std::string &key,
+					const std::string &label, const std::string &hint,
+					const std::string &accent);
 	void	print_menu_header();
 	void	print_menu();
 	template <typename F>

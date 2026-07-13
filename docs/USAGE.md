@@ -2,15 +2,18 @@
 
 Libft Tester has two workflows:
 
-- use `make` for the interactive menu;
-- use `./libft_tester` for direct commands, scripts, and CI.
+- use `./libft_tester` for the interactive menu, direct commands, scripts, and CI;
+- use `make` as a small convenience wrapper when you want it.
 
 If you are unsure, start with the menu.
 
 `./libft_tester` is a standalone C++ driver. It can run the menu, diagnose a
 broken target project, and explain fallback results before the target library is
 healthy enough to link. When real function tests are needed, it builds an
-internal suite at `tester/build/libft_suite`.
+internal suite under `tester/build/`.
+
+Documentation commands such as `--coverage`, `--explain`, and `--hint` do not
+need the target project to build successfully.
 
 Use `--doctor` when you want a quick environment check:
 
@@ -30,7 +33,8 @@ projects/
 
 ```sh
 cd Libft-Tester
-make ROOT_DIR=../libft
+make build
+./libft_tester --root ../libft
 ```
 
 The tester can also live inside the target repository:
@@ -45,12 +49,14 @@ libft/
 
 ```sh
 cd tester
-make
+make build
+./libft_tester --root ..
 ```
 
 ## Menu Workflow
 
-`make` opens the menu when used from a normal terminal.
+`./libft_tester --root ../libft` opens the menu when used from a normal
+terminal.
 
 Start with:
 
@@ -76,47 +82,47 @@ Useful menu options:
 | `d) Doctor environment` | Check required tools and target project shape. |
 | `9) Generate HTML report` | Write a standalone HTML report. |
 
-If `make` runs without an interactive terminal, it falls back to smart test
+If the driver runs without an interactive terminal, it falls back to smart test
 instead of waiting for keyboard input. This keeps CI and scripts safe.
 
 ## Minimal Make Commands
 
 | Command | Purpose |
 | --- | --- |
-| `make ROOT_DIR=../libft` | Open the menu. |
-| `make ROOT_DIR=../libft build` | Build the standalone `./libft_tester` driver. |
+| `make build` | Build the standalone `./libft_tester` driver. |
+| `make ROOT_DIR=../libft` | Build, then open the menu as a shortcut. |
 | `make self-test` | Validate the tester's own fallback behavior. |
 | `make clean` | Remove tester build files and reports. |
 | `make fclean` | Same as `clean`. |
-| `make re ROOT_DIR=../libft` | Rebuild the driver. |
+| `make re` | Rebuild the driver. |
 
 ## Direct CLI Workflow
 
 Build the driver first:
 
 ```sh
-make ROOT_DIR=../libft build
+make build
 ```
 
 Then run the binary. Commands that need real tests build the internal suite
 automatically:
 
 ```sh
-./libft_tester --summary-only
-./libft_tester --only ft_split
-./libft_tester --suite memory
-./libft_tester --profile quick
-./libft_tester --profile strict
-./libft_tester --profile brutal --seed 42
-./libft_tester --repeat 10 --seed 42
-./libft_tester --fail-fast
-./libft_tester --verbose
-./libft_tester --json --no-color
-./libft_tester --html --no-color
+./libft_tester --root ../libft --summary-only
+./libft_tester --root ../libft --only ft_split
+./libft_tester --root ../libft --suite memory
+./libft_tester --root ../libft --profile quick
+./libft_tester --root ../libft --profile strict
+./libft_tester --root ../libft --profile brutal --seed 42
+./libft_tester --root ../libft --repeat 10 --seed 42
+./libft_tester --root ../libft --fail-fast
+./libft_tester --root ../libft --verbose
+./libft_tester --root ../libft --json --no-color
+./libft_tester --root ../libft --html --no-color
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
-./libft_tester --doctor
+./libft_tester --root ../libft --doctor
 ./libft_tester --help
 ```
 
@@ -157,8 +163,8 @@ Use the menu option:
 Or use the CLI directly:
 
 ```sh
-./libft_tester --json --no-color > libft-test-report.json
-./libft_tester --html --no-color > libft-test-report.html
+./libft_tester --root ../libft --json --no-color > libft-test-report.json
+./libft_tester --root ../libft --html --no-color > libft-test-report.html
 ```
 
 ## Valgrind
@@ -169,14 +175,13 @@ Use the menu option:
 7) Leak check
 ```
 
-Or run Valgrind manually against the internal suite:
+Or run Valgrind manually through the driver:
 
 ```sh
-make ROOT_DIR=../libft suite
-LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
+LIBFT_TESTER_NO_FORK=1 valgrind --trace-children=yes --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  tester/build/libft_suite --only ft_split --no-color
+  ./libft_tester --root ../libft --only ft_split --no-color
 ```
 
 ## GitHub Actions

@@ -700,6 +700,16 @@ namespace tester
 		}
 	}
 
+	inline void	print_indented_block(const std::string &text,
+		const std::string &prefix)
+	{
+		std::istringstream	input(text);
+		std::string			line;
+
+		while (std::getline(input, line))
+			std::cout << prefix << line << '\n';
+	}
+
 	inline void	print_failure_details(const Report &report)
 	{
 		size_t	i;
@@ -727,7 +737,7 @@ namespace tester
 					std::cout << paint(red) << check.status << paint(reset) << " "
 						<< check.label << '\n';
 					if (!check.details.empty())
-						std::cout << "  " << check.details << '\n';
+						print_indented_block(check.details, "  ");
 					std::string	hint = hints::for_label(check.label);
 					if (!hint.empty())
 						std::cout << paint(dim) << "  hint: " << hint
@@ -737,6 +747,124 @@ namespace tester
 			}
 			i++;
 		}
+	}
+
+	inline std::vector<std::string>	failed_functions(const Report &report)
+	{
+		std::vector<std::string>	names;
+		size_t					i;
+
+		i = 0;
+		while (i < report.functions.size())
+		{
+			if (function_has_failure(report.functions[i])
+				&& !function_is_runner_issues(report.functions[i]))
+				names.push_back(report.functions[i].name);
+			i++;
+		}
+		return (names);
+	}
+
+	inline void	print_name_list(const std::vector<std::string> &names)
+	{
+		size_t	i;
+
+		i = 0;
+		while (i < names.size())
+		{
+			if (i > 0)
+				std::cout << ", ";
+			std::cout << names[i];
+			i++;
+		}
+	}
+
+	inline std::string	shell_quote(const std::string &value)
+	{
+		std::string	quoted;
+		size_t		i;
+
+		quoted = "'";
+		i = 0;
+		while (i < value.size())
+		{
+			if (value[i] == '\'')
+				quoted += "'\\''";
+			else
+				quoted += value[i];
+			i++;
+		}
+		quoted += "'";
+		return (quoted);
+	}
+
+	inline std::string	root_cli_arg(void)
+	{
+		const char	*root;
+
+		root = std::getenv("LIBFT_TESTER_ROOT");
+		if (!root || root[0] == '\0')
+			return ("");
+		return (std::string(" --root ") + shell_quote(root));
+	}
+
+	inline std::string	seed_cli_arg(unsigned int seed)
+	{
+		std::ostringstream	out;
+
+		if (seed == 0)
+			return ("");
+		out << " --seed " << seed;
+		return (out.str());
+	}
+
+	inline void	print_focus_commands(const std::vector<std::string> &names,
+		const std::string &root_arg, const std::string &seed_arg)
+	{
+		size_t	limit;
+		size_t	i;
+
+		limit = std::min<size_t>(names.size(), 3);
+		i = 0;
+		while (i < limit)
+		{
+			std::cout << "    ./libft_tester" << root_arg << " --only "
+				<< names[i] << " --verbose" << seed_arg << "\n";
+			i++;
+		}
+		if (names.size() > limit)
+			std::cout << paint(dim) << "    ... and "
+				<< (names.size() - limit) << " more failed function(s)\n"
+				<< paint(reset);
+	}
+
+	inline void	print_debug_next_steps(const Report &report)
+	{
+		std::vector<std::string>	names;
+		std::string				root_arg;
+		std::string				seed_arg;
+
+		names = failed_functions(report);
+		if (names.empty())
+			return ;
+		root_arg = root_cli_arg();
+		seed_arg = seed_cli_arg(report.seed);
+		std::cout << "\n" << paint(bold) << "Debug Focus"
+			<< paint(reset) << "\n";
+		std::cout << "  failed functions: " << paint(red);
+		print_name_list(names);
+		std::cout << paint(reset) << "\n";
+		std::cout << "  try next:\n";
+		print_focus_commands(names, root_arg, seed_arg);
+		std::cout << "    ./libft_tester --hint " << names[0] << "\n";
+		if (root_arg.empty())
+			std::cout << paint(dim)
+				<< "  note: add --root PATH if your Libft is not in ../libft.\n"
+				<< paint(reset);
+		if (names.size() > 1)
+			std::cout << paint(dim)
+				<< "  tip: fix one function at a time, then rerun the same "
+				<< "seed.\n" << paint(reset);
 	}
 
 	inline int	count_runner_issues(const Report &report)
@@ -1015,6 +1143,8 @@ namespace tester
 			print_runner_issues(report);
 		if (!options.summary_only)
 			print_failure_details(report);
+		if (!options.summary_only && report.failures > 0)
+			print_debug_next_steps(report);
 		std::cout << "\n" << paint(bold) << "Summary" << paint(reset) << "\n  ";
 		if (options.summary_only && report.seed != 0)
 			std::cout << "seed: " << report.seed

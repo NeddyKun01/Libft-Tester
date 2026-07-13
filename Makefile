@@ -48,6 +48,8 @@ RESCUE_NAME=$(RESCUE_BUILD)/libft_suite_rescue
 
 DRIVER_SRCS=$(wildcard $(DRIVER_DIR)/*.cpp)
 DRIVER_OBJS=$(DRIVER_SRCS:$(DRIVER_DIR)/%.cpp=$(DRIVER_BUILD)/%.o)
+DRIVER_INFO_SRCS=$(SRC_DIR)/coverage.cpp $(SRC_DIR)/hints.cpp
+DRIVER_INFO_OBJS=$(DRIVER_INFO_SRCS:$(SRC_DIR)/%.cpp=$(DRIVER_BUILD)/info_%.o)
 
 SRC_SRCS=$(wildcard $(SRC_DIR)/*.cpp)
 ALL_TEST_SRCS=$(filter-out $(TEST_DIR)/selftest_suites.cpp,$(wildcard $(TEST_DIR)/*.cpp))
@@ -99,9 +101,12 @@ $(ROOT_STAMP): FORCE | $(BUILD_DIR)
 	fi
 
 $(DRIVER_BUILD)/%.o: $(DRIVER_DIR)/%.cpp $(DRIVER_DIR)/driver.hpp | $(DRIVER_BUILD)
-	@$(CXX) $(CXXFLAGS) -I$(DRIVER_DIR) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -I$(DRIVER_DIR) -I$(INC_DIR) -c $< -o $@
 
-$(NAME): $(DRIVER_OBJS)
+$(DRIVER_BUILD)/info_%.o: $(SRC_DIR)/%.cpp $(HEADERS) | $(DRIVER_BUILD)
+	@$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
+
+$(NAME): $(DRIVER_OBJS) $(DRIVER_INFO_OBJS)
 	@$(CXX) $(CXXFLAGS) $^ -o $@
 
 check-root:
