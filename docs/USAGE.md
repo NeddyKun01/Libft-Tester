@@ -167,6 +167,27 @@ Or use the CLI directly:
 ./libft_tester --root ../libft --html --no-color > libft-test-report.html
 ```
 
+The terminal output, JSON report, and HTML report all use the same score
+direction: `passed/total`.
+
+Examples:
+
+| Display | Meaning |
+| --- | --- |
+| `13/13` | 13 checks passed out of 13 total checks. |
+| `9/10` | 9 checks passed out of 10 total checks. |
+| `1/10` under `Failed` | 1 check failed out of 10 total checks. |
+
+Status counters such as `OKx5`, `MOKx4`, and `MNOKx1` are plain counters, not
+ratios. They show how many checks produced each status.
+
+The HTML report also includes:
+
+- a score guide explaining `passed/total`;
+- quick filters for all, failed, and passed functions;
+- a failure summary with links to failing function cards;
+- copyable rerun commands for focused debugging.
+
 ## Valgrind
 
 Use the menu option:

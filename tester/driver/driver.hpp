@@ -149,8 +149,15 @@ private:
 	void	assert_contains(std::ostream &out, int &failures,
 					const std::string &needle, const std::string &label,
 					const std::string &log);
+	void	assert_not_contains(std::ostream &out, int &failures,
+					const std::string &needle, const std::string &label,
+					const std::string &log);
+	void	assert_in_order(std::ostream &out, int &failures,
+					const std::vector<std::string> &needles,
+					const std::string &label, const std::string &log);
 	void	write_partial_libft(const fs::path &root);
 	void	write_bad_strlen_libft(const fs::path &root);
+	void	write_html_report_libft(const fs::path &root, bool bad_strlen);
 	void	write_broken_makefile_libft(const fs::path &root);
 	void	test_missing_header(std::ostream &out, const fs::path &tmp,
 					int &failures);
@@ -159,6 +166,10 @@ private:
 	void	test_broken_makefile(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_rescue_failure_output(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_terminal_output_contract(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_html_report_output(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_doctor(std::ostream &out, const fs::path &tmp,
 					int &failures);

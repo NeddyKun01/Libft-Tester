@@ -1,6 +1,6 @@
 #include "driver.hpp"
 
-const char	*g_version = "1.5.0";
+const char	*g_version = "1.6.0";
 
 const std::vector<FunctionInfo>	&functions()
 {

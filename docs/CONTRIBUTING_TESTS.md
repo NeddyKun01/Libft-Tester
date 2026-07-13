@@ -39,6 +39,23 @@ prefix to group results:
 tester::expect_eq(report, "ft_split token count", expected, actual);
 ```
 
+## Reporting Convention
+
+Keep score displays consistent across terminal, JSON, and HTML output.
+
+Any `X/Y` score must mean `passed/total`.
+
+Examples:
+
+| Score | Meaning |
+| --- | --- |
+| `13/13` | All 13 checks passed. |
+| `9/10` | 9 checks passed out of 10 total checks. |
+| `1/10` under `Failed` | 1 check failed out of 10 total checks. |
+
+Do not use `X/Y` to compare status types such as `OK/MOK` or `NOK/MNOK`. Use
+plain counters instead, for example `OKx5`, `MOKx4`, and `MNOKx1`.
+
 ## Good Test Cases
 
 Prefer cases that prove a different behavior:

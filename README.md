@@ -24,6 +24,20 @@ is not built yet, run `make build` once first. The `make` command still exists a
 a convenience shortcut, but the day-to-day interface is the standalone
 `./libft_tester` binary.
 
+## What's New
+
+- Cleaner HTML reports with `All`, `Failed`, and `Passed` filters.
+- Clear score convention: every `X/Y` value means `passed/total`.
+- `Score Guide` in the HTML report so new users understand results quickly.
+- Stronger self-tests that protect terminal and HTML output formatting.
+- Visual previews for the interactive menu and HTML report.
+
+## Preview
+
+![Interactive menu preview](docs/assets/menu-preview.svg)
+
+![HTML report preview](docs/assets/html-report-preview.svg)
+
 ## What It Checks
 
 The tester covers:
@@ -156,7 +170,7 @@ The menu is designed for day-to-day use:
 +------------------------------------------------------------+
 |                        LIBFT TESTER                        |
 +------------------------------------------------------------+
- Libft Tester (v1.5.0)
+ Libft Tester (v1.6.0)
  target:    ../libft
  health:    Makefile OK  libft.h OK  libft.a OK  suite OK
 ------------------------------------------------------------
@@ -200,6 +214,22 @@ The menu uses colors when supported and respects `NO_COLOR=1`.
 | `ABRT` | The tested code aborted. |
 | `FPE` | The tested code caused an arithmetic error. |
 | `TIMEOUT` | The suite took too long and was stopped. |
+
+Score values are always written as `passed/total`.
+
+For example, `9/10` means that 9 checks passed out of 10 checks. It never means
+10 total checks out of 9 passed checks. Malloc-related statuses follow the same
+rule: a passing malloc-failure expectation counts as passed and appears as
+`MOK`; a failing one counts as failed and appears as `MNOK`.
+
+In compact function output, the tester shows the score beside each function:
+
+```text
+Results
+Function             OK/Total   Progress     Status
+------------------------------------------------------------
+ft_lstmap                9/10  [#########-]  MOK OK OK OK OK MNOK MOK MOK MOK OK
+```
 
 Example summary:
 
@@ -316,6 +346,9 @@ From the CLI:
 ./libft_tester --json --no-color > libft-test-report.json
 ./libft_tester --html --no-color > libft-test-report.html
 ```
+
+The HTML report includes a score guide, quick filters for passed/failed
+functions, a failure summary, and copyable commands for focused reruns.
 
 ## GitHub Actions
 

@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.6.0 - 2026-07-13
+
+- Added a clearer HTML report with a `Score Guide` explaining that every
+  `X/Y` score means `passed/total`.
+- Added HTML report filters for all, failed, and passed functions.
+- Replaced ambiguous HTML summary ratios such as `OK/MOK` with explicit
+  `Passed` and `Failed` metrics.
+- Renamed terminal and HTML function score headers to `OK/Total`.
+- Added output contract self-tests for terminal section order, score labels,
+  HTML filters, filter metadata, and score-guide content.
+- Updated README, usage, and contribution docs with the score convention and
+  report filtering behavior.
+- Added visual README previews for the interactive menu and HTML report.
+
 ## 1.5.0 - 2026-07-13
 
 - Polished the interactive menu with a compact health line, explicit

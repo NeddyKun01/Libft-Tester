@@ -641,7 +641,7 @@ namespace tester
 
 		std::cout << "\n" << paint(bold) << "Results" << paint(reset) << "\n";
 		std::cout << paint(dim)
-			<< "Function             Score      Progress     Status\n"
+			<< "Function             OK/Total   Progress     Status\n"
 			<< "------------------------------------------------------------\n"
 			<< paint(reset);
 		i = 0;
@@ -1016,64 +1016,277 @@ namespace tester
 			<< html_escape(check.status) << "</span>";
 	}
 
-	inline void	print_html_report(const Report &report)
+	inline int	pass_percent(int passed, size_t total)
+	{
+		if (total == 0)
+			return (100);
+		return ((passed * 100) / static_cast<int>(total));
+	}
+
+	inline void	print_html_progress(int percent)
+	{
+		std::cout << "<div class=\"bar\"><span style=\"width:"
+			<< percent << "%\"></span></div>";
+	}
+
+	inline std::string	html_id(const std::string &value)
+	{
+		std::string	id;
+		size_t		i;
+
+		id = "fn-";
+		i = 0;
+		while (i < value.size())
+		{
+			if (std::isalnum(static_cast<unsigned char>(value[i])))
+				id += static_cast<char>(std::tolower(
+					static_cast<unsigned char>(value[i])));
+			else
+				id += "-";
+			i++;
+		}
+		return (id);
+	}
+
+	inline void	print_html_copy_block(const std::string &content)
+	{
+		std::cout << "<button class=\"copy\" onclick=\"copyCommand(this)\">";
+		std::cout << "Copy commands</button><pre class=\"commands\">";
+		std::cout << html_escape(content);
+		std::cout << "</pre>";
+	}
+
+	inline void	print_html_debug_focus(const Report &report)
+	{
+		std::vector<std::string>	names;
+		std::string				root_arg;
+		std::string				seed_arg;
+		std::string				commands;
+		size_t					limit;
+		size_t					i;
+
+		names = failed_functions(report);
+		if (names.empty())
+			return ;
+		root_arg = root_cli_arg();
+		seed_arg = seed_cli_arg(report.seed);
+		limit = std::min<size_t>(names.size(), 3);
+		std::cout << "<section class=\"panel\" id=\"debug-focus\"><h2>Debug Focus</h2>";
+		std::cout << "<p class=\"muted\">Fix one function at a time, then "
+			<< "rerun the same seed.</p>";
+		i = 0;
+		while (i < limit)
+		{
+			commands += "./libft_tester" + root_arg + " --only "
+				+ names[i] + " --verbose" + seed_arg + "\n";
+			i++;
+		}
+		if (names.size() > limit)
+			commands += "... and "
+				+ std::to_string(names.size() - limit)
+				+ " more failed function(s)\n";
+		commands += "./libft_tester --hint " + names[0];
+		print_html_copy_block(commands);
+		std::cout << "</section>";
+	}
+
+	inline void	print_html_failed_summary(const Report &report)
+	{
+		std::vector<std::string>	names;
+		size_t					i;
+
+		names = failed_functions(report);
+		if (names.empty())
+			return ;
+		std::cout << "<section class=\"panel\" id=\"failures\">";
+		std::cout << "<h2>Failed Functions</h2><div class=\"failed-list\">";
+		i = 0;
+		while (i < names.size())
+		{
+			std::cout << "<a href=\"#" << html_escape(html_id(names[i]))
+				<< "\">" << html_escape(names[i]) << "</a>";
+			i++;
+		}
+		std::cout << "</div></section>";
+	}
+
+	inline void	print_html_score_guide(void)
+	{
+		std::cout << "<section class=\"panel\" id=\"score-guide\">";
+		std::cout << "<h2>Score Guide</h2>";
+		std::cout << "<p class=\"muted\">Every X/Y score means passed/total. ";
+		std::cout << "Status pills such as OKx5, MOKx4, and MNOKx1 are ";
+		std::cout << "counters, not ratios.</p></section>";
+	}
+
+	inline void	print_html_function_table(const Report &report)
 	{
 		size_t	i;
 
+		std::cout << "<section class=\"panel\"><h2>Function Overview</h2>";
+		std::cout << "<table><thead><tr><th>Function</th><th>OK/Total</th>";
+		std::cout << "<th>Progress</th><th>Status counts</th></tr></thead><tbody>";
+		i = 0;
+		while (i < report.functions.size())
+		{
+			const FunctionReport	&function = report.functions[i];
+			StatusCounts			counts = status_counts(function);
+			int						percent = pass_percent(function.passed,
+										function.checks.size());
+
+			std::cout << "<tr data-result=\""
+				<< (function_has_failure(function) ? "failed" : "passed")
+				<< "\"><td><a href=\"#"
+				<< html_escape(html_id(function.name)) << "\"><strong>"
+				<< html_escape(function.name)
+				<< "</strong></a></td><td class=\""
+				<< (function_has_failure(function) ? "fail" : "pass") << "\">"
+				<< function.passed << "/" << function.checks.size() << "</td><td>";
+			print_html_progress(percent);
+			std::cout << "</td><td>";
+			if (counts.ok > 0)
+				std::cout << "<span class=\"pill pass\">OKx" << counts.ok
+					<< "</span>";
+			if (counts.mok > 0)
+				std::cout << "<span class=\"pill pass\">MOKx" << counts.mok
+					<< "</span>";
+			if (counts.nok > 0)
+				std::cout << "<span class=\"pill fail\">NOKx" << counts.nok
+					<< "</span>";
+			if (counts.mnok > 0)
+				std::cout << "<span class=\"pill fail\">MNOKx" << counts.mnok
+					<< "</span>";
+			if (counts.segv > 0)
+				std::cout << "<span class=\"pill fail\">SEGVx" << counts.segv
+					<< "</span>";
+			if (counts.timeout > 0)
+				std::cout << "<span class=\"pill fail\">TIMEOUTx"
+					<< counts.timeout << "</span>";
+			std::cout << "</td></tr>";
+			i++;
+		}
+		std::cout << "</tbody></table></section>";
+	}
+
+	inline void	print_html_report(const Report &report)
+	{
+		size_t	i;
+		int		passed;
+		int		percent;
+
+		passed = report.checks - report.failures;
+		percent = 100;
+		if (report.checks > 0)
+			percent = (passed * 100) / report.checks;
 		std::cout << "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">";
 		std::cout << "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">";
 		std::cout << "<title>Libft Tester Report</title><style>";
-		std::cout << ":root{--bg:#10131a;--card:#181d27;--text:#eef2ff;";
-		std::cout << "--muted:#9aa4b2;--ok:#54d18a;--bad:#ff6370;--line:#293142;}";
-		std::cout << "body{margin:0;background:radial-gradient(circle at top left,#1e3557,#10131a 45%);";
-		std::cout << "color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}";
-		std::cout << "main{max-width:1180px;margin:0 auto;padding:32px 18px;}";
-		std::cout << ".hero{border:1px solid var(--line);background:rgba(24,29,39,.92);";
-		std::cout << "border-radius:22px;padding:26px;box-shadow:0 24px 70px #0008;}";
-		std::cout << "h1{margin:0 0 8px;font-size:34px}.muted{color:var(--muted)}";
-		std::cout << ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));";
-		std::cout << "gap:12px;margin:22px 0}.metric{background:#0d111a;border:1px solid var(--line);";
-		std::cout << "border-radius:16px;padding:14px}.metric strong{display:block;font-size:25px}";
-		std::cout << ".pass{color:var(--ok)}.fail{color:var(--bad)}";
-		std::cout << ".card{margin-top:16px;border:1px solid var(--line);border-radius:18px;";
-		std::cout << "background:rgba(24,29,39,.9);overflow:hidden}";
-		std::cout << ".head{display:flex;justify-content:space-between;gap:12px;padding:14px 16px;";
-		std::cout << "border-bottom:1px solid var(--line)}.checks{padding:14px 16px}";
-		std::cout << ".status{display:inline-block;margin:3px 5px 3px 0;font-weight:700}";
-		std::cout << "details{margin-top:10px}.failure{margin:10px 0;padding:10px;border-left:3px solid var(--bad);";
-		std::cout << "background:#0d111a}.hint{color:var(--muted)}";
-		std::cout << "</style></head><body><main>";
+		std::cout << ":root{--bg:#0f1411;--card:#18211d;--panel:#101713;";
+		std::cout << "--text:#f3f4e8;--muted:#aab5a7;--ok:#67d68f;";
+		std::cout << "--bad:#ff6b5f;--line:#2c3a32;--gold:#e2c044;}";
+		std::cout << "body{margin:0;background:radial-gradient(circle at 10% 0%,";
+		std::cout << "#254734,#0f1411 44%,#0b0f0d);color:var(--text);";
+		std::cout << "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}";
+		std::cout << "main{max-width:1220px;margin:0 auto;padding:34px 18px 48px;}";
+		std::cout << ".hero,.panel,.card{border:1px solid var(--line);";
+		std::cout << "background:linear-gradient(145deg,rgba(24,33,29,.96),";
+		std::cout << "rgba(16,23,19,.92));box-shadow:0 24px 80px #0009;}";
+		std::cout << ".hero{border-radius:26px;padding:28px;position:relative;overflow:hidden;}";
+		std::cout << ".hero:after{content:\"\";position:absolute;right:-80px;top:-90px;";
+		std::cout << "width:240px;height:240px;border-radius:50%;background:#e2c04422;}";
+		std::cout << "h1{margin:0 0 8px;font-size:38px;letter-spacing:-1px}";
+		std::cout << "h2{margin:0 0 14px;font-size:20px}.muted{color:var(--muted)}";
+		std::cout << ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));";
+		std::cout << "gap:12px;margin:22px 0}.metric,.panel{background:var(--panel);";
+		std::cout << "border:1px solid var(--line);border-radius:18px;padding:16px}";
+		std::cout << ".metric strong{display:block;font-size:26px}.pass{color:var(--ok)}";
+		std::cout << ".fail{color:var(--bad)}.bar{height:9px;background:#0a0f0c;";
+		std::cout << "border-radius:999px;overflow:hidden;border:1px solid var(--line)}";
+		std::cout << ".bar span{display:block;height:100%;background:linear-gradient(90deg,";
+		std::cout << "var(--ok),var(--gold));}.panel{margin-top:16px}";
+		std::cout << "table{width:100%;border-collapse:collapse}th,td{padding:10px;";
+		std::cout << "border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted)}";
+		std::cout << "a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}";
+		std::cout << ".pill,.status{display:inline-block;margin:3px 5px 3px 0;";
+		std::cout << "font-weight:700}.pill{border:1px solid currentColor;border-radius:999px;";
+		std::cout << "padding:2px 8px}.card{margin-top:16px;border-radius:18px;overflow:hidden}";
+		std::cout << ".head{display:flex;justify-content:space-between;gap:12px;";
+		std::cout << "padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer}";
+		std::cout << ".checks{padding:14px 16px}details{margin-top:10px}";
+		std::cout << ".failure{margin:10px 0;padding:12px;border-left:3px solid var(--bad);";
+		std::cout << "background:#0a0f0c}.hint{color:var(--muted)}pre.commands,pre{";
+		std::cout << "white-space:pre-wrap;background:#0a0f0c;border:1px solid var(--line);";
+		std::cout << "border-radius:14px;padding:12px;overflow:auto}.copy,.jump{";
+		std::cout << "display:inline-block;margin:4px 0 10px;padding:8px 12px;";
+		std::cout << "border-radius:999px;border:1px solid var(--gold);";
+		std::cout << "background:#e2c04418;color:var(--gold);font-weight:700}";
+		std::cout << ".actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}";
+		std::cout << ".filter{display:inline-block;padding:8px 12px;border-radius:999px;";
+		std::cout << "border:1px solid var(--line);background:#0a0f0c;color:var(--text);";
+		std::cout << "font-weight:700;cursor:pointer}.filter:hover{border-color:var(--gold)}";
+		std::cout << ".failed-list{display:flex;flex-wrap:wrap;gap:8px}.failed-list a{";
+		std::cout << "border:1px solid var(--bad);border-radius:999px;padding:6px 10px;";
+		std::cout << "color:var(--bad)}summary{list-style:none}summary::-webkit-details-marker{display:none}";
+		std::cout << ".card:not([open]) .head{border-bottom:0}";
+		std::cout << "</style><script>function copyCommand(b){var p=b.nextElementSibling;";
+		std::cout << "navigator.clipboard&&navigator.clipboard.writeText(p.innerText);";
+		std::cout << "b.innerText='Copied';setTimeout(function(){b.innerText='Copy commands'},1200);}";
+		std::cout << "function filterReport(m){document.querySelectorAll('[data-result]').";
+		std::cout << "forEach(function(e){e.style.display=(m==='all'||e.dataset.result===m)";
+		std::cout << "?'':'none';});}";
+		std::cout << "</script>";
+		std::cout << "</head><body><main>";
 		std::cout << "<section class=\"hero\"><h1>Libft Tester Report</h1>";
 		std::cout << "<p class=\"muted\">version " << html_escape(report.version)
 			<< " | profile " << html_escape(report.profile)
 			<< " | seed " << report.seed
 			<< " | repeats " << report.repeat_count
 			<< " | duration " << report.duration_ms << "ms</p>";
+		std::cout << "<p class=\"" << (report.failures == 0 ? "pass" : "fail")
+			<< "\"><strong>" << (report.failures == 0 ? "PASS" : "FAIL")
+			<< "</strong> - " << percent << "% pass rate</p>";
+		std::cout << "<div class=\"actions\">";
+		if (report.failures > 0)
+			std::cout << "<a class=\"jump\" href=\"#failures\">Jump to failures</a>";
+		std::cout << "<button class=\"filter\" onclick=\"filterReport('all')\">All</button>";
+		std::cout << "<button class=\"filter\" onclick=\"filterReport('failed')\">Failed</button>";
+		std::cout << "<button class=\"filter\" onclick=\"filterReport('passed')\">Passed</button>";
+		std::cout << "</div>";
 		std::cout << "<div class=\"grid\">";
 		std::cout << "<div class=\"metric\"><span>Verdict</span><strong class=\""
 			<< (report.failures == 0 ? "pass\">PASS" : "fail\">FAIL")
 			<< "</strong></div>";
 		std::cout << "<div class=\"metric\"><span>Checks</span><strong>"
 			<< report.checks << "</strong></div>";
-		std::cout << "<div class=\"metric\"><span>Failures</span><strong class=\""
+		std::cout << "<div class=\"metric\"><span>Passed</span><strong class=\"pass\">"
+			<< passed << "/" << report.checks << "</strong></div>";
+		std::cout << "<div class=\"metric\"><span>Failed</span><strong class=\""
 			<< (report.failures == 0 ? "pass" : "fail") << "\">"
-			<< report.failures << "</strong></div>";
-		std::cout << "<div class=\"metric\"><span>OK/MOK</span><strong>"
-			<< report.ok_count << "/" << report.mok_count << "</strong></div>";
-		std::cout << "<div class=\"metric\"><span>NOK/MNOK</span><strong>"
-			<< report.nok_count << "/" << report.mnok_count << "</strong></div>";
+			<< report.failures << "/" << report.checks << "</strong></div>";
 		std::cout << "</div></section>";
+		print_html_score_guide();
+		print_html_debug_focus(report);
+		print_html_failed_summary(report);
+		print_html_function_table(report);
 		i = 0;
 		while (i < report.functions.size())
 		{
 			const FunctionReport	&function = report.functions[i];
 			size_t					j = 0;
+			bool					open_card;
 
-			std::cout << "<section class=\"card\"><div class=\"head\"><strong>"
+			open_card = (report.failures == 0 || function_has_failure(function));
+			std::cout << "<details class=\"card\" data-result=\""
+				<< (function_has_failure(function) ? "failed" : "passed")
+				<< "\" id=\""
+				<< html_escape(html_id(function.name)) << "\"";
+			if (open_card)
+				std::cout << " open";
+			std::cout << "><summary class=\"head\"><strong>"
 				<< html_escape(function.name) << "</strong><span class=\""
 				<< (function_has_failure(function) ? "fail" : "pass") << "\">"
 				<< function.passed << "/" << function.checks.size()
-				<< "</span></div><div class=\"checks\">";
+				<< "</span></summary><div class=\"checks\">";
 			while (j < function.checks.size())
 			{
 				print_html_status(function.checks[j]);
@@ -1106,7 +1319,7 @@ namespace tester
 				}
 				std::cout << "</details>";
 			}
-			std::cout << "</div></section>";
+			std::cout << "</div></details>";
 			i++;
 		}
 		std::cout << "</main></body></html>\n";

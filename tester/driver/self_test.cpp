@@ -24,6 +24,40 @@ void	Driver::assert_contains(std::ostream &out, int &failures,
 		fail(out, failures, label, "missing: " + needle + "\n" + log);
 }
 
+void	Driver::assert_not_contains(std::ostream &out, int &failures,
+	const std::string &needle, const std::string &label,
+	const std::string &log)
+{
+	if (log.find(needle) == std::string::npos)
+		pass(out, label);
+	else
+		fail(out, failures, label, "unexpected: " + needle + "\n" + log);
+}
+
+void	Driver::assert_in_order(std::ostream &out, int &failures,
+	const std::vector<std::string> &needles, const std::string &label,
+	const std::string &log)
+{
+	size_t	position;
+	size_t	i;
+
+	position = 0;
+	i = 0;
+	while (i < needles.size())
+	{
+		position = log.find(needles[i], position);
+		if (position == std::string::npos)
+		{
+			fail(out, failures, label, "missing in order: " + needles[i]
+				+ "\n" + log);
+			return ;
+		}
+		position += needles[i].size();
+		i++;
+	}
+	pass(out, label);
+}
+
 void	Driver::write_partial_libft(const fs::path &root)
 {
 	fs::create_directories(root);
@@ -103,6 +137,59 @@ void	Driver::write_bad_strlen_libft(const fs::path &root)
 		"size_t\tft_strlen(const char *s)\n"
 		"{\n"
 		"\t(void)s;\n"
+		"\treturn (0);\n"
+		"}\n");
+}
+
+void	Driver::write_html_report_libft(const fs::path &root, bool bad_strlen)
+{
+	fs::create_directories(root);
+	fs::copy_file(model_header(), root / "libft.h",
+		fs::copy_options::overwrite_existing);
+	write_file(root / "Makefile",
+		"NAME=libft.a\n"
+		"CC=cc\n"
+		"CFLAGS=-Wall -Wextra -Werror\n"
+		"AR=ar rcs\n"
+		"RM=rm -f\n"
+		"SRCS=ft_strlen.c ft_split.c\n"
+		"OBJS=$(SRCS:.c=.o)\n"
+		"all: $(NAME)\n"
+		"$(NAME): $(OBJS)\n"
+		"\t$(AR) $(NAME) $(OBJS)\n"
+		"%.o: %.c libft.h\n"
+		"\t$(CC) $(CFLAGS) -c $< -o $@\n"
+		"clean:\n"
+		"\t$(RM) $(OBJS)\n"
+		"fclean: clean\n"
+		"\t$(RM) $(NAME)\n"
+		"re: fclean all\n"
+		".PHONY: all clean fclean re\n");
+	if (bad_strlen)
+		write_file(root / "ft_strlen.c",
+			"#include \"libft.h\"\n\n"
+			"size_t\tft_strlen(const char *s)\n"
+			"{\n"
+			"\t(void)s;\n"
+			"\treturn (0);\n"
+			"}\n");
+	else
+		write_file(root / "ft_strlen.c",
+			"#include \"libft.h\"\n\n"
+			"size_t\tft_strlen(const char *s)\n"
+			"{\n"
+			"\tsize_t\ti;\n\n"
+			"\ti = 0;\n"
+			"\twhile (s[i])\n"
+			"\t\ti++;\n"
+			"\treturn (i);\n"
+			"}\n");
+	write_file(root / "ft_split.c",
+		"#include \"libft.h\"\n\n"
+		"char\t**ft_split(char const *s, char c)\n"
+		"{\n"
+		"\t(void)s;\n"
+		"\t(void)c;\n"
 		"\treturn (0);\n"
 		"}\n");
 }
@@ -226,6 +313,101 @@ void	Driver::test_broken_makefile(std::ostream &out, const fs::path &tmp,
 	root_dir = old_root;
 }
 
+void	Driver::test_terminal_output_contract(std::ostream &out,
+	const fs::path &tmp, int &failures)
+{
+	fs::path			root = tmp / "terminal_contract";
+	std::ostringstream	log;
+	std::string			old_root = root_dir;
+	int					status;
+
+	write_html_report_libft(root, true);
+	root_dir = root.string();
+	status = run_suite({"--only", "ft_strlen", "--no-color", "--seed", "42"},
+			log);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "terminal output contract uses a failing fixture");
+	else
+		fail(out, failures, "terminal output contract uses a failing fixture",
+			log.str());
+	assert_contains(out, failures, "Function             OK/Total",
+		"terminal output labels scores as OK over total", log.str());
+	assert_contains(out, failures, "ft_strlen",
+		"terminal output includes the failing function name", log.str());
+	assert_contains(out, failures, "2/13",
+		"terminal output prints passed checks over total checks", log.str());
+	assert_not_contains(out, failures, "Function             Score",
+		"terminal output does not use the old score header", log.str());
+	assert_in_order(out, failures,
+		{"Results", "Failure Details", "Debug Focus", "Summary"},
+		"terminal output keeps the debugging sections in order", log.str());
+}
+
+void	Driver::test_html_report_output(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path			pass_root = tmp / "html_report_pass";
+	fs::path			fail_root = tmp / "html_report_fail";
+	std::ostringstream	html;
+	std::string			old_root = root_dir;
+	int					status;
+
+	write_html_report_libft(pass_root, false);
+	root_dir = pass_root.string();
+	status = run_suite({"--only", "ft_strlen", "--html", "--no-color",
+			"--seed", "42"}, html);
+	if (status == 0)
+		pass(out, "html report succeeds for passing function output");
+	else
+		fail(out, failures, "html report succeeds for passing function output",
+			html.str());
+	assert_contains(out, failures, "Function Overview",
+		"html report includes function overview", html.str());
+	assert_contains(out, failures, "OK/Total",
+		"html report labels scores as OK over total", html.str());
+	assert_contains(out, failures, "PASS</strong> - 100% pass rate",
+		"html report includes pass rate hero", html.str());
+	assert_contains(out, failures, "Passed</span><strong class=\"pass\">13/13",
+		"html report shows passed checks over total checks", html.str());
+	assert_contains(out, failures, "id=\"score-guide\"",
+		"html report explains score direction", html.str());
+	assert_contains(out, failures, "filterReport('passed')",
+		"html report includes a passing filter button", html.str());
+	assert_contains(out, failures, "data-result=\"passed\"",
+		"html report marks passing rows and cards for filtering", html.str());
+	assert_contains(out, failures, "<details class=\"card\"",
+		"html report uses collapsible function cards", html.str());
+	html.str("");
+	html.clear();
+	write_html_report_libft(fail_root, true);
+	root_dir = fail_root.string();
+	status = run_suite({"--only", "ft_strlen", "--html", "--no-color",
+			"--seed", "42"}, html);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "html report fails when selected function fails");
+	else
+		fail(out, failures, "html report fails when selected function fails",
+			html.str());
+	assert_contains(out, failures, "Debug Focus",
+		"html report includes debug focus for failures", html.str());
+	assert_contains(out, failures, "id=\"failures\"",
+		"html report includes failure jump target", html.str());
+	assert_contains(out, failures, "Copy commands",
+		"html report includes copy command control", html.str());
+	assert_contains(out, failures, "./libft_tester --root '",
+		"html report includes copyable root-aware command", html.str());
+	assert_contains(out, failures, "filterReport('failed')",
+		"html report includes a failure filter button", html.str());
+	assert_contains(out, failures, "data-result=\"failed\"",
+		"html report marks failing rows and cards for filtering", html.str());
+	assert_contains(out, failures, "Failed</span><strong class=\"fail\">11/13",
+		"html report shows failed checks over total checks", html.str());
+	assert_contains(out, failures, "NOK",
+		"html report includes failed status labels", html.str());
+}
+
 void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
 	int &failures)
 {
@@ -338,6 +520,8 @@ int	Driver::run_self_test(std::ostream &out)
 	test_partial_libft(out, tmp, failures);
 	test_rescue_failure_output(out, tmp, failures);
 	test_broken_makefile(out, tmp, failures);
+	test_terminal_output_contract(out, tmp, failures);
+	test_html_report_output(out, tmp, failures);
 	test_doctor(out, tmp, failures);
 	fs::remove_all(tmp);
 	if (old_mode)

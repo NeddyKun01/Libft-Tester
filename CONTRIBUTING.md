@@ -87,6 +87,11 @@ tester::expect_eq(report, "ft_strlen empty", 0, ft_strlen(""));
 tester::expect_malloc(report, "ft_strdup malloc failure", copy, false);
 ```
 
+Reporter scores must stay easy to read. Any value displayed as `X/Y` must mean
+`passed/total`, never `total/passed` and never a comparison between two status
+types. Use status counters such as `OKx5`, `MOKx4`, or `MNOKx1` when you want to
+show how many checks produced each status.
+
 ## Test Quality Guidelines
 
 Prefer tests that prove different behavior:
