@@ -34,7 +34,7 @@ a convenience shortcut, but the day-to-day interface is the standalone
 
 ## Preview
 
-![Interactive menu preview](docs/assets/menu-preview.svg)
+![Interactive menu preview](docs/assets/menu-preview-v1.6.0.svg)
 
 ![HTML report preview](docs/assets/html-report-preview.svg)
 

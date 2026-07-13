@@ -5,7 +5,7 @@
   <rect x="70" y="58" width="1060" height="644" rx="22" fill="#101713" stroke="#2c3a32" stroke-width="2"/>
   <rect x="100" y="90" width="1000" height="86" rx="16" fill="#18211d" stroke="#2c3a32"/>
   <text x="600" y="128" text-anchor="middle" font-family="JetBrains Mono, Menlo, monospace" font-size="30" font-weight="800" fill="#f3f4e8">LIBFT TESTER</text>
-  <text x="600" y="156" text-anchor="middle" font-family="JetBrains Mono, Menlo, monospace" font-size="15" fill="#aab5a7">interactive menu preview</text>
+  <text x="600" y="156" text-anchor="middle" font-family="JetBrains Mono, Menlo, monospace" font-size="15" fill="#aab5a7">interactive menu preview v1.6.0</text>
   <text x="120" y="220" font-family="JetBrains Mono, Menlo, monospace" font-size="22" font-weight="700" fill="#f3f4e8">Libft Tester <tspan fill="#aab5a7">(v1.6.0)</tspan></text>
   <text x="120" y="258" font-family="JetBrains Mono, Menlo, monospace" font-size="18" fill="#aab5a7">target:</text>
   <text x="230" y="258" font-family="JetBrains Mono, Menlo, monospace" font-size="18" fill="#f3f4e8">../libft</text>
