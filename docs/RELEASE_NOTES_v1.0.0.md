@@ -20,7 +20,7 @@ First stable release of Libft Tester.
 ## Quick Start
 
 ```sh
-git clone git@github.com:NeddyKun01/Libft-Tester.git
+git clone git@github.com:OWNER/Libft-Tester.git
 cd Libft-Tester
 make ROOT_DIR=../libft
 ```

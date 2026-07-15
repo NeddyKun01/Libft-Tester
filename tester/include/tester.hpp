@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tester.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: neddykun <neddykun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: libft-tester <opensource@example.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/06 22:54:33 by neddykun          #+#    #+#             */
-/*   Updated: 2026/07/06 22:54:34 by neddykun         ###   ########.fr       */
+/*   Created: 2026/07/06 22:54:33 by libft-tester          #+#    #+#             */
+/*   Updated: 2026/07/06 22:54:34 by libft-tester         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1268,7 +1268,7 @@ namespace tester
 				<< "\">" << html_escape(names[i]) << "</a>";
 			i++;
 		}
-		std::cout << "</div></section>";
+		std::cout << "</div></div></section>";
 	}
 
 	inline void	print_html_likely_fixes(const Report &report)
@@ -1334,20 +1334,29 @@ namespace tester
 	{
 		size_t	i;
 
-		std::cout << "<section class=\"panel\"><h2>Function Overview</h2>";
-		std::cout << "<table><thead><tr><th>Function</th><th>OK/Total</th>";
-		std::cout << "<th>Progress</th><th>Status counts</th></tr></thead><tbody>";
+		std::cout << "<section class=\"panel\" id=\"function-overview\">";
+		std::cout << "<div class=\"section-head\"><div>";
+		std::cout << "<p class=\"eyebrow\">Function map</p>";
+		std::cout << "<h2>Function Overview</h2></div>";
+		std::cout << "<input id=\"functionSearch\" class=\"search\" ";
+		std::cout << "oninput=\"searchFunctions()\" ";
+		std::cout << "placeholder=\"Search ft_split, lst, mem...\" ";
+		std::cout << "aria-label=\"Search functions\"></div>";
+		std::cout << "<div class=\"table-wrap\"><table><thead><tr>";
+		std::cout << "<th>Function</th><th>OK/Total</th><th>Progress</th>";
+		std::cout << "<th>Status counts</th></tr></thead><tbody>";
 		i = 0;
 		while (i < report.functions.size())
 		{
 			const FunctionReport	&function = report.functions[i];
 			StatusCounts			counts = status_counts(function);
 			int						percent = pass_percent(function.passed,
-										function.checks.size());
+									function.checks.size());
 
 			std::cout << "<tr data-result=\""
 				<< (function_has_failure(function) ? "failed" : "passed")
 				<< "\" data-tags=\"" << html_escape(html_function_tags(function))
+				<< "\" data-name=\"" << html_escape(function.name)
 				<< "\"><td><a href=\"#"
 				<< html_escape(html_id(function.name)) << "\"><strong>"
 				<< html_escape(function.name)
@@ -1377,7 +1386,7 @@ namespace tester
 			std::cout << "</td></tr>";
 			i++;
 		}
-		std::cout << "</tbody></table></section>";
+		std::cout << "</tbody></table></div></section>";
 	}
 
 	inline void	print_html_report(const Report &report)
@@ -1400,72 +1409,221 @@ namespace tester
 		crash_functions = count_functions_matching(report, function_has_crash);
 		std::cout << "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">";
 		std::cout << "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">";
-		std::cout << "<title>Libft Tester Report</title><style>";
-		std::cout << ":root{--bg:#0f1411;--card:#18211d;--panel:#101713;";
-		std::cout << "--text:#f3f4e8;--muted:#aab5a7;--ok:#67d68f;";
-		std::cout << "--bad:#ff6b5f;--line:#2c3a32;--gold:#e2c044;}";
-		std::cout << "body{margin:0;background:radial-gradient(circle at 10% 0%,";
-		std::cout << "#254734,#0f1411 44%,#0b0f0d);color:var(--text);";
-		std::cout << "font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}";
-		std::cout << "main{max-width:1220px;margin:0 auto;padding:34px 18px 48px;}";
-		std::cout << ".hero,.panel,.card{border:1px solid var(--line);";
-		std::cout << "background:linear-gradient(145deg,rgba(24,33,29,.96),";
-		std::cout << "rgba(16,23,19,.92));box-shadow:0 24px 80px #0009;}";
-		std::cout << ".hero{border-radius:26px;padding:28px;position:relative;overflow:hidden;}";
-		std::cout << ".hero:after{content:\"\";position:absolute;right:-80px;top:-90px;";
-		std::cout << "width:240px;height:240px;border-radius:50%;background:#e2c04422;}";
-		std::cout << "h1{margin:0 0 8px;font-size:38px;letter-spacing:-1px}";
-		std::cout << "h2{margin:0 0 14px;font-size:20px}.muted{color:var(--muted)}";
-		std::cout << ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));";
-		std::cout << "gap:12px;margin:22px 0}.metric,.panel{background:var(--panel);";
-		std::cout << "border:1px solid var(--line);border-radius:18px;padding:16px}";
-		std::cout << ".metric strong{display:block;font-size:26px}.pass{color:var(--ok)}";
-		std::cout << ".fail{color:var(--bad)}.bar{height:9px;background:#0a0f0c;";
-		std::cout << "border-radius:999px;overflow:hidden;border:1px solid var(--line)}";
-		std::cout << ".bar span{display:block;height:100%;background:linear-gradient(90deg,";
-		std::cout << "var(--ok),var(--gold));}.panel{margin-top:16px}";
-		std::cout << "table{width:100%;border-collapse:collapse}th,td{padding:10px;";
-		std::cout << "border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted)}";
-		std::cout << "a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}";
-		std::cout << ".pill,.status{display:inline-block;margin:3px 5px 3px 0;";
-		std::cout << "font-weight:700}.pill{border:1px solid currentColor;border-radius:999px;";
-		std::cout << "padding:2px 8px}.card{margin-top:16px;border-radius:18px;overflow:hidden}";
-		std::cout << ".head{display:flex;justify-content:space-between;gap:12px;";
-		std::cout << "padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer}";
-		std::cout << ".checks{padding:14px 16px}details{margin-top:10px}";
-		std::cout << ".failure{margin:10px 0;padding:12px;border-left:3px solid var(--bad);";
-		std::cout << "background:#0a0f0c}.hint{color:var(--muted)}pre.commands,pre{";
-		std::cout << "white-space:pre-wrap;background:#0a0f0c;border:1px solid var(--line);";
-		std::cout << "border-radius:14px;padding:12px;overflow:auto}.copy,.jump{";
-		std::cout << "display:inline-block;margin:4px 0 10px;padding:8px 12px;";
-		std::cout << "border-radius:999px;border:1px solid var(--gold);";
-		std::cout << "background:#e2c04418;color:var(--gold);font-weight:700}";
-		std::cout << ".actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}";
-		std::cout << ".filter{display:inline-block;padding:8px 12px;border-radius:999px;";
-		std::cout << "border:1px solid var(--line);background:#0a0f0c;color:var(--text);";
-		std::cout << "font-weight:700;cursor:pointer}.filter:hover{border-color:var(--gold)}";
-		std::cout << ".filter span{color:var(--muted)}.fix{margin-top:12px;";
-		std::cout << "padding:12px;border:1px solid var(--line);border-radius:14px;";
-		std::cout << "background:#0a0f0c}.fix p{margin:8px 0;color:var(--muted)}";
-		std::cout << ".failed-list{display:flex;flex-wrap:wrap;gap:8px}.failed-list a{";
-		std::cout << "border:1px solid var(--bad);border-radius:999px;padding:6px 10px;";
-		std::cout << "color:var(--bad)}summary{list-style:none}summary::-webkit-details-marker{display:none}";
-		std::cout << ".card:not([open]) .head{border-bottom:0}";
-		std::cout << "</style><script>function copyCommand(b){var p=b.nextElementSibling;";
+		std::cout << "<title>Libft Tester Web Dashboard</title>\n";
+		std::cout << "<style>\n";
+		std::cout << ":root{\n";
+		std::cout << "  --bg:#0b1110;\n";
+		std::cout << "  --surface:#101713;\n";
+		std::cout << "  --surface-soft:#18211d;\n";
+		std::cout << "  --ink:#f3f4e8;\n";
+		std::cout << "  --muted:#aab5a7;\n";
+		std::cout << "  --line:#2c3a32;\n";
+		std::cout << "  --ok:#67d68f;\n";
+		std::cout << "  --bad:#ff6b5f;\n";
+		std::cout << "  --gold:#e2c044;\n";
+		std::cout << "}\n";
+		std::cout << "*{box-sizing:border-box}\n";
+		std::cout << "body{\n";
+		std::cout << "  margin:0;\n";
+		std::cout << "  min-width:1100px;\n";
+		std::cout << "  background:radial-gradient(circle at 8% -10%,#335f46,#0f1411 42%,#070a09);\n";
+		std::cout << "  color:var(--ink);\n";
+		std::cout << "  font:17px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;\n";
+		std::cout << "}\n";
+		std::cout << "main{\n";
+		std::cout << "  width:min(92vw,1540px);\n";
+		std::cout << "  margin:0 auto;\n";
+		std::cout << "  padding:30px 0 78px;\n";
+		std::cout << "}\n";
+		std::cout << ".topnav{\n";
+		std::cout << "  position:sticky;\n";
+		std::cout << "  top:0;\n";
+		std::cout << "  z-index:5;\n";
+		std::cout << "  backdrop-filter:blur(16px);\n";
+		std::cout << "  background:#0b1110dd;\n";
+		std::cout << "  border-bottom:1px solid var(--line);\n";
+		std::cout << "}\n";
+		std::cout << ".topnav div{\n";
+		std::cout << "  width:min(92vw,1540px);\n";
+		std::cout << "  margin:auto;\n";
+		std::cout << "  padding:14px 0;\n";
+		std::cout << "  display:flex;\n";
+		std::cout << "  gap:12px;\n";
+		std::cout << "}\n";
+		std::cout << ".topnav a{\n";
+		std::cout << "  border:1px solid var(--line);\n";
+		std::cout << "  border-radius:999px;\n";
+		std::cout << "  padding:8px 14px;\n";
+		std::cout << "  color:var(--muted);\n";
+		std::cout << "}\n";
+		std::cout << ".topnav a:hover{color:var(--gold);border-color:var(--gold);text-decoration:none}\n";
+		std::cout << ".hero,.panel,.card{\n";
+		std::cout << "  border:1px solid var(--line);\n";
+		std::cout << "  background:linear-gradient(145deg,rgba(24,33,29,.96),rgba(16,23,19,.92));\n";
+		std::cout << "  box-shadow:0 28px 90px #0009;\n";
+		std::cout << "}\n";
+		std::cout << ".hero{\n";
+		std::cout << "  position:relative;\n";
+		std::cout << "  overflow:hidden;\n";
+		std::cout << "  border-radius:30px;\n";
+		std::cout << "  padding:36px;\n";
+		std::cout << "}\n";
+		std::cout << ".hero:after{\n";
+		std::cout << "  content:\"\";\n";
+		std::cout << "  position:absolute;\n";
+		std::cout << "  right:-70px;\n";
+		std::cout << "  top:-90px;\n";
+		std::cout << "  width:260px;\n";
+		std::cout << "  height:260px;\n";
+		std::cout << "  border-radius:50%;\n";
+		std::cout << "  background:#e2c04422;\n";
+		std::cout << "}\n";
+		std::cout << ".hero-grid{\n";
+		std::cout << "  display:grid;\n";
+		std::cout << "  grid-template-columns:minmax(0,1.08fr) minmax(500px,.92fr);\n";
+		std::cout << "  gap:32px;\n";
+		std::cout << "  align-items:stretch;\n";
+		std::cout << "}\n";
+		std::cout << ".hero-copy,.hero-aside{position:relative;z-index:1}\n";
+		std::cout << ".hero-copy{display:flex;flex-direction:column;justify-content:center}\n";
+		std::cout << ".hero-aside{\n";
+		std::cout << "  border:1px solid var(--line);\n";
+		std::cout << "  border-radius:24px;\n";
+		std::cout << "  background:#0a0f0ccc;\n";
+		std::cout << "  padding:22px;\n";
+		std::cout << "}\n";
+		std::cout << ".kicker,.eyebrow{\n";
+		std::cout << "  margin:0 0 10px;\n";
+		std::cout << "  color:var(--gold);\n";
+		std::cout << "  font-size:14px;\n";
+		std::cout << "  font-weight:900;\n";
+		std::cout << "  letter-spacing:.16em;\n";
+		std::cout << "  text-transform:uppercase;\n";
+		std::cout << "}\n";
+		std::cout << "h1{\n";
+		std::cout << "  max-width:15ch;\n";
+		std::cout << "  margin:8px 0 22px;\n";
+		std::cout << "  font-size:clamp(58px,4.3vw,82px);\n";
+		std::cout << "  line-height:.98;\n";
+		std::cout << "  letter-spacing:-3px;\n";
+		std::cout << "}\n";
+		std::cout << "h2{margin:0 0 18px;font-size:28px;line-height:1.15}\n";
+		std::cout << ".muted{color:var(--muted)}\n";
+		std::cout << ".section-head{\n";
+		std::cout << "  display:flex;\n";
+		std::cout << "  gap:24px;\n";
+		std::cout << "  justify-content:space-between;\n";
+		std::cout << "  align-items:flex-end;\n";
+		std::cout << "}\n";
+		std::cout << ".search{\n";
+		std::cout << "  width:440px;\n";
+		std::cout << "  border:1px solid var(--line);\n";
+		std::cout << "  border-radius:999px;\n";
+		std::cout << "  background:#0a0f0c;\n";
+		std::cout << "  color:var(--ink);\n";
+		std::cout << "  padding:14px 18px;\n";
+		std::cout << "  font:inherit;\n";
+		std::cout << "  outline:none;\n";
+		std::cout << "}\n";
+		std::cout << ".search:focus{border-color:var(--gold);box-shadow:0 0 0 3px #e2c04422}\n";
+		std::cout << ".grid{\n";
+		std::cout << "  display:grid;\n";
+		std::cout << "  grid-template-columns:repeat(2,minmax(0,1fr));\n";
+		std::cout << "  gap:16px;\n";
+		std::cout << "  margin-top:26px;\n";
+		std::cout << "}\n";
+		std::cout << ".metric,.panel{\n";
+		std::cout << "  background:var(--surface);\n";
+		std::cout << "  border:1px solid var(--line);\n";
+		std::cout << "  border-radius:22px;\n";
+		std::cout << "  padding:26px;\n";
+		std::cout << "}\n";
+		std::cout << ".metric span{\n";
+		std::cout << "  color:var(--muted);\n";
+		std::cout << "  font-size:14px;\n";
+		std::cout << "  letter-spacing:.1em;\n";
+		std::cout << "  text-transform:uppercase;\n";
+		std::cout << "}\n";
+		std::cout << ".metric strong{\n";
+		std::cout << "  display:block;\n";
+		std::cout << "  margin-top:8px;\n";
+		std::cout << "  font-size:clamp(32px,2.25vw,42px);\n";
+		std::cout << "  line-height:1;\n";
+		std::cout << "  word-break:break-word;\n";
+		std::cout << "}\n";
+		std::cout << ".pass{color:var(--ok)}\n";
+		std::cout << ".fail{color:var(--bad)}\n";
+		std::cout << ".bar{height:12px;background:#0a0f0c;border:1px solid var(--line);border-radius:999px;overflow:hidden}\n";
+		std::cout << ".bar span{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--gold))}\n";
+		std::cout << ".panel{margin-top:22px}\n";
+		std::cout << ".table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#0a0f0c}\n";
+		std::cout << "table{width:100%;min-width:940px;border-collapse:collapse}\n";
+		std::cout << "th,td{padding:16px 18px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}\n";
+		std::cout << "tr:last-child td{border-bottom:0}\n";
+		std::cout << "th{color:var(--muted);font-size:14px;letter-spacing:.1em;text-transform:uppercase}\n";
+		std::cout << "a{color:var(--gold);text-decoration:none}\n";
+		std::cout << "a:hover{text-decoration:underline}\n";
+		std::cout << ".pill,.status{display:inline-block;margin:4px 7px 4px 0;font-weight:800}\n";
+		std::cout << ".pill{border:1px solid currentColor;border-radius:999px;padding:4px 10px}\n";
+		std::cout << ".card{margin-top:18px;border-radius:22px;overflow:hidden}\n";
+		std::cout << ".head{display:flex;justify-content:space-between;gap:18px;padding:18px 22px;border-bottom:1px solid var(--line);cursor:pointer}\n";
+		std::cout << ".checks{padding:18px 22px}\n";
+		std::cout << "details{margin-top:12px}\n";
+		std::cout << ".failure{margin:14px 0;padding:16px;border-left:4px solid var(--bad);background:#0a0f0c}\n";
+		std::cout << ".hint{color:var(--muted)}\n";
+		std::cout << "pre.commands,pre{white-space:pre-wrap;background:#0a0f0c;border:1px solid var(--line);border-radius:16px;padding:18px;overflow:auto}\n";
+		std::cout << ".copy,.jump{display:inline-block;margin:6px 0 12px;padding:10px 14px;border-radius:999px;border:1px solid var(--gold);background:#e2c04418;color:var(--gold);font-weight:800}\n";
+		std::cout << ".actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}\n";
+		std::cout << ".filter{display:inline-block;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#0a0f0c;color:var(--ink);font-weight:800;cursor:pointer}\n";
+		std::cout << ".filter:hover,.filter.active{border-color:var(--gold);color:var(--gold)}\n";
+		std::cout << ".filter span{color:var(--muted)}\n";
+		std::cout << ".fix{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:16px;background:#0a0f0c}\n";
+		std::cout << ".fix p{margin:10px 0;color:var(--muted)}\n";
+		std::cout << ".failed-list{display:flex;flex-wrap:wrap;gap:10px}\n";
+		std::cout << ".failed-list a{border:1px solid var(--bad);border-radius:999px;padding:8px 12px;color:var(--bad)}\n";
+		std::cout << "summary{list-style:none}\n";
+		std::cout << "summary::-webkit-details-marker{display:none}\n";
+		std::cout << ".card:not([open]) .head{border-bottom:0}\n";
+		std::cout << "@media(min-width:2100px){\n";
+		std::cout << "  body{font-size:19px}\n";
+		std::cout << "  main,.topnav div{max-width:1840px}\n";
+		std::cout << "}\n";
+		std::cout << "@media(max-width:1280px){\n";
+		std::cout << "  body{font-size:16px}\n";
+		std::cout << "  main,.topnav div{width:94vw}\n";
+		std::cout << "  .hero{padding:34px}\n";
+		std::cout << "  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(360px,.8fr);gap:28px}\n";
+		std::cout << "  h1{font-size:56px}\n";
+		std::cout << "  .metric strong{font-size:32px}\n";
+		std::cout << "}\n";
+		std::cout << "</style><script>var currentFilter='all';function copyCommand(b){var p=b.nextElementSibling;";
 		std::cout << "navigator.clipboard&&navigator.clipboard.writeText(p.innerText);";
 		std::cout << "b.innerText='Copied';setTimeout(function(){b.innerText='Copy commands'},1200);}";
-		std::cout << "function filterReport(m){document.querySelectorAll('[data-tags]').";
-		std::cout << "forEach(function(e){var t=(e.dataset.tags||'').split(' ');";
-		std::cout << "e.style.display=(m==='all'||t.indexOf(m)!==-1)";
+		std::cout << "function applyFilters(){var q=(document.getElementById('functionSearch')||{}).value||'';q=q.toLowerCase();document.querySelectorAll('[data-tags]').";
+		std::cout << "forEach(function(e){var t=(e.dataset.tags||'').split(' ');var n=(e.dataset.name||'').toLowerCase();";
+		std::cout << "e.style.display=((currentFilter==='all'||t.indexOf(currentFilter)!==-1)&&n.indexOf(q)!==-1)";
 		std::cout << "?'':'none';});}";
+		std::cout << "function filterReport(m){currentFilter=m;applyFilters();}";
+		std::cout << "function searchFunctions(){applyFilters();}";
 		std::cout << "</script>";
-		std::cout << "</head><body><main>";
-		std::cout << "<section class=\"hero\"><h1>Libft Tester Report</h1>";
+		std::cout << "</head><body>";
+		std::cout << "<nav class=\"topnav\"><div>";
+		std::cout << "<a href=\"#summary\">Summary</a>";
+		std::cout << "<a href=\"#score-guide\">Score Guide</a>";
+		std::cout << "<a href=\"#function-overview\">Functions</a>";
+		std::cout << "<a href=\"#details\">Details</a>";
+		std::cout << "</div></nav><main>";
+		std::cout << "<section class=\"hero\" id=\"summary\">";
+		std::cout << "<div class=\"hero-grid\"><div class=\"hero-copy\">";
+		std::cout << "<p class=\"kicker\">Web-first zero-dependency report</p>";
+		std::cout << "<h1>Libft Tester Web Dashboard</h1>";
 		std::cout << "<p class=\"muted\">version " << html_escape(report.version)
 			<< " | profile " << html_escape(report.profile)
 			<< " | seed " << report.seed
 			<< " | repeats " << report.repeat_count
 			<< " | duration " << report.duration_ms << "ms</p>";
+		std::cout << "<p class=\"muted\">Open this file anywhere. No server, npm, or shell script required.</p>";
+		std::cout << "</div><div class=\"hero-aside\"><p class=\"eyebrow\">Current run</p>";
 		std::cout << "<p class=\"" << (report.failures == 0 ? "pass" : "fail")
 			<< "\"><strong>" << (report.failures == 0 ? "PASS" : "FAIL")
 			<< "</strong> - " << percent << "% pass rate</p>";
@@ -1489,12 +1647,13 @@ namespace tester
 		std::cout << "<div class=\"metric\"><span>Failed</span><strong class=\""
 			<< (report.failures == 0 ? "pass" : "fail") << "\">"
 			<< report.failures << "/" << report.checks << "</strong></div>";
-		std::cout << "</div></section>";
+		std::cout << "</div></div></section>";
 		print_html_score_guide();
 		print_html_debug_focus(report);
 		print_html_failed_summary(report);
 		print_html_likely_fixes(report);
 		print_html_function_table(report);
+		std::cout << "<section id=\"details\"></section>";
 		i = 0;
 		while (i < report.functions.size())
 		{
@@ -1506,6 +1665,7 @@ namespace tester
 			std::cout << "<details class=\"card\" data-result=\""
 				<< (function_has_failure(function) ? "failed" : "passed")
 				<< "\" data-tags=\"" << html_escape(html_function_tags(function))
+				<< "\" data-name=\"" << html_escape(function.name)
 				<< "\" id=\""
 				<< html_escape(html_id(function.name)) << "\"";
 			if (open_card)

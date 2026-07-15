@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   malloc_fail.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: neddykun <neddykun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: libft-tester <opensource@example.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/06 22:53:44 by neddykun          #+#    #+#             */
-/*   Updated: 2026/07/06 22:53:45 by neddykun         ###   ########.fr       */
+/*   Created: 2026/07/06 22:53:44 by libft-tester          #+#    #+#             */
+/*   Updated: 2026/07/06 22:53:45 by libft-tester         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

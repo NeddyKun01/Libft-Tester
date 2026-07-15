@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 2.0.0 - 2026-07-15
+
+- Added Web-first dashboard reports with `--web` and kept `--html` as a compatibility alias.
+- Added named driver presets with `--preset NAME` and `--presets`.
+- Added guided preset selection to the interactive menu.
+- Added optional `preset` support to `.libft-tester.json`.
+- Added `--compare PATH` to compare two Libft roots with the same test options.
+- Added self-tests for preset expansion, config presets, preset listing, and compare mode.
+- Updated public docs and examples around Web-first, preset-first workflows.
+- Replaced mock README previews with images generated from real tester runs.
+
 ## 1.7.0 - 2026-07-15
 
 - Added `--review` mode with a compact reviewer-friendly verdict, score,

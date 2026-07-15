@@ -389,35 +389,39 @@ void	Driver::test_html_report_output(std::ostream &out, const fs::path &tmp,
 
 	write_html_report_libft(pass_root, false);
 	root_dir = pass_root.string();
-	status = run_suite({"--only", "ft_strlen", "--html", "--no-color",
+	status = run_suite({"--only", "ft_strlen", "--web", "--no-color",
 			"--seed", "42"}, html);
 	if (status == 0)
 		pass(out, "html report succeeds for passing function output");
 	else
 		fail(out, failures, "html report succeeds for passing function output",
 			html.str());
+	assert_contains(out, failures, "Libft Tester Web Dashboard",
+		"web report includes dashboard hero", html.str());
 	assert_contains(out, failures, "Function Overview",
-		"html report includes function overview", html.str());
+		"web report includes function overview", html.str());
+	assert_contains(out, failures, "id=\"functionSearch\"",
+		"web report includes function search", html.str());
 	assert_contains(out, failures, "OK/Total",
-		"html report labels scores as OK over total", html.str());
+		"web report labels scores as OK over total", html.str());
 	assert_contains(out, failures, "PASS</strong> - 100% pass rate",
-		"html report includes pass rate hero", html.str());
+		"web report includes pass rate hero", html.str());
 	assert_contains(out, failures, "Passed</span><strong class=\"pass\">13/13",
-		"html report shows passed checks over total checks", html.str());
+		"web report shows passed checks over total checks", html.str());
 	assert_contains(out, failures, "id=\"score-guide\"",
-		"html report explains score direction", html.str());
+		"web report explains score direction", html.str());
 	assert_contains(out, failures, "filterReport('passed')",
-		"html report includes a passing filter button", html.str());
+		"web report includes a passing filter button", html.str());
 	assert_contains(out, failures, "filterReport('malloc')",
-		"html report includes a malloc filter button", html.str());
+		"web report includes a malloc filter button", html.str());
 	assert_contains(out, failures, "filterReport('crash')",
-		"html report includes a crash filter button", html.str());
+		"web report includes a crash filter button", html.str());
 	assert_contains(out, failures, "data-result=\"passed\"",
-		"html report marks passing rows and cards for filtering", html.str());
+		"web report marks passing rows and cards for filtering", html.str());
 	assert_contains(out, failures, "data-tags=\"passed\"",
-		"html report marks passing filter tags", html.str());
+		"web report marks passing filter tags", html.str());
 	assert_contains(out, failures, "<details class=\"card\"",
-		"html report uses collapsible function cards", html.str());
+		"web report uses collapsible function cards", html.str());
 	html.str("");
 	html.clear();
 	write_html_report_libft(fail_root, true);
@@ -463,12 +467,13 @@ void	Driver::test_config_file(std::ostream &out, const fs::path &tmp,
 	write_file(config,
 		"{\n"
 		"  \"root\": \"" + root.string() + "\",\n"
+		"  \"preset\": \"review\",\n"
 		"  \"profile\": \"quick\",\n"
 		"  \"seed\": 42,\n"
 		"  \"no_color\": true\n"
 		"}\n");
 	result = run_process({(tester_dir / "libft_tester").string(),
-			"--config", config.string(), "--only", "ft_strlen", "--review"});
+			"--config", config.string(), "--only", "ft_strlen"});
 	if (result.status == 0)
 		pass(out, "config file can provide root and suite defaults");
 	else
@@ -480,6 +485,95 @@ void	Driver::test_config_file(std::ostream &out, const fs::path &tmp,
 		"config file applies profile and seed defaults", result.output);
 	assert_contains(out, failures, "verdict: PASS",
 		"config file run tests the configured target", result.output);
+}
+
+void	Driver::test_presets(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path		root = tmp / "preset_libft";
+	CommandResult	result;
+
+	write_html_report_libft(root, false);
+	result = run_process({(tester_dir / "libft_tester").string(),
+			"--root", root.string(), "--preset", "review", "--only",
+			"ft_strlen"});
+	if (result.status == 0)
+		pass(out, "review preset runs successfully");
+	else
+		fail(out, failures, "review preset runs successfully", result.output);
+	assert_contains(out, failures, "Libft Tester Review",
+		"review preset enables review output", result.output);
+	assert_contains(out, failures, "profile: normal | seed: 42",
+		"review preset applies deterministic seed", result.output);
+	result = run_process({(tester_dir / "libft_tester").string(),
+			"--root", root.string(), "--preset=school", "--only",
+			"ft_strlen", "--review"});
+	if (result.status == 0)
+		pass(out, "school preset runs successfully");
+	else
+		fail(out, failures, "school preset runs successfully", result.output);
+	assert_contains(out, failures, "profile: strict | seed: 42",
+		"school preset applies strict profile", result.output);
+	result = run_process({(tester_dir / "libft_tester").string(), "--presets"});
+	if (result.status == 0)
+		pass(out, "preset listing command succeeds");
+	else
+		fail(out, failures, "preset listing command succeeds", result.output);
+	assert_contains(out, failures, "review",
+		"preset listing includes review preset", result.output);
+	assert_contains(out, failures, "school",
+		"preset listing includes school preset", result.output);
+	assert_contains(out, failures, "web",
+		"preset listing includes web preset", result.output);
+}
+
+void	Driver::test_compare(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path		good_root = tmp / "compare_good";
+	fs::path		bad_root = tmp / "compare_bad";
+	std::string		old_root = root_dir;
+	std::ostringstream	same;
+	std::ostringstream	different;
+	int				status;
+
+	write_html_report_libft(good_root, false);
+	write_html_report_libft(bad_root, true);
+	root_dir = good_root.string();
+	status = run_compare(same, good_root.string(), {"--only", "ft_strlen",
+			"--seed", "42"});
+	if (status == 0)
+		pass(out, "compare mode passes for matching roots");
+	else
+		fail(out, failures, "compare mode passes for matching roots", same.str());
+	assert_contains(out, failures, "Compare verdict: MATCHING PASS",
+		"compare mode reports matching pass", same.str());
+	status = run_compare(different, bad_root.string(), {"--only", "ft_strlen",
+			"--seed", "42"});
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "compare mode fails for different roots");
+	else
+		fail(out, failures, "compare mode fails for different roots",
+			different.str());
+	assert_contains(out, failures, "Compare verdict: DIFFERENT",
+		"compare mode reports different verdict", different.str());
+	assert_contains(out, failures, "ft_strlen",
+		"compare mode lists differing function", different.str());
+	assert_contains(out, failures, "Left : PASS",
+		"compare mode shows left summary", different.str());
+	assert_contains(out, failures, "Right: FAIL",
+		"compare mode shows right summary", different.str());
+	CommandResult result = run_process({(tester_dir / "libft_tester").string(),
+			"--root", good_root.string(), "--preset", "review", "--compare",
+			good_root.string(), "--only", "ft_strlen"});
+	if (result.status == 0)
+		pass(out, "compare mode works after preset expansion");
+	else
+		fail(out, failures, "compare mode works after preset expansion",
+			result.output);
+	assert_contains(out, failures, "Compare verdict: MATCHING PASS",
+		"compare mode after preset reports matching pass", result.output);
 }
 
 void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
@@ -598,6 +692,8 @@ int	Driver::run_self_test(std::ostream &out)
 	test_review_output(out, tmp, failures);
 	test_html_report_output(out, tmp, failures);
 	test_config_file(out, tmp, failures);
+	test_presets(out, tmp, failures);
+	test_compare(out, tmp, failures);
 	test_doctor(out, tmp, failures);
 	fs::remove_all(tmp);
 	if (old_mode)

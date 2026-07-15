@@ -30,9 +30,10 @@ make ROOT_DIR=/path/to/libft
 For direct CLI checks:
 
 ```sh
-make ROOT_DIR=/path/to/libft build
-./libft_tester --summary-only --seed 42
-./libft_tester --only ft_split --verbose
+make build
+./libft_tester --root /path/to/libft --summary-only --seed 42
+./libft_tester --root /path/to/libft --only ft_split --verbose
+./libft_tester --root /path/to/libft --preset review
 ./libft_tester --coverage
 ```
 
@@ -48,7 +49,7 @@ If your change touches allocation behavior, also run a focused Valgrind check:
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  ./libft_tester --only ft_split --no-color
+  ./libft_tester --root /path/to/libft --only ft_split --no-color
 ```
 
 ## Adding Or Changing Tests
@@ -92,8 +93,9 @@ Reporter scores must stay easy to read. Any value displayed as `X/Y` must mean
 types. Use status counters such as `OKx5`, `MOKx4`, or `MNOKx1` when you want to
 show how many checks produced each status.
 
-If a change touches terminal output, `--review`, config-file behavior, JSON, or
-HTML reports, add or update `make self-test` coverage for the visible contract.
+If a change touches terminal output, presets, `--compare`, `--review`,
+config-file behavior, JSON, or Web reports, add or update `make self-test`
+coverage for the visible contract.
 
 ## Test Quality Guidelines
 
@@ -178,16 +180,17 @@ Please keep documentation:
 Before opening a pull request, run:
 
 ```sh
-make ROOT_DIR=/path/to/libft build
-./libft_tester --summary-only --seed 42
+make build
+./libft_tester --root /path/to/libft --summary-only --seed 42
 make self-test
 ```
 
 If relevant, also run:
 
 ```sh
-./libft_tester --json --no-color --only ft_strlen --seed 42 > libft-test-report.json
-./libft_tester --html --no-color --only ft_strlen --seed 42 > libft-test-report.html
+./libft_tester --root /path/to/libft --json --no-color --only ft_strlen --seed 42 > libft-test-report.json
+./libft_tester --root /path/to/libft --web --no-color --only ft_strlen --seed 42 > libft-test-report.html
+./libft_tester --root /path/to/libft --compare /path/to/libft-before --only ft_strlen --seed 42
 ./libft_tester --coverage
 ```
 
@@ -197,5 +200,5 @@ If the change touches allocation behavior:
 LIBFT_TESTER_NO_FORK=1 valgrind --leak-check=full \
   --show-leak-kinds=all --track-origins=yes \
   --errors-for-leak-kinds=all --error-exitcode=42 \
-  ./libft_tester --only ft_split --no-color
+  ./libft_tester --root /path/to/libft --only ft_split --no-color
 ```

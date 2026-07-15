@@ -16,9 +16,11 @@ struct DriverConfig
 	std::string	path;
 	std::string	root;
 	std::string	profile;
+	std::string	preset;
 	std::string	seed;
 	bool		has_root = false;
 	bool		has_profile = false;
+	bool		has_preset = false;
 	bool		has_seed = false;
 	bool		no_color = false;
 };
@@ -82,6 +84,7 @@ static DriverConfig	load_config(const fs::path &path)
 	config.path = path.string();
 	config.has_root = json_string(content, "root", config.root);
 	config.has_profile = json_string(content, "profile", config.profile);
+	config.has_preset = json_string(content, "preset", config.preset);
 	config.has_seed = json_number(content, "seed", config.seed);
 	json_bool(content, "no_color", config.no_color);
 	return (config);
@@ -105,8 +108,13 @@ static bool	arg_has_option(const std::vector<std::string> &args,
 static void	apply_config_args(std::vector<std::string> &args,
 	const DriverConfig &config)
 {
-	if (args.empty())
+	if (args.empty() && !config.has_preset)
 		return ;
+	if (config.has_preset && !arg_has_option(args, "--preset"))
+	{
+		args.push_back("--preset");
+		args.push_back(config.preset);
+	}
 	if (config.has_profile && !arg_has_option(args, "--profile")
 		&& !arg_has_option(args, "--strict"))
 	{
@@ -120,6 +128,37 @@ static void	apply_config_args(std::vector<std::string> &args,
 	}
 	if (config.no_color && !arg_has_option(args, "--no-color"))
 		args.push_back("--no-color");
+}
+
+static bool	take_compare_arg(std::vector<std::string> &args,
+	std::string &compare_root)
+{
+	std::vector<std::string>	filtered;
+	size_t					i;
+
+	i = 0;
+	while (i < args.size())
+	{
+		if (args[i] == "--compare")
+		{
+			if (i + 1 >= args.size())
+			{
+				std::cerr << "Missing value for --compare\n";
+				return (false);
+			}
+			compare_root = args[i + 1];
+			i += 2;
+		}
+		else if (args[i].rfind("--compare=", 0) == 0)
+		{
+			compare_root = args[i].substr(10);
+			i++;
+		}
+		else
+			filtered.push_back(args[i++]);
+	}
+	args = filtered;
+	return (true);
 }
 
 static std::vector<std::string>	parse_args(int argc, char **argv,
@@ -167,6 +206,7 @@ int	main(int argc, char **argv)
 	fs::path					tester_dir = executable_dir(argv[0]);
 	std::string					root = "..";
 	std::string					config_path;
+	std::string					compare_root;
 	bool						root_set = false;
 	std::vector<std::string>	args;
 	DriverConfig				config;
@@ -189,8 +229,14 @@ int	main(int argc, char **argv)
 	if (config.no_color)
 		setenv("NO_COLOR", "1", 1);
 	apply_config_args(args, config);
+	if (!expand_driver_presets(args, std::cerr))
+		return (2);
+	if (!take_compare_arg(args, compare_root))
+		return (2);
 	driver = Driver(tester_dir, root);
 
+	if (!compare_root.empty())
+		return (driver.run_compare(std::cout, compare_root, args));
 	if (args.empty())
 		return (driver.run_menu(args));
 	if (args[0] == "--version")
@@ -200,6 +246,11 @@ int	main(int argc, char **argv)
 	}
 	if (args[0] == "--help")
 		return (driver.print_help());
+	if (args[0] == "--presets")
+	{
+		print_driver_presets(std::cout);
+		return (0);
+	}
 	if (args[0] == "--menu")
 		return (driver.run_menu(std::vector<std::string>(args.begin() + 1, args.end())));
 	if (args[0] == "--smart")

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   hints.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: neddykun <neddykun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: libft-tester <opensource@example.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/07 15:10:00 by neddykun          #+#    #+#             */
-/*   Updated: 2026/07/07 15:10:00 by neddykun         ###   ########.fr       */
+/*   Created: 2026/07/07 15:10:00 by libft-tester          #+#    #+#             */
+/*   Updated: 2026/07/07 15:10:00 by libft-tester         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

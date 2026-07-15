@@ -17,11 +17,11 @@ Mention the menu option or command you already used.
 Examples:
 
 ```sh
-make ROOT_DIR=../libft
-make ROOT_DIR=../libft build
-./libft_tester --only ft_split --verbose
-./libft_tester --review --seed 42
-./libft_tester --config .libft-tester.json --review
+make build
+./libft_tester --root ../libft --only ft_split --verbose
+./libft_tester --root ../libft --preset web
+./libft_tester --root ../libft --compare ../libft-before --seed 42
+./libft_tester --config .libft-tester.json
 ```
 
 ## Environment

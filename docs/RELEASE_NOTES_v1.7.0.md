@@ -100,8 +100,8 @@ This release was validated locally with:
 make build
 make self-test
 ./libft_tester --version
-./libft_tester --root /home/neddykun/Secretária/reposdeteste/git_libft --review --seed 42
-./libft_tester --root /home/neddykun/Secretária/reposdeteste/git_libft --only ft_lstmap --html --no-color --seed 42
+./libft_tester --root /path/to/libft --review --seed 42
+./libft_tester --root /path/to/libft --only ft_lstmap --html --no-color --seed 42
 git diff --check
 ```
 

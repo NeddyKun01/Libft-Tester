@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: neddykun <neddykun@student.42.fr>          +#+  +:+       +#+        */
+/*   By: libft-tester <opensource@example.com>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/06 22:53:40 by neddykun          #+#    #+#             */
-/*   Updated: 2026/07/06 22:53:41 by neddykun         ###   ########.fr       */
+/*   Created: 2026/07/06 22:53:40 by libft-tester          #+#    #+#             */
+/*   Updated: 2026/07/06 22:53:41 by libft-tester         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ struct CliOptions
 	bool		fail_fast_set = false;
 };
 
-static const char	*g_version = "1.7.0";
+static const char	*g_version = "2.0.0";
 
 static void	register_suites(tester::SuiteRunner &runner)
 {
@@ -83,7 +83,7 @@ static void	print_help(const char *program)
 		<< "  --quiet             Show only failures and summary\n"
 		<< "  --review            Print a compact reviewer-friendly report\n"
 		<< "  --json              Print machine-readable JSON\n"
-		<< "  --html              Print a standalone HTML report\n"
+		<< "  --web, --html       Print a standalone Web dashboard report\n"
 		<< "  --no-color          Disable terminal colors\n\n"
 		<< "Examples:\n"
 		<< "  " << program << " --only ft_split\n"
@@ -95,7 +95,7 @@ static void	print_help(const char *program)
 		<< "  " << program << " --suite memory --verbose\n"
 		<< "  " << program << " --review --seed 42\n"
 		<< "  " << program << " --json --no-color\n"
-		<< "  " << program << " --html --no-color > report.html\n";
+		<< "  " << program << " --web --no-color > report.html\n";
 }
 
 static void	print_list(const tester::SuiteRunner &runner)
@@ -191,7 +191,7 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.review = true;
 		else if (value == "--json")
 			options.json = true;
-		else if (value == "--html")
+		else if (value == "--web" || value == "--html")
 			options.html = true;
 		else if (value == "--no-color")
 			setenv("NO_COLOR", "1", 1);

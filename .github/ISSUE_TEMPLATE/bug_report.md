@@ -17,7 +17,9 @@ Choose the closest area:
 - menu
 - CLI
 - `--review`
-- HTML report
+- presets
+- compare mode
+- Web report
 - JSON report
 - config file
 - tests
@@ -34,11 +36,11 @@ Choose the closest area:
 Example commands:
 
 ```sh
-make ROOT_DIR=../libft
-make ROOT_DIR=../libft build
-./libft_tester --only ft_split --profile strict
-./libft_tester --review --seed 42
-./libft_tester --html --no-color
+make build
+./libft_tester --root ../libft --only ft_split --profile strict
+./libft_tester --root ../libft --preset review
+./libft_tester --root ../libft --compare ../libft-before --seed 42
+./libft_tester --root ../libft --web --no-color
 ```
 
 ## Expected Behavior

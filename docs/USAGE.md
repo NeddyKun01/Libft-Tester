@@ -75,13 +75,15 @@ Useful menu options:
 | `2) Quick test` | Fast feedback while editing code. |
 | `3) Full test` | Normal full run. |
 | `4) Strict test` | Stronger validation before sharing work. |
+| `p) Preset run` | Choose a named workflow such as review, school, CI, or HTML. |
 | `5) Diagnose project` | Explain Makefile/header/archive problems. |
 | `6) Rescue test` | Test real symbols in `libft.a` even if the project is incomplete. |
 | `7) Leak check` | Run a focused Valgrind check. |
 | `8) Explain or hint a function` | Read coverage notes or debugging hints. |
 | `d) Doctor environment` | Check required tools and target project shape. |
-| `9) Generate HTML report` | Write a standalone HTML report. |
+| `9) Generate Web report` | Write a standalone Web dashboard. |
 | `10) Review summary` | Print compact reviewer-friendly output. |
+| `11) Compare roots` | Compare this Libft with another root using the same options. |
 
 If the driver runs without an interactive terminal, it falls back to smart test
 instead of waiting for keyboard input. This keeps CI and scripts safe.
@@ -110,6 +112,9 @@ automatically:
 
 ```sh
 ./libft_tester --root ../libft --summary-only
+./libft_tester --root ../libft --preset review
+./libft_tester --root ../libft --preset school
+./libft_tester --presets
 ./libft_tester --root ../libft --only ft_split
 ./libft_tester --root ../libft --suite memory
 ./libft_tester --root ../libft --profile quick
@@ -120,13 +125,57 @@ automatically:
 ./libft_tester --root ../libft --verbose
 ./libft_tester --root ../libft --review --seed 42
 ./libft_tester --root ../libft --json --no-color
-./libft_tester --root ../libft --html --no-color
+./libft_tester --root ../libft --web --no-color
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
 ./libft_tester --root ../libft --doctor
 ./libft_tester --help
 ```
+
+## Presets
+
+Presets are named shortcuts for common workflows. Use them when you want the
+right default without remembering every flag.
+
+| Preset | Expands to | Best for |
+| --- | --- | --- |
+| `quick` | `--profile quick` | Fast feedback while coding. |
+| `review` | `--review --seed 42` | Compact deterministic reviewer output. |
+| `school` | `--profile strict --seed 42` | Strong local validation before evaluation. |
+| `ci` | `--profile strict --summary-only --seed 42 --no-color` | Clean automation output. |
+| `web` | `--web --seed 42 --no-color` | Shareable visual dashboard. |
+| `html` | `--html --seed 42 --no-color` | Compatibility alias for the Web dashboard. |
+| `brutal` | `--profile brutal --seed 42` | Heavy stress checks before release. |
+
+Examples:
+
+```sh
+./libft_tester --root ../libft --preset review
+./libft_tester --root ../libft --preset school
+./libft_tester --root ../libft --preset web > libft-test-report.html
+./libft_tester --presets
+```
+
+Options after a preset can override preset defaults. For example, this keeps the
+review output but changes the seed:
+
+```sh
+./libft_tester --root ../libft --preset review --seed 123
+```
+
+## Compare Two Roots
+
+Use `--compare PATH` to run the same selected tests against two Libft roots. The
+left side is `--root`; the right side is the path passed to `--compare`.
+
+```sh
+./libft_tester --root ../libft --compare ../libft-before --seed 42
+./libft_tester --root ../libft --compare ../libft-before --only ft_split --seed 42
+```
+
+The command prints both scores and then only the function-level differences. It
+returns success only when both roots pass and their function scores match.
 
 ## Optional Config File
 
@@ -137,6 +186,7 @@ Example:
 ```json
 {
   "root": "../libft",
+  "preset": "review",
   "profile": "strict",
   "seed": 42,
   "no_color": false
@@ -147,7 +197,7 @@ The tester looks for this file in the current working directory and in the
 tester directory. You can also pass a specific file:
 
 ```sh
-./libft_tester --config .libft-tester.json --review
+./libft_tester --config .libft-tester.json
 ```
 
 CLI arguments always override config values.
@@ -186,17 +236,17 @@ prints a `Next action:` line so new users know what to run next.
 Use the menu option:
 
 ```text
-9) Generate HTML report
+9) Generate Web report
 ```
 
 Or use the CLI directly:
 
 ```sh
 ./libft_tester --root ../libft --json --no-color > libft-test-report.json
-./libft_tester --root ../libft --html --no-color > libft-test-report.html
+./libft_tester --root ../libft --web --no-color > libft-test-report.html
 ```
 
-The terminal output, JSON report, and HTML report all use the same score
+The terminal output, JSON report, and Web report all use the same score
 direction: `passed/total`.
 
 Examples:
@@ -210,7 +260,7 @@ Examples:
 Status counters such as `OKx5`, `MOKx4`, and `MNOKx1` are plain counters, not
 ratios. They show how many checks produced each status.
 
-The HTML report also includes:
+The Web dashboard also includes:
 
 - a score guide explaining `passed/total`;
 - quick filters for all, failed, passed, malloc-related, and crash-related
@@ -247,13 +297,13 @@ owner/repository
 Example:
 
 ```text
-NeddyKun01/Libft
+OWNER/Libft
 ```
 
 After that, pushes to the tester repository run:
 
 - the main JSON suite;
-- a standalone HTML report artifact;
+- a standalone Web report artifact;
 - a focused Valgrind leak check;
 - coverage metadata generation;
 - the tester self-test.

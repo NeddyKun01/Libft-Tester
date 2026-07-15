@@ -22,6 +22,15 @@ namespace fs = std::filesystem;
 
 extern const char	*g_version;
 
+struct DriverPreset
+{
+	std::string				name;
+	std::string				key;
+	std::string				label;
+	std::string				description;
+	std::vector<std::string>	args;
+};
+
 struct FunctionInfo
 {
 	std::string	name;
@@ -46,6 +55,11 @@ struct Counters
 	int	missing_symbols = 0;
 };
 
+const std::vector<DriverPreset>	&driver_presets();
+const DriverPreset				*find_driver_preset(const std::string &name);
+bool						expand_driver_presets(std::vector<std::string> &args,
+									std::ostream &err);
+void						print_driver_presets(std::ostream &out);
 const std::vector<FunctionInfo>	&functions();
 std::string						join_args(const std::vector<std::string> &args);
 std::vector<std::string>		split_lines(const std::string &text);
@@ -70,6 +84,8 @@ public:
 	int	run_menu(const std::vector<std::string> &args);
 	int	run_self_test(std::ostream &out);
 	int	run_doctor(std::ostream &out);
+	int	run_compare(std::ostream &out, const std::string &other_root,
+					const std::vector<std::string> &args);
 
 private:
 	fs::path	tester_dir;
@@ -140,6 +156,8 @@ private:
 		std::getline(std::cin, line);
 	}
 	void	function_tools(const std::vector<std::string> &args);
+	void	preset_tools(const std::vector<std::string> &args);
+	void	compare_tools(const std::vector<std::string> &args);
 	void	change_root();
 	int		run_leaks(std::ostream &out, const std::vector<std::string> &args);
 	int		generate_html(std::ostream &out, const std::vector<std::string> &args);
@@ -174,6 +192,10 @@ private:
 	void	test_html_report_output(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_config_file(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_presets(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_compare(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_doctor(std::ostream &out, const fs::path &tmp,
 					int &failures);

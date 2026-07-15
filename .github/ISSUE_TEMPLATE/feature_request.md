@@ -26,8 +26,8 @@ Example terminal output or menu flow
 
 ## Scope
 
-- Area affected: menu / CLI / review / HTML report / JSON report / config /
-  tests / CI / docs / other
+- Area affected: menu / CLI / presets / compare / review / Web report /
+  JSON report / config / tests / CI / docs / other
 - Function or suite affected, if any:
 - New flag or command, if any:
 - Config behavior affected, if any:

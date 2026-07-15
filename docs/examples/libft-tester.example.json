@@ -1,5 +1,6 @@
 {
   "root": "../libft",
+  "preset": "web",
   "profile": "strict",
   "seed": 42,
   "no_color": false

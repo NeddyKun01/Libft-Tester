@@ -1,6 +1,115 @@
 #include "driver.hpp"
 
-const char	*g_version = "1.7.0";
+#include <iomanip>
+
+const char	*g_version = "2.0.0";
+
+const std::vector<DriverPreset>	&driver_presets()
+{
+	static const std::vector<DriverPreset>	items = {
+		{"quick", "q", "Quick preset",
+			"Fast feedback while coding",
+			{"--profile", "quick"}},
+		{"review", "r", "Review preset",
+			"Compact deterministic output for reviewers",
+			{"--review", "--seed", "42"}},
+		{"school", "s", "School preset",
+			"Strict local validation with a reproducible seed",
+			{"--profile", "strict", "--seed", "42"}},
+		{"ci", "c", "CI preset",
+			"Quiet strict output for automation",
+			{"--profile", "strict", "--summary-only", "--seed", "42",
+				"--no-color"}},
+		{"web", "w", "Web report preset",
+			"Standalone visual dashboard with reproducible output",
+			{"--web", "--seed", "42", "--no-color"}},
+		{"html", "h", "HTML report alias",
+			"Compatibility alias for the Web dashboard",
+			{"--html", "--seed", "42", "--no-color"}},
+		{"brutal", "b", "Brutal preset",
+			"Heavy stress run before release",
+			{"--profile", "brutal", "--seed", "42"}}
+	};
+
+	return (items);
+}
+
+const DriverPreset	*find_driver_preset(const std::string &name)
+{
+	const std::vector<DriverPreset>	&items = driver_presets();
+	size_t						i;
+
+	i = 0;
+	while (i < items.size())
+	{
+		if (items[i].name == name || items[i].key == name)
+			return (&items[i]);
+		i++;
+	}
+	return (NULL);
+}
+
+void	print_driver_presets(std::ostream &out)
+{
+	const std::vector<DriverPreset>	&items = driver_presets();
+	size_t						i;
+
+	out << "Preset   Args                                                        Best for\n";
+	out << "------------------------------------------------------------\n";
+	i = 0;
+	while (i < items.size())
+	{
+		out << std::left << std::setw(9) << items[i].name
+			<< std::setw(60) << join_args(items[i].args)
+			<< items[i].description << "\n";
+		i++;
+	}
+}
+
+bool	expand_driver_presets(std::vector<std::string> &args, std::ostream &err)
+{
+	std::vector<std::string>	expanded;
+	size_t					i;
+	std::string				name;
+	const DriverPreset		*preset;
+
+	i = 0;
+	while (i < args.size())
+	{
+		name.clear();
+		if (args[i] == "--preset")
+		{
+			if (i + 1 >= args.size())
+			{
+				err << "Missing value for --preset\n";
+				return (false);
+			}
+			name = args[i + 1];
+			i += 2;
+		}
+		else if (args[i].rfind("--preset=", 0) == 0)
+		{
+			name = args[i].substr(9);
+			i++;
+		}
+		else
+		{
+			expanded.push_back(args[i]);
+			i++;
+			continue ;
+		}
+		preset = find_driver_preset(name);
+		if (!preset)
+		{
+			err << "Unknown preset: " << name << "\n\n";
+			print_driver_presets(err);
+			return (false);
+		}
+		expanded.insert(expanded.end(), preset->args.begin(), preset->args.end());
+	}
+	args = expanded;
+	return (true);
+}
 
 const std::vector<FunctionInfo>	&functions()
 {
@@ -258,11 +367,14 @@ int	Driver::print_help()
 		<< "Driver options:\n"
 		<< "  --root PATH         Target Libft directory, default: ..\n"
 		<< "  --config PATH       Optional .libft-tester.json path\n"
+		<< "  --preset NAME       Use quick, review, school, ci, web, html, or brutal\n"
+		<< "  --presets           List available presets\n"
 		<< "  --menu              Open the interactive menu\n"
 		<< "  --smart             Run normal tests, then diagnose/rescue if needed\n"
 		<< "  --diagnose          Check Makefile, header, sources, and symbols\n"
 		<< "  --rescue            Test only symbols found in libft.a\n"
 		<< "  --doctor            Check tester tools and target project shape\n"
+		<< "  --compare PATH      Compare current root with another Libft root\n"
 		<< "  --self-test         Validate tester fallback behavior\n"
 		<< "  --version           Show tester version\n"
 		<< "  --help              Show this help message\n\n"
@@ -270,15 +382,18 @@ int	Driver::print_help()
 		<< "  --coverage, --coverage-md\n"
 		<< "  --explain NAME, --hint NAME\n\n"
 		<< "Optional config file:\n"
-		<< "  .libft-tester.json may define root, profile, seed, and no_color.\n"
+		<< "  .libft-tester.json may define root, preset, profile, seed, and no_color.\n"
 		<< "  CLI options always override config values.\n\n"
 		<< "Test options, forwarded after building the internal suite:\n"
 		<< "  --profile quick|normal|strict|brutal\n"
-		<< "  --summary-only, --review, --only NAME, --suite NAME, --json, --html\n"
+		<< "  --summary-only, --review, --only NAME, --suite NAME, --json, --web, --html\n"
 		<< "  --fail-fast, --seed N, --repeat N, --verbose\n\n"
 		<< "Recommended examples:\n"
 		<< "  ./libft_tester --root ../libft\n"
 		<< "  ./libft_tester --root ../libft --only ft_split --verbose\n"
+		<< "  ./libft_tester --root ../libft --preset review\n"
+		<< "  ./libft_tester --root ../libft --compare ../libft-old --seed 42\n"
+		<< "  ./libft_tester --root ../libft --preset web > report.html\n"
 		<< "  ./libft_tester --root ../libft --profile strict --seed 42\n"
 		<< "  ./libft_tester --hint ft_split\n"
 		<< "  ./libft_tester --coverage\n";

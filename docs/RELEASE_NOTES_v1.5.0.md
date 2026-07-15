@@ -47,9 +47,9 @@ This release was validated locally with:
 ```sh
 make build
 make self-test
-./libft_tester --root /home/neddykun/Secretária/reposdeteste/git_libft --seed 42
-./libft_tester --root /home/neddykun/Secretária/reposdeteste/git_libft --only ft_strlen --json --no-color --seed 42
-./libft_tester --root /home/neddykun/Secretária/reposdeteste/git_libft --only ft_strlen --html --no-color --seed 42
+./libft_tester --root /path/to/libft --seed 42
+./libft_tester --root /path/to/libft --only ft_strlen --json --no-color --seed 42
+./libft_tester --root /path/to/libft --only ft_strlen --html --no-color --seed 42
 ./libft_tester --root /tmp/does-not-exist --explain ft_lstmap
 ```
 

@@ -137,7 +137,7 @@ Before opening a pull request, run:
 make build
 ./libft_tester --root /path/to/libft --summary-only --seed 42
 ./libft_tester --root /path/to/libft --json --no-color --only ft_strlen --seed 42 > libft-test-report.json
-./libft_tester --root /path/to/libft --html --no-color --only ft_strlen --seed 42 > libft-test-report.html
+./libft_tester --root /path/to/libft --web --no-color --only ft_strlen --seed 42 > libft-test-report.html
 ./libft_tester --coverage
 ```
 

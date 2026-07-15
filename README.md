@@ -1,12 +1,12 @@
 # Libft Tester
 
-![CI](https://github.com/NeddyKun01/Libft-Tester/actions/workflows/ci.yml/badge.svg)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF)
 ![Language](https://img.shields.io/badge/language-C%2B%2B17-00599C)
 ![Project](https://img.shields.io/badge/project-libft-111111)
 ![Output](https://img.shields.io/badge/output-OK%20%7C%20MOK%20%7C%20NOK%20%7C%20MNOK-informational)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-Libft Tester is an interactive and CI-friendly tester for `libft` projects.
+Libft Tester is a Web-first, terminal-friendly tester for `libft` projects.
 
 It is useful for students, reviewers, maintainers, and anyone working on a
 small C standard-library-style project that exposes the usual `ft_*` functions.
@@ -26,17 +26,46 @@ a convenience shortcut, but the day-to-day interface is the standalone
 
 ## What's New
 
-- `--review` mode for short reviewer-friendly summaries.
-- HTML reports with `All`, `Failed`, `Passed`, `Malloc`, and `Crash` filters.
-- Per-function copy commands and likely-fix hints in HTML reports.
-- Optional `.libft-tester.json` config for root/profile/seed/no-color defaults.
-- Stronger self-tests that protect terminal, review, config, and HTML output.
+- Web-first dashboard reports with `--web`, while `--html` remains as a compatibility alias.
+- Named presets with `--preset quick`, `--preset review`, `--preset school`,
+  `--preset ci`, `--preset web`, `--preset html`, and `--preset brutal`.
+- Guided preset selection in the interactive menu, so new users do not need to
+  memorize long commands.
+- Optional `.libft-tester.json` config can now define a default `preset`.
+- `--presets` lists every preset and the exact arguments it expands to.
+- `--compare PATH` compares two Libft roots with the same test options.
+- Stronger self-tests protect preset expansion, config presets, compare output,
+  review output, Web reports, and fallback behavior.
 
-## Preview
+## Real Captures
 
-![Interactive menu preview](docs/assets/menu-preview-v1.7.0.svg)
+The README does not use mock screenshots. The images below are generated from
+real tester commands against a real Libft target. They are documentation
+artifacts, not hand-drawn previews.
 
-![HTML report preview](docs/assets/html-report-preview.svg)
+Real interactive menu capture:
+
+![Real menu capture](docs/assets/real-menu-v2.0.0.svg)
+
+Real Web report data captured from generated HTML:
+
+![Real Web report capture](docs/assets/real-web-report-v2.0.0.svg)
+
+Reproduce the menu locally:
+
+```bash
+make build
+./libft_tester --root /path/to/libft
+```
+
+Generate the real Web dashboard from your own Libft project:
+
+```bash
+./libft_tester --root /path/to/libft --web --no-color > libft-test-report.html
+```
+
+Open the generated `libft-test-report.html` in your browser to inspect the
+actual report produced by the tester.
 
 ## What It Checks
 
@@ -170,7 +199,7 @@ The menu is designed for day-to-day use:
 +------------------------------------------------------------+
 |                        LIBFT TESTER                        |
 +------------------------------------------------------------+
- Libft Tester (v1.7.0)
+ Libft Tester (v2.0.0)
  target:    ../libft
  health:    Makefile OK  libft.h OK  libft.a OK  suite OK
 ------------------------------------------------------------
@@ -184,6 +213,7 @@ Test Runs
   2) Quick test            fast feedback while coding
   3) Full test             normal complete suite
   4) Strict test           deeper validation before sharing
+  p) Preset run            guided quick/review/school/CI runs
 
 Fix And Inspect
   5) Diagnose project      Makefile/header/source checks
@@ -193,8 +223,9 @@ Fix And Inspect
   d) Doctor environment    tools and target sanity check
 
 Reports And Setup
-  9) Generate HTML report  standalone visual report
+  9) Generate Web report   standalone Web dashboard
   10) Review summary       compact reviewer output
+  11) Compare roots        compare this Libft with another
   h) Advanced CLI help     all command-line options
   r) Change ROOT_DIR       point tester at another Libft
   0) Exit                  close the tester
@@ -283,6 +314,51 @@ Debug Focus
     ./libft_tester --hint ft_striteri
 ```
 
+## Presets
+
+Presets are shortcuts for common workflows. They make the tester easier to use
+without hiding what is actually executed.
+
+| Preset | Expands to | Best for |
+| --- | --- | --- |
+| `quick` | `--profile quick` | Fast feedback while coding. |
+| `review` | `--review --seed 42` | Compact deterministic output for reviewers. |
+| `school` | `--profile strict --seed 42` | Strong local validation before evaluation. |
+| `ci` | `--profile strict --summary-only --seed 42 --no-color` | Clean automation output. |
+| `web` | `--web --seed 42 --no-color` | Shareable visual dashboard. |
+| `html` | `--html --seed 42 --no-color` | Compatibility alias for the Web dashboard. |
+| `brutal` | `--profile brutal --seed 42` | Heavy stress checks before release. |
+
+Examples:
+
+```sh
+./libft_tester --root ../libft --preset review
+./libft_tester --root ../libft --preset school
+./libft_tester --root ../libft --preset web > libft-test-report.html
+./libft_tester --presets
+```
+
+CLI arguments can still be added after a preset. If an option appears twice, the
+later value wins, so this is valid:
+
+```sh
+./libft_tester --root ../libft --preset review --seed 123
+```
+
+## Compare Two Libfts
+
+Use `--compare PATH` when you want to compare your current target with another
+Libft root using the same test filters and seed. This is useful for checking a
+refactor, comparing two branches, or verifying whether a fix changed behavior.
+
+```sh
+./libft_tester --root ../libft --compare ../libft-before --seed 42
+./libft_tester --root ../libft --compare ../libft-before --only ft_split --seed 42
+```
+
+The compare command prints both scores, lists only functions whose score differs,
+and exits successfully only when both sides pass with matching function scores.
+
 ## Advanced CLI
 
 Build the tester driver once:
@@ -296,6 +372,10 @@ when a command needs to execute tests against your `libft.a`:
 
 ```sh
 ./libft_tester --root ../libft --summary-only
+./libft_tester --root ../libft --preset review
+./libft_tester --root ../libft --preset school
+./libft_tester --presets
+./libft_tester --root ../libft --compare ../libft-before --seed 42
 ./libft_tester --root ../libft --profile quick
 ./libft_tester --root ../libft --profile strict
 ./libft_tester --root ../libft --profile brutal --seed 42
@@ -305,7 +385,7 @@ when a command needs to execute tests against your `libft.a`:
 ./libft_tester --root ../libft --fail-fast
 ./libft_tester --root ../libft --review --seed 42
 ./libft_tester --root ../libft --json --no-color
-./libft_tester --root ../libft --html --no-color
+./libft_tester --root ../libft --web --no-color
 ./libft_tester --explain ft_lstmap
 ./libft_tester --hint ft_split
 ./libft_tester --coverage
@@ -326,6 +406,7 @@ You can store common defaults in `.libft-tester.json`:
 ```json
 {
   "root": "../libft",
+  "preset": "review",
   "profile": "strict",
   "seed": 42,
   "no_color": false
@@ -336,7 +417,7 @@ The tester looks for this file in the current directory and in the tester
 directory. You can also pass it explicitly:
 
 ```sh
-./libft_tester --config .libft-tester.json --review
+./libft_tester --config .libft-tester.json
 ```
 
 CLI arguments always win over config values.
@@ -364,17 +445,17 @@ Everything else is available in the menu or through `./libft_tester`.
 From the menu:
 
 ```text
-9) Generate HTML report
+9) Generate Web report
 ```
 
 From the CLI:
 
 ```sh
-./libft_tester --json --no-color > libft-test-report.json
-./libft_tester --html --no-color > libft-test-report.html
+./libft_tester --root ../libft --json --no-color > libft-test-report.json
+./libft_tester --root ../libft --web --no-color > libft-test-report.html
 ```
 
-The HTML report includes a score guide, filters for passed/failed/malloc/crash
+The Web dashboard includes a score guide, filters for passed/failed/malloc/crash
 functions, a failure summary, likely fixes, and copyable commands for focused
 reruns.
 
@@ -391,10 +472,10 @@ LIBFT_REPOSITORY=owner/repository
 Example:
 
 ```text
-LIBFT_REPOSITORY=NeddyKun01/Libft
+LIBFT_REPOSITORY=OWNER/Libft
 ```
 
-The workflow builds the tester, runs the JSON suite, generates an HTML report,
+The workflow builds the tester, runs the JSON suite, generates a Web report,
 checks Valgrind leaks, validates coverage metadata, and runs the tester
 self-test.
 

@@ -1,0 +1,44 @@
+<svg width="1500" height="1082" viewBox="0 0 1500 1082" xmlns="http://www.w3.org/2000/svg">
+<rect width="100%" height="100%" rx="30" fill="#0b1110"/>
+<circle cx="1290" cy="55" r="260" fill="#e2c044" opacity="0.10"/>
+<circle cx="110" cy="720" r="310" fill="#67d68f" opacity="0.10"/>
+<rect x="34" y="34" width="1432" height="1014" rx="26" fill="#101713" stroke="#2c3a32" stroke-width="2"/>
+<text x="750.0" y="72" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" font-weight="800" fill="#f3f4e8">REAL LIBFT TESTER MENU</text>
+<text x="750.0" y="103" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" fill="#aab5a7">Sanitized capture. Reproduce with: ./libft_tester --root &#x27;$ROOT_DIR&#x27;</text>
+<rect x="70" y="130" width="1360" height="892" rx="18" fill="#0a0f0c" stroke="#2c3a32"/>
+<text x="94" y="166" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">+------------------------------------------------------------+</text>
+<text x="94" y="190" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">|                        LIBFT TESTER                        |</text>
+<text x="94" y="214" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">+------------------------------------------------------------+</text>
+<text x="94" y="238" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"> Libft Tester (v2.0.0)</text>
+<text x="94" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"> target:    $ROOT_DIR</text>
+<text x="94" y="286" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#67d68f"> health:    Makefile OK  libft.h OK  libft.a OK  suite OK</text>
+<text x="94" y="310" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">------------------------------------------------------------</text>
+<text x="94" y="334" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#e2c044"> recommended: [3] Full test</text>
+<text x="94" y="358" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"> why:         Project shape looks ready for the full suite.</text>
+<text x="94" y="382" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"> CLI:         ./libft_tester --root &#x27;$ROOT_DIR&#x27;</text>
+<text x="94" y="406" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">------------------------------------------------------------</text>
+<text x="94" y="430" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"></text>
+<text x="94" y="454" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">Test Runs</text>
+<text x="94" y="478" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  1) Smart test            best first run, auto fallback</text>
+<text x="94" y="502" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  2) Quick test            fast feedback while coding</text>
+<text x="94" y="526" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  3) Full test             normal complete suite</text>
+<text x="94" y="550" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  4) Strict test           deeper validation before sharing</text>
+<text x="94" y="574" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  p) Preset run            guided quick/review/school/CI runs</text>
+<text x="94" y="598" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"></text>
+<text x="94" y="622" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">Fix And Inspect</text>
+<text x="94" y="646" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  5) Diagnose project      Makefile/header/source checks</text>
+<text x="94" y="670" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  6) Rescue test           test valid symbols even if incomplete</text>
+<text x="94" y="694" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  7) Leak check            focused Valgrind run</text>
+<text x="94" y="718" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  8) Explain or hint       coverage notes or debugging hint</text>
+<text x="94" y="742" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  d) Doctor environment    tools and target sanity check</text>
+<text x="94" y="766" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"></text>
+<text x="94" y="790" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">Reports And Setup</text>
+<text x="94" y="814" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#e2c044">  9) Generate Web report   standalone Web dashboard</text>
+<text x="94" y="838" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  10) Review summary        compact reviewer output</text>
+<text x="94" y="862" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  11) Compare roots         compare this Libft with another</text>
+<text x="94" y="886" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  h) Advanced CLI help     all command-line options</text>
+<text x="94" y="910" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  r) Change ROOT_DIR       point tester at another Libft</text>
+<text x="94" y="934" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8">  0) Exit                  close the tester</text>
+<text x="94" y="958" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#f3f4e8"></text>
+<text x="94" y="982" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#e2c044">Choice: 0</text>
+</svg>

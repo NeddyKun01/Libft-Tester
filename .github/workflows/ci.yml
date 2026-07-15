@@ -57,12 +57,12 @@ jobs:
           cat libft-test-report.json
           exit $status
 
-      - name: Generate HTML report
+      - name: Generate Web report
         if: always()
         working-directory: libft/tester
         run: |
           set +e
-          ./libft_tester --html --no-color > libft-test-report.html
+          ./libft_tester --web --no-color > libft-test-report.html
           exit 0
 
       - name: Upload JSON report
@@ -73,7 +73,7 @@ jobs:
           path: libft/tester/libft-test-report.json
           if-no-files-found: ignore
 
-      - name: Upload HTML report
+      - name: Upload Web report
         if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -173,5 +173,5 @@ jobs:
       - name: Explain missing variable
         run: |
           echo "Set the repository variable LIBFT_REPOSITORY to run this workflow automatically."
-          echo "Example: NeddyKun01/Libft"
+          echo "Example: OWNER/Libft"
           echo "You can also run workflow_dispatch and provide libft_repository manually."

@@ -32,7 +32,7 @@ The tester could not find the target directory you passed.
 Use an absolute path if you are unsure:
 
 ```sh
-./libft_tester --root /home/user/projects/libft
+./libft_tester --root /path/to/libft
 ```
 
 You can also change it from the menu:
@@ -165,7 +165,7 @@ LIBFT_REPOSITORY
 Example value:
 
 ```text
-NeddyKun01/Libft
+OWNER/Libft
 ```
 
 Without that variable, the workflow shows a configuration-help job instead of

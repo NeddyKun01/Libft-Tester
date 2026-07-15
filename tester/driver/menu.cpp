@@ -135,6 +135,7 @@ void	Driver::print_menu()
 	print_menu_item("2", "Quick test", "fast feedback while coding", cyan);
 	print_menu_item("3", "Full test", "normal complete suite", cyan);
 	print_menu_item("4", "Strict test", "deeper validation before sharing", cyan);
+	print_menu_item("p", "Preset run", "guided quick/review/school/CI runs", cyan);
 	std::cout << "\n" << bold << "Fix And Inspect" << reset << "\n";
 	print_menu_item("5", "Diagnose project", "Makefile/header/source checks", yellow);
 	print_menu_item("6", "Rescue test", "test valid symbols even if incomplete", yellow);
@@ -142,13 +143,50 @@ void	Driver::print_menu()
 	print_menu_item("8", "Explain or hint", "coverage notes or debugging hint", yellow);
 	print_menu_item("d", "Doctor environment", "tools and target sanity check", yellow);
 	std::cout << "\n" << bold << "Reports And Setup" << reset << "\n";
-	print_menu_item("9", "Generate HTML report", "standalone visual report", green);
+	print_menu_item("9", "Generate Web report", "standalone Web dashboard", green);
 	print_menu_item("10", "Review summary", "compact reviewer output", green);
+	print_menu_item("11", "Compare roots", "compare this Libft with another", green);
 	print_menu_item("h", "Advanced CLI help", "all command-line options", green);
 	print_menu_item("r", "Change ROOT_DIR", "point tester at another Libft", green);
 	print_menu_item("0", "Exit", "close the tester", green);
 	std::cout << "\n";
 	std::cout << "Choice: ";
+}
+
+void	Driver::preset_tools(const std::vector<std::string> &args)
+{
+	const std::vector<DriverPreset>	&items = driver_presets();
+	std::string				choice;
+	size_t					i;
+
+	std::cout << "\nPresets\n";
+	std::cout << "------------------------------------------------------------\n";
+	i = 0;
+	while (i < items.size())
+	{
+		std::cout << "  " << cyan << items[i].key << reset << ") "
+			<< std::left << std::setw(18) << items[i].label
+			<< dim << items[i].description << reset << "\n";
+		i++;
+	}
+	std::cout << "\nChoice: ";
+	std::getline(std::cin, choice);
+	i = 0;
+	while (i < items.size())
+	{
+		if (choice == items[i].key || choice == items[i].name)
+		{
+			DriverPreset preset = items[i];
+			run_and_pause([&]() {
+				std::cout << "Preset: " << preset.name << "\n";
+				std::cout << "Args: " << join_args(preset.args) << "\n\n";
+				return (run_suite(append(args, preset.args), std::cout));
+			});
+			return ;
+		}
+		i++;
+	}
+	run_and_pause([&]() { std::cout << "Invalid preset.\n"; return (1); });
 }
 
 void	Driver::function_tools(const std::vector<std::string> &args)
@@ -169,6 +207,18 @@ void	Driver::function_tools(const std::vector<std::string> &args)
 		run_and_pause([&](){ (void)args; return (hints::print_for_function(name) ? 0 : 1); });
 	else
 		run_and_pause([&](){ std::cout << "Invalid choice.\n"; return 1; });
+}
+
+
+void	Driver::compare_tools(const std::vector<std::string> &args)
+{
+	std::string	other_root;
+
+	std::cout << "Other Libft ROOT_DIR: ";
+	std::getline(std::cin, other_root);
+	if (other_root.empty())
+		return ;
+	run_and_pause([&]() { return (run_compare(std::cout, other_root, args)); });
 }
 
 void	Driver::change_root()
@@ -206,7 +256,7 @@ int	Driver::generate_html(std::ostream &out,
 	const std::vector<std::string> &args)
 {
 	int						status = build_suite(out, false);
-	std::vector<std::string>	cmd = {suite_path().string(), "--html", "--no-color"};
+	std::vector<std::string>	cmd = {suite_path().string(), "--web", "--no-color"};
 	CommandResult			result;
 	fs::path				report = tester_dir / "libft-test-report.html";
 
@@ -215,7 +265,7 @@ int	Driver::generate_html(std::ostream &out,
 	cmd.insert(cmd.end(), args.begin(), args.end());
 	result = run_process(cmd, fs::path(), suite_env());
 	write_file(report, result.output);
-	out << "HTML report written to " << report << "\n";
+	out << "Web report written to " << report << "\n";
 	return (result.status);
 }
 
@@ -239,6 +289,8 @@ int	Driver::run_menu(const std::vector<std::string> &args)
 			run_and_pause([&](){ return run_suite(args, std::cout); });
 		else if (choice == "4")
 			run_and_pause([&](){ return run_suite(append(args, {"--profile", "strict"}), std::cout); });
+		else if (choice == "p" || choice == "P")
+			preset_tools(args);
 		else if (choice == "5")
 			run_and_pause([&](){ return run_diagnose(std::cout); });
 		else if (choice == "6")
@@ -251,6 +303,8 @@ int	Driver::run_menu(const std::vector<std::string> &args)
 			run_and_pause([&](){ return generate_html(std::cout, args); });
 		else if (choice == "10")
 			run_and_pause([&](){ return run_suite(append(args, {"--review"}), std::cout); });
+		else if (choice == "11")
+			compare_tools(args);
 		else if (choice == "d" || choice == "D")
 			run_and_pause([&](){ return run_doctor(std::cout); });
 		else if (choice == "h" || choice == "H")

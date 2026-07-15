@@ -3,7 +3,7 @@
 static bool	is_rescue_output_option(const std::string &arg)
 {
 	return (arg == "--summary-only" || arg == "--quiet"
-		|| arg == "--json" || arg == "--html" || arg == "--review"
+		|| arg == "--json" || arg == "--web" || arg == "--html" || arg == "--review"
 		|| arg == "--coverage"
 		|| arg == "--coverage-md" || arg == "--list" || arg == "--help"
 		|| arg == "--version" || arg == "--no-color");
