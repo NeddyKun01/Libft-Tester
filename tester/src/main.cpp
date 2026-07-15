@@ -29,6 +29,7 @@ struct CliOptions
 	bool		quiet = false;
 	bool		json = false;
 	bool		html = false;
+	bool		review = false;
 	bool		list = false;
 	bool		help = false;
 	bool		profiles = false;
@@ -43,7 +44,7 @@ struct CliOptions
 	bool		fail_fast_set = false;
 };
 
-static const char	*g_version = "1.6.0";
+static const char	*g_version = "1.7.0";
 
 static void	register_suites(tester::SuiteRunner &runner)
 {
@@ -80,6 +81,7 @@ static void	print_help(const char *program)
 		<< "  --summary-only      Print only the final summary\n"
 		<< "  --verbose           Do not aggregate status tokens\n"
 		<< "  --quiet             Show only failures and summary\n"
+		<< "  --review            Print a compact reviewer-friendly report\n"
 		<< "  --json              Print machine-readable JSON\n"
 		<< "  --html              Print a standalone HTML report\n"
 		<< "  --no-color          Disable terminal colors\n\n"
@@ -91,6 +93,7 @@ static void	print_help(const char *program)
 		<< "  " << program << " --hint ft_split\n"
 		<< "  " << program << " --explain ft_lstmap\n"
 		<< "  " << program << " --suite memory --verbose\n"
+		<< "  " << program << " --review --seed 42\n"
 		<< "  " << program << " --json --no-color\n"
 		<< "  " << program << " --html --no-color > report.html\n";
 }
@@ -184,6 +187,8 @@ static bool	parse_args(int argc, char **argv, CliOptions &options)
 			options.verbose = true;
 		else if (value == "--quiet" || value == "-q")
 			options.quiet = true;
+		else if (value == "--review")
+			options.review = true;
 		else if (value == "--json")
 			options.json = true;
 		else if (value == "--html")
@@ -263,6 +268,7 @@ static tester::OutputOptions	output_options(const CliOptions &cli)
 	options.quiet = cli.quiet;
 	options.json = cli.json;
 	options.summary_only = cli.summary_only;
+	options.review = cli.review;
 	options.filter = cli.only;
 	return (options);
 }
@@ -366,6 +372,8 @@ int	main(int argc, char **argv)
 		tester::print_json_report(report);
 	else if (cli.html)
 		tester::print_html_report(report);
+	else if (cli.review)
+		tester::print_review_report(report);
 	else
 		tester::print_summary(report, output_options(cli));
 	return (report.failures == 0 ? 0 : 1);

@@ -56,6 +56,10 @@ Examples:
 Do not use `X/Y` to compare status types such as `OK/MOK` or `NOK/MNOK`. Use
 plain counters instead, for example `OKx5`, `MOKx4`, and `MNOKx1`.
 
+When output changes affect terminal summaries, `--review`, config-file
+behavior, or HTML filters, extend `tester/driver/self_test.cpp` so future UI
+work cannot silently regress the public output.
+
 ## Good Test Cases
 
 Prefer cases that prove a different behavior:

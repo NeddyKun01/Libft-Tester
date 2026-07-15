@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.7.0 - 2026-07-15
+
+- Added `--review` mode with a compact reviewer-friendly verdict, score,
+  failed-function list, crash list, malloc-failure list, and rerun commands.
+- Expanded the HTML report with filter counters for all, passed, failed,
+  malloc-related, and crash-related functions.
+- Added per-function copyable rerun commands and a `Likely Fixes` section to
+  the HTML report.
+- Added optional `.libft-tester.json` config support for `root`, `profile`,
+  `seed`, and `no_color`, while keeping CLI arguments as the final override.
+- Strengthened self-tests for review output, config-file behavior, HTML report
+  filters, filter metadata, and likely-fix sections.
+- Updated public documentation for review mode, config files, and the richer
+  HTML report workflow.
+
 ## 1.6.0 - 2026-07-13
 
 - Added a clearer HTML report with a `Score Guide` explaining that every

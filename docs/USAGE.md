@@ -81,6 +81,7 @@ Useful menu options:
 | `8) Explain or hint a function` | Read coverage notes or debugging hints. |
 | `d) Doctor environment` | Check required tools and target project shape. |
 | `9) Generate HTML report` | Write a standalone HTML report. |
+| `10) Review summary` | Print compact reviewer-friendly output. |
 
 If the driver runs without an interactive terminal, it falls back to smart test
 instead of waiting for keyboard input. This keeps CI and scripts safe.
@@ -117,6 +118,7 @@ automatically:
 ./libft_tester --root ../libft --repeat 10 --seed 42
 ./libft_tester --root ../libft --fail-fast
 ./libft_tester --root ../libft --verbose
+./libft_tester --root ../libft --review --seed 42
 ./libft_tester --root ../libft --json --no-color
 ./libft_tester --root ../libft --html --no-color
 ./libft_tester --explain ft_lstmap
@@ -125,6 +127,33 @@ automatically:
 ./libft_tester --root ../libft --doctor
 ./libft_tester --help
 ```
+
+## Optional Config File
+
+You can store common defaults in `.libft-tester.json`.
+
+Example:
+
+```json
+{
+  "root": "../libft",
+  "profile": "strict",
+  "seed": 42,
+  "no_color": false
+}
+```
+
+The tester looks for this file in the current working directory and in the
+tester directory. You can also pass a specific file:
+
+```sh
+./libft_tester --config .libft-tester.json --review
+```
+
+CLI arguments always override config values.
+
+See [`docs/examples/libft-tester.example.json`](examples/libft-tester.example.json)
+for a ready-to-copy example.
 
 ## Doctor Mode
 
@@ -184,8 +213,10 @@ ratios. They show how many checks produced each status.
 The HTML report also includes:
 
 - a score guide explaining `passed/total`;
-- quick filters for all, failed, and passed functions;
+- quick filters for all, failed, passed, malloc-related, and crash-related
+  functions;
 - a failure summary with links to failing function cards;
+- likely-fix hints near the failure summary;
 - copyable rerun commands for focused debugging.
 
 ## Valgrind

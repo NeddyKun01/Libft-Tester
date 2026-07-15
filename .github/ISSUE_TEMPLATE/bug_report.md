@@ -10,6 +10,21 @@ assignees: ""
 
 Describe the problem clearly.
 
+## Area Affected
+
+Choose the closest area:
+
+- menu
+- CLI
+- `--review`
+- HTML report
+- JSON report
+- config file
+- tests
+- CI
+- docs
+- other
+
 ## Steps To Reproduce
 
 1. Set up the tester and target library.
@@ -22,6 +37,8 @@ Example commands:
 make ROOT_DIR=../libft
 make ROOT_DIR=../libft build
 ./libft_tester --only ft_split --profile strict
+./libft_tester --review --seed 42
+./libft_tester --html --no-color
 ```
 
 ## Expected Behavior
@@ -41,6 +58,7 @@ What happened instead?
 - Tester version or commit:
 - Target repository or commit:
 - Command, flags, or menu option used:
+- Config file used, if any:
 
 ## Output
 

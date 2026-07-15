@@ -26,15 +26,15 @@ a convenience shortcut, but the day-to-day interface is the standalone
 
 ## What's New
 
-- Cleaner HTML reports with `All`, `Failed`, and `Passed` filters.
-- Clear score convention: every `X/Y` value means `passed/total`.
-- `Score Guide` in the HTML report so new users understand results quickly.
-- Stronger self-tests that protect terminal and HTML output formatting.
-- Visual previews for the interactive menu and HTML report.
+- `--review` mode for short reviewer-friendly summaries.
+- HTML reports with `All`, `Failed`, `Passed`, `Malloc`, and `Crash` filters.
+- Per-function copy commands and likely-fix hints in HTML reports.
+- Optional `.libft-tester.json` config for root/profile/seed/no-color defaults.
+- Stronger self-tests that protect terminal, review, config, and HTML output.
 
 ## Preview
 
-![Interactive menu preview](docs/assets/menu-preview-v1.6.0.svg)
+![Interactive menu preview](docs/assets/menu-preview-v1.7.0.svg)
 
 ![HTML report preview](docs/assets/html-report-preview.svg)
 
@@ -170,7 +170,7 @@ The menu is designed for day-to-day use:
 +------------------------------------------------------------+
 |                        LIBFT TESTER                        |
 +------------------------------------------------------------+
- Libft Tester (v1.6.0)
+ Libft Tester (v1.7.0)
  target:    ../libft
  health:    Makefile OK  libft.h OK  libft.a OK  suite OK
 ------------------------------------------------------------
@@ -194,6 +194,7 @@ Fix And Inspect
 
 Reports And Setup
   9) Generate HTML report  standalone visual report
+  10) Review summary       compact reviewer output
   h) Advanced CLI help     all command-line options
   r) Change ROOT_DIR       point tester at another Libft
   0) Exit                  close the tester
@@ -302,6 +303,7 @@ when a command needs to execute tests against your `libft.a`:
 ./libft_tester --root ../libft --suite memory
 ./libft_tester --root ../libft --repeat 10 --seed 42
 ./libft_tester --root ../libft --fail-fast
+./libft_tester --root ../libft --review --seed 42
 ./libft_tester --root ../libft --json --no-color
 ./libft_tester --root ../libft --html --no-color
 ./libft_tester --explain ft_lstmap
@@ -316,6 +318,31 @@ need the target project to build successfully.
 
 Use the menu when you want guidance. Use the CLI when you want automation,
 filters, reports, or reproducible commands.
+
+## Optional Config
+
+You can store common defaults in `.libft-tester.json`:
+
+```json
+{
+  "root": "../libft",
+  "profile": "strict",
+  "seed": 42,
+  "no_color": false
+}
+```
+
+The tester looks for this file in the current directory and in the tester
+directory. You can also pass it explicitly:
+
+```sh
+./libft_tester --config .libft-tester.json --review
+```
+
+CLI arguments always win over config values.
+
+An example file is available at
+[`docs/examples/libft-tester.example.json`](docs/examples/libft-tester.example.json).
 
 ## Minimal Makefile Commands
 
@@ -347,8 +374,9 @@ From the CLI:
 ./libft_tester --html --no-color > libft-test-report.html
 ```
 
-The HTML report includes a score guide, quick filters for passed/failed
-functions, a failure summary, and copyable commands for focused reruns.
+The HTML report includes a score guide, filters for passed/failed/malloc/crash
+functions, a failure summary, likely fixes, and copyable commands for focused
+reruns.
 
 ## GitHub Actions
 

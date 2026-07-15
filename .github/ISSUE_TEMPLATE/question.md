@@ -20,6 +20,8 @@ Examples:
 make ROOT_DIR=../libft
 make ROOT_DIR=../libft build
 ./libft_tester --only ft_split --verbose
+./libft_tester --review --seed 42
+./libft_tester --config .libft-tester.json --review
 ```
 
 ## Environment
@@ -29,6 +31,7 @@ make ROOT_DIR=../libft build
 - Compiler and version:
 - Tester version or commit:
 - Target repository or commit:
+- Config file used, if any:
 
 ## Goal
 

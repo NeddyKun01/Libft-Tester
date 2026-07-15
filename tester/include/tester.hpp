@@ -105,6 +105,7 @@ namespace tester
 		bool		quiet = false;
 		bool		json = false;
 		bool		summary_only = false;
+		bool		review = false;
 		std::string	filter;
 	};
 
@@ -473,6 +474,56 @@ namespace tester
 	inline bool	is_runner_issue(const CheckResult &check)
 	{
 		return (check.label == "runner issue");
+	}
+
+	inline bool	is_crash_status(const std::string &status)
+	{
+		return (status == "SEGV" || status == "BUS" || status == "ABRT"
+			|| status == "FPE" || status == "TIMEOUT");
+	}
+
+	inline bool	is_malloc_status(const std::string &status)
+	{
+		return (status == "MOK" || status == "MNOK");
+	}
+
+	inline bool	function_has_status(const FunctionReport &function,
+		bool (*predicate)(const std::string &))
+	{
+		size_t	i;
+
+		i = 0;
+		while (i < function.checks.size())
+		{
+			if (predicate(function.checks[i].status))
+				return (true);
+			i++;
+		}
+		return (false);
+	}
+
+	inline bool	function_has_crash(const FunctionReport &function)
+	{
+		return (function_has_status(function, is_crash_status));
+	}
+
+	inline bool	function_has_malloc_check(const FunctionReport &function)
+	{
+		return (function_has_status(function, is_malloc_status));
+	}
+
+	inline bool	function_has_malloc_failure(const FunctionReport &function)
+	{
+		size_t	i;
+
+		i = 0;
+		while (i < function.checks.size())
+		{
+			if (function.checks[i].status == "MNOK")
+				return (true);
+			i++;
+		}
+		return (false);
 	}
 
 	inline bool	function_is_runner_issues(const FunctionReport &function)
@@ -889,6 +940,104 @@ namespace tester
 		return (count);
 	}
 
+	inline int	count_functions_matching(const Report &report,
+		bool (*predicate)(const FunctionReport &))
+	{
+		int		count;
+		size_t	i;
+
+		count = 0;
+		i = 0;
+		while (i < report.functions.size())
+		{
+			if (!function_is_runner_issues(report.functions[i])
+				&& predicate(report.functions[i]))
+				count++;
+			i++;
+		}
+		return (count);
+	}
+
+	inline bool	function_passed(const FunctionReport &function)
+	{
+		return (!function_has_failure(function));
+	}
+
+	inline std::vector<std::string>	functions_matching(const Report &report,
+		bool (*predicate)(const FunctionReport &))
+	{
+		std::vector<std::string>	names;
+		size_t					i;
+
+		i = 0;
+		while (i < report.functions.size())
+		{
+			if (!function_is_runner_issues(report.functions[i])
+				&& predicate(report.functions[i]))
+				names.push_back(report.functions[i].name);
+			i++;
+		}
+		return (names);
+	}
+
+	inline void	print_review_name_line(const std::string &title,
+		const std::vector<std::string> &names)
+	{
+		std::cout << "  " << title << ": ";
+		if (names.empty())
+			std::cout << paint(green) << "none" << paint(reset);
+		else
+		{
+			std::cout << paint(red);
+			print_name_list(names);
+			std::cout << paint(reset);
+		}
+		std::cout << "\n";
+	}
+
+	inline void	print_review_report(const Report &report)
+	{
+		int							passed;
+		int							percent;
+		std::vector<std::string>	failed;
+		std::vector<std::string>	crashes;
+		std::vector<std::string>	malloc_failures;
+		std::string					root_arg;
+		std::string					seed_arg;
+
+		passed = report.checks - report.failures;
+		percent = 100;
+		if (report.checks > 0)
+			percent = (passed * 100) / report.checks;
+		failed = failed_functions(report);
+		crashes = functions_matching(report, function_has_crash);
+		malloc_failures = functions_matching(report, function_has_malloc_failure);
+		root_arg = root_cli_arg();
+		seed_arg = seed_cli_arg(report.seed);
+		std::cout << paint(bold) << "Libft Tester Review" << paint(reset) << "\n";
+		std::cout << "  verdict: "
+			<< (report.failures == 0 ? paint(green) : paint(red))
+			<< (report.failures == 0 ? "PASS" : "FAIL") << paint(reset)
+			<< "\n";
+		std::cout << "  score: " << passed << "/" << report.checks
+			<< " (" << percent << "%)"
+			<< " | profile: " << report.profile
+			<< " | seed: " << report.seed << "\n";
+		std::cout << "  status: OKx" << report.ok_count
+			<< " MOKx" << report.mok_count
+			<< " NOKx" << report.nok_count
+			<< " MNOKx" << report.mnok_count << "\n";
+		print_review_name_line("failed functions", failed);
+		print_review_name_line("crash functions", crashes);
+		print_review_name_line("malloc failures", malloc_failures);
+		if (!failed.empty())
+		{
+			std::cout << "\nReproduce first failures:\n";
+			print_focus_commands(failed, root_arg, seed_arg);
+			std::cout << "    ./libft_tester --hint " << failed[0] << "\n";
+		}
+	}
+
 	inline std::string	json_escape(const std::string &value)
 	{
 		std::string	result;
@@ -1056,6 +1205,18 @@ namespace tester
 		std::cout << "</pre>";
 	}
 
+	inline std::string	html_rerun_command(const std::string &name,
+		unsigned int seed, bool verbose)
+	{
+		std::string	command;
+
+		command = "./libft_tester" + root_cli_arg() + " --only " + name;
+		if (verbose)
+			command += " --verbose";
+		command += seed_cli_arg(seed);
+		return (command);
+	}
+
 	inline void	print_html_debug_focus(const Report &report)
 	{
 		std::vector<std::string>	names;
@@ -1110,6 +1271,36 @@ namespace tester
 		std::cout << "</div></section>";
 	}
 
+	inline void	print_html_likely_fixes(const Report &report)
+	{
+		std::vector<std::string>	names;
+		size_t					i;
+
+		names = failed_functions(report);
+		if (names.empty())
+			return ;
+		std::cout << "<section class=\"panel\" id=\"likely-fixes\">";
+		std::cout << "<h2>Likely Fixes</h2>";
+		std::cout << "<p class=\"muted\">Start with the first failing function. ";
+		std::cout << "Each hint is intentionally short so you can inspect your ";
+		std::cout << "own implementation.</p>";
+		i = 0;
+		while (i < names.size())
+		{
+			std::string	hint = hints::for_label(names[i]);
+
+			std::cout << "<div class=\"fix\"><strong>"
+				<< html_escape(names[i]) << "</strong>";
+			if (!hint.empty())
+				std::cout << "<p>" << html_escape(hint) << "</p>";
+			print_html_copy_block(html_rerun_command(names[i], report.seed, true)
+				+ "\n./libft_tester --hint " + names[i]);
+			std::cout << "</div>";
+			i++;
+		}
+		std::cout << "</section>";
+	}
+
 	inline void	print_html_score_guide(void)
 	{
 		std::cout << "<section class=\"panel\" id=\"score-guide\">";
@@ -1117,6 +1308,26 @@ namespace tester
 		std::cout << "<p class=\"muted\">Every X/Y score means passed/total. ";
 		std::cout << "Status pills such as OKx5, MOKx4, and MNOKx1 are ";
 		std::cout << "counters, not ratios.</p></section>";
+	}
+
+	inline std::string	html_function_tags(const FunctionReport &function)
+	{
+		std::string	tags;
+
+		tags = function_has_failure(function) ? "failed" : "passed";
+		if (function_has_malloc_check(function))
+			tags += " malloc";
+		if (function_has_crash(function))
+			tags += " crash";
+		return (tags);
+	}
+
+	inline void	print_html_filter_button(const std::string &mode,
+		const std::string &label, int count)
+	{
+		std::cout << "<button class=\"filter\" onclick=\"filterReport('"
+			<< html_escape(mode) << "')\">" << html_escape(label)
+			<< " <span>" << count << "</span></button>";
 	}
 
 	inline void	print_html_function_table(const Report &report)
@@ -1136,6 +1347,7 @@ namespace tester
 
 			std::cout << "<tr data-result=\""
 				<< (function_has_failure(function) ? "failed" : "passed")
+				<< "\" data-tags=\"" << html_escape(html_function_tags(function))
 				<< "\"><td><a href=\"#"
 				<< html_escape(html_id(function.name)) << "\"><strong>"
 				<< html_escape(function.name)
@@ -1173,11 +1385,19 @@ namespace tester
 		size_t	i;
 		int		passed;
 		int		percent;
+		int		passed_functions;
+		int		failed_functions_count;
+		int		malloc_functions;
+		int		crash_functions;
 
 		passed = report.checks - report.failures;
 		percent = 100;
 		if (report.checks > 0)
 			percent = (passed * 100) / report.checks;
+		passed_functions = count_functions_matching(report, function_passed);
+		failed_functions_count = count_functions_matching(report, function_has_failure);
+		malloc_functions = count_functions_matching(report, function_has_malloc_check);
+		crash_functions = count_functions_matching(report, function_has_crash);
 		std::cout << "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">";
 		std::cout << "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">";
 		std::cout << "<title>Libft Tester Report</title><style>";
@@ -1224,6 +1444,9 @@ namespace tester
 		std::cout << ".filter{display:inline-block;padding:8px 12px;border-radius:999px;";
 		std::cout << "border:1px solid var(--line);background:#0a0f0c;color:var(--text);";
 		std::cout << "font-weight:700;cursor:pointer}.filter:hover{border-color:var(--gold)}";
+		std::cout << ".filter span{color:var(--muted)}.fix{margin-top:12px;";
+		std::cout << "padding:12px;border:1px solid var(--line);border-radius:14px;";
+		std::cout << "background:#0a0f0c}.fix p{margin:8px 0;color:var(--muted)}";
 		std::cout << ".failed-list{display:flex;flex-wrap:wrap;gap:8px}.failed-list a{";
 		std::cout << "border:1px solid var(--bad);border-radius:999px;padding:6px 10px;";
 		std::cout << "color:var(--bad)}summary{list-style:none}summary::-webkit-details-marker{display:none}";
@@ -1231,8 +1454,9 @@ namespace tester
 		std::cout << "</style><script>function copyCommand(b){var p=b.nextElementSibling;";
 		std::cout << "navigator.clipboard&&navigator.clipboard.writeText(p.innerText);";
 		std::cout << "b.innerText='Copied';setTimeout(function(){b.innerText='Copy commands'},1200);}";
-		std::cout << "function filterReport(m){document.querySelectorAll('[data-result]').";
-		std::cout << "forEach(function(e){e.style.display=(m==='all'||e.dataset.result===m)";
+		std::cout << "function filterReport(m){document.querySelectorAll('[data-tags]').";
+		std::cout << "forEach(function(e){var t=(e.dataset.tags||'').split(' ');";
+		std::cout << "e.style.display=(m==='all'||t.indexOf(m)!==-1)";
 		std::cout << "?'':'none';});}";
 		std::cout << "</script>";
 		std::cout << "</head><body><main>";
@@ -1248,9 +1472,11 @@ namespace tester
 		std::cout << "<div class=\"actions\">";
 		if (report.failures > 0)
 			std::cout << "<a class=\"jump\" href=\"#failures\">Jump to failures</a>";
-		std::cout << "<button class=\"filter\" onclick=\"filterReport('all')\">All</button>";
-		std::cout << "<button class=\"filter\" onclick=\"filterReport('failed')\">Failed</button>";
-		std::cout << "<button class=\"filter\" onclick=\"filterReport('passed')\">Passed</button>";
+		print_html_filter_button("all", "All", passed_functions + failed_functions_count);
+		print_html_filter_button("failed", "Failed", failed_functions_count);
+		print_html_filter_button("passed", "Passed", passed_functions);
+		print_html_filter_button("malloc", "Malloc", malloc_functions);
+		print_html_filter_button("crash", "Crash", crash_functions);
 		std::cout << "</div>";
 		std::cout << "<div class=\"grid\">";
 		std::cout << "<div class=\"metric\"><span>Verdict</span><strong class=\""
@@ -1267,6 +1493,7 @@ namespace tester
 		print_html_score_guide();
 		print_html_debug_focus(report);
 		print_html_failed_summary(report);
+		print_html_likely_fixes(report);
 		print_html_function_table(report);
 		i = 0;
 		while (i < report.functions.size())
@@ -1278,6 +1505,7 @@ namespace tester
 			open_card = (report.failures == 0 || function_has_failure(function));
 			std::cout << "<details class=\"card\" data-result=\""
 				<< (function_has_failure(function) ? "failed" : "passed")
+				<< "\" data-tags=\"" << html_escape(html_function_tags(function))
 				<< "\" id=\""
 				<< html_escape(html_id(function.name)) << "\"";
 			if (open_card)
@@ -1294,6 +1522,8 @@ namespace tester
 			}
 			if (function_has_failure(function))
 			{
+				print_html_copy_block(html_rerun_command(function.name,
+					report.seed, true));
 				std::cout << "<details open><summary>Failure details</summary>";
 				j = 0;
 				while (j < function.checks.size())

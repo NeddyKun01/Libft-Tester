@@ -344,6 +344,40 @@ void	Driver::test_terminal_output_contract(std::ostream &out,
 		"terminal output keeps the debugging sections in order", log.str());
 }
 
+void	Driver::test_review_output(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path			root = tmp / "review_contract";
+	std::ostringstream	log;
+	std::string			old_root = root_dir;
+	int					status;
+
+	write_html_report_libft(root, true);
+	root_dir = root.string();
+	status = run_suite({"--only", "ft_strlen", "--review", "--no-color",
+			"--seed", "42"}, log);
+	root_dir = old_root;
+	if (status != 0)
+		pass(out, "review mode returns failing status for failing fixture");
+	else
+		fail(out, failures, "review mode returns failing status for failing fixture",
+			log.str());
+	assert_contains(out, failures, "Libft Tester Review",
+		"review mode prints review header", log.str());
+	assert_contains(out, failures, "verdict: FAIL",
+		"review mode prints compact verdict", log.str());
+	assert_contains(out, failures, "score: 2/13",
+		"review mode prints passed checks over total checks", log.str());
+	assert_contains(out, failures, "failed functions: ft_strlen",
+		"review mode lists failed functions", log.str());
+	assert_contains(out, failures, "crash functions: none",
+		"review mode reports no crashes when none happened", log.str());
+	assert_contains(out, failures, "Reproduce first failures",
+		"review mode prints focused rerun section", log.str());
+	assert_contains(out, failures, "--only ft_strlen --verbose --seed 42",
+		"review mode includes reproducible rerun command", log.str());
+}
+
 void	Driver::test_html_report_output(std::ostream &out, const fs::path &tmp,
 	int &failures)
 {
@@ -374,8 +408,14 @@ void	Driver::test_html_report_output(std::ostream &out, const fs::path &tmp,
 		"html report explains score direction", html.str());
 	assert_contains(out, failures, "filterReport('passed')",
 		"html report includes a passing filter button", html.str());
+	assert_contains(out, failures, "filterReport('malloc')",
+		"html report includes a malloc filter button", html.str());
+	assert_contains(out, failures, "filterReport('crash')",
+		"html report includes a crash filter button", html.str());
 	assert_contains(out, failures, "data-result=\"passed\"",
 		"html report marks passing rows and cards for filtering", html.str());
+	assert_contains(out, failures, "data-tags=\"passed\"",
+		"html report marks passing filter tags", html.str());
 	assert_contains(out, failures, "<details class=\"card\"",
 		"html report uses collapsible function cards", html.str());
 	html.str("");
@@ -402,10 +442,44 @@ void	Driver::test_html_report_output(std::ostream &out, const fs::path &tmp,
 		"html report includes a failure filter button", html.str());
 	assert_contains(out, failures, "data-result=\"failed\"",
 		"html report marks failing rows and cards for filtering", html.str());
+	assert_contains(out, failures, "data-tags=\"failed\"",
+		"html report marks failing filter tags", html.str());
+	assert_contains(out, failures, "Likely Fixes",
+		"html report includes likely fixes section", html.str());
 	assert_contains(out, failures, "Failed</span><strong class=\"fail\">11/13",
 		"html report shows failed checks over total checks", html.str());
 	assert_contains(out, failures, "NOK",
 		"html report includes failed status labels", html.str());
+}
+
+void	Driver::test_config_file(std::ostream &out, const fs::path &tmp,
+	int &failures)
+{
+	fs::path		root = tmp / "config_libft";
+	fs::path		config = tmp / "libft-tester-config.json";
+	CommandResult	result;
+
+	write_html_report_libft(root, false);
+	write_file(config,
+		"{\n"
+		"  \"root\": \"" + root.string() + "\",\n"
+		"  \"profile\": \"quick\",\n"
+		"  \"seed\": 42,\n"
+		"  \"no_color\": true\n"
+		"}\n");
+	result = run_process({(tester_dir / "libft_tester").string(),
+			"--config", config.string(), "--only", "ft_strlen", "--review"});
+	if (result.status == 0)
+		pass(out, "config file can provide root and suite defaults");
+	else
+		fail(out, failures, "config file can provide root and suite defaults",
+			result.output);
+	assert_contains(out, failures, "Libft Tester Review",
+		"config file run reaches review mode", result.output);
+	assert_contains(out, failures, "profile: quick | seed: 42",
+		"config file applies profile and seed defaults", result.output);
+	assert_contains(out, failures, "verdict: PASS",
+		"config file run tests the configured target", result.output);
 }
 
 void	Driver::test_doctor(std::ostream &out, const fs::path &tmp,
@@ -521,7 +595,9 @@ int	Driver::run_self_test(std::ostream &out)
 	test_rescue_failure_output(out, tmp, failures);
 	test_broken_makefile(out, tmp, failures);
 	test_terminal_output_contract(out, tmp, failures);
+	test_review_output(out, tmp, failures);
 	test_html_report_output(out, tmp, failures);
+	test_config_file(out, tmp, failures);
 	test_doctor(out, tmp, failures);
 	fs::remove_all(tmp);
 	if (old_mode)

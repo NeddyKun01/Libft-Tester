@@ -1,6 +1,6 @@
 #include "driver.hpp"
 
-const char	*g_version = "1.6.0";
+const char	*g_version = "1.7.0";
 
 const std::vector<FunctionInfo>	&functions()
 {
@@ -257,6 +257,7 @@ int	Driver::print_help()
 		<< "  make build\n\n"
 		<< "Driver options:\n"
 		<< "  --root PATH         Target Libft directory, default: ..\n"
+		<< "  --config PATH       Optional .libft-tester.json path\n"
 		<< "  --menu              Open the interactive menu\n"
 		<< "  --smart             Run normal tests, then diagnose/rescue if needed\n"
 		<< "  --diagnose          Check Makefile, header, sources, and symbols\n"
@@ -268,9 +269,12 @@ int	Driver::print_help()
 		<< "Info options, no target build needed:\n"
 		<< "  --coverage, --coverage-md\n"
 		<< "  --explain NAME, --hint NAME\n\n"
+		<< "Optional config file:\n"
+		<< "  .libft-tester.json may define root, profile, seed, and no_color.\n"
+		<< "  CLI options always override config values.\n\n"
 		<< "Test options, forwarded after building the internal suite:\n"
 		<< "  --profile quick|normal|strict|brutal\n"
-		<< "  --summary-only, --only NAME, --suite NAME, --json, --html\n"
+		<< "  --summary-only, --review, --only NAME, --suite NAME, --json, --html\n"
 		<< "  --fail-fast, --seed N, --repeat N, --verbose\n\n"
 		<< "Recommended examples:\n"
 		<< "  ./libft_tester --root ../libft\n"

@@ -92,6 +92,9 @@ Reporter scores must stay easy to read. Any value displayed as `X/Y` must mean
 types. Use status counters such as `OKx5`, `MOKx4`, or `MNOKx1` when you want to
 show how many checks produced each status.
 
+If a change touches terminal output, `--review`, config-file behavior, JSON, or
+HTML reports, add or update `make self-test` coverage for the visible contract.
+
 ## Test Quality Guidelines
 
 Prefer tests that prove different behavior:

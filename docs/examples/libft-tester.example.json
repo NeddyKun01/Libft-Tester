@@ -1,0 +1,6 @@
+{
+  "root": "../libft",
+  "profile": "strict",
+  "seed": 42,
+  "no_color": false
+}

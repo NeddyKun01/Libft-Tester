@@ -143,6 +143,7 @@ void	Driver::print_menu()
 	print_menu_item("d", "Doctor environment", "tools and target sanity check", yellow);
 	std::cout << "\n" << bold << "Reports And Setup" << reset << "\n";
 	print_menu_item("9", "Generate HTML report", "standalone visual report", green);
+	print_menu_item("10", "Review summary", "compact reviewer output", green);
 	print_menu_item("h", "Advanced CLI help", "all command-line options", green);
 	print_menu_item("r", "Change ROOT_DIR", "point tester at another Libft", green);
 	print_menu_item("0", "Exit", "close the tester", green);
@@ -248,6 +249,8 @@ int	Driver::run_menu(const std::vector<std::string> &args)
 			function_tools(args);
 		else if (choice == "9")
 			run_and_pause([&](){ return generate_html(std::cout, args); });
+		else if (choice == "10")
+			run_and_pause([&](){ return run_suite(append(args, {"--review"}), std::cout); });
 		else if (choice == "d" || choice == "D")
 			run_and_pause([&](){ return run_doctor(std::cout); });
 		else if (choice == "h" || choice == "H")

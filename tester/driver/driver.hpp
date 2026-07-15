@@ -169,7 +169,11 @@ private:
 					int &failures);
 	void	test_terminal_output_contract(std::ostream &out, const fs::path &tmp,
 					int &failures);
+	void	test_review_output(std::ostream &out, const fs::path &tmp,
+					int &failures);
 	void	test_html_report_output(std::ostream &out, const fs::path &tmp,
+					int &failures);
+	void	test_config_file(std::ostream &out, const fs::path &tmp,
 					int &failures);
 	void	test_doctor(std::ostream &out, const fs::path &tmp,
 					int &failures);
